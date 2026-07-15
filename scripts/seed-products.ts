@@ -8,6 +8,7 @@ import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'node:fs'
 import { extname, resolve } from 'node:path'
+import WebSocket from 'ws'
 import { categories } from '../src/data/categories.ts'
 import { products } from '../src/data/products.ts'
 
@@ -23,7 +24,9 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
   process.exit(1)
 }
 
-const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY)
+const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
+  realtime: { transport: WebSocket as never },
+})
 
 function contentTypeFor(path: string): string {
   const ext = extname(path).toLowerCase()

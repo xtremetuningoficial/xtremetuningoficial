@@ -42,20 +42,20 @@ con foto/precio/precio de instalación, y el dueño la aprueba visualmente.
 
 ---
 
-## Fase 2 — Modelado de datos y Supabase 🚧 (en curso)
+## Fase 2 — Modelado de datos y Supabase ✅
 
 **Objetivo:** reemplazar los datos hardcodeados por una base de datos real para que el
 inventario se pueda gestionar sin tocar código.
 
 **Estado:**
 - ✅ Proyecto real de Supabase creado (`gmrqnivtfiyuihvlysxk`), credenciales en `.env`.
-- ✅ Esquema SQL listo en `supabase/schema.sql` (tablas, RLS, bucket `product-images`).
-- ✅ Script `npm run db:seed` (`scripts/seed-products.ts`) listo para sembrar los 13
-  productos y subir sus fotos a Storage, tomando `src/data/` como fuente única.
+- ✅ Esquema aplicado en producción: tablas, RLS y bucket `product-images` (ver
+  `supabase/schema.sql`).
+- ✅ Catálogo sembrado: 4 categorías, 13 productos y sus 13 fotos subidas a Storage vía
+  `npm run db:seed` (`scripts/seed-products.ts`), verificado accesible por la API
+  pública con la `anon key`.
 - ✅ Cliente de Supabase para el frontend en `src/lib/supabase.ts` (aún no conectado a
   la UI — eso es la Fase 3).
-- ⏳ Pendiente: aplicar `supabase/schema.sql` en el SQL Editor del proyecto, luego
-  correr `npm run db:seed`.
 
 **Entregables:**
 - Proyecto Supabase creado (Postgres + Auth + Storage).
