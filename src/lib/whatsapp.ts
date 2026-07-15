@@ -23,3 +23,33 @@ export function buildProductInquiryLink(product: Product): string {
 export const GENERAL_INQUIRY_LINK = buildWhatsAppLink(
   'Hola Xtreme Tuning, quiero más información sobre sus productos.',
 )
+
+export interface CartInquiryItem {
+  product: Product
+  quantity: number
+}
+
+export function buildCartInquiryLink(items: CartInquiryItem[]): string {
+  const productsTotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
+  const installTotal = items.reduce(
+    (sum, item) => sum + item.product.installPrice * item.quantity,
+    0,
+  )
+
+  const lines = [
+    'Hola Xtreme Tuning, quiero pedir esto:',
+    '',
+    ...items.map((item) => {
+      const subtotal = (item.product.price + item.product.installPrice) * item.quantity
+      return `• ${item.quantity}x *${item.product.name}* — ${formatCOP(subtotal)}`
+    }),
+    '',
+    `Productos: ${formatCOP(productsTotal)}`,
+    `Instalación: ${formatCOP(installTotal)}`,
+    `*Total: ${formatCOP(productsTotal + installTotal)}*`,
+    '',
+    '¿Me confirman disponibilidad y cómo coordinamos el pago y la instalación?',
+  ]
+
+  return buildWhatsAppLink(lines.join('\n'))
+}

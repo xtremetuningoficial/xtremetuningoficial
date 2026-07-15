@@ -5,12 +5,15 @@ import { formatCOP } from '../lib/format'
 import { buildProductInquiryLink, GENERAL_INQUIRY_LINK } from '../lib/whatsapp'
 import { vehicleLabels } from '../data/vehicleLabels'
 import { WhatsAppIcon } from '../components/layout/Header'
+import { QuantityStepper } from '../components/cart/QuantityStepper'
+import { useCart } from '../context/CartContext'
 import type { Category } from '../types/product'
 
 export default function ProductDetail() {
   const { slug } = useParams()
   const { status, data: product, error } = useProduct(slug)
   const categoriesState = useOutletContext<{ data: Category[] }>()
+  const { quantityOf, addItem, setQuantity } = useCart()
 
   if (status === 'loading') {
     return (
@@ -114,14 +117,41 @@ export default function ProductDetail() {
             </div>
           </div>
 
+          {(() => {
+            const quantity = quantityOf(product.slug)
+            return quantity > 0 ? (
+              <div className="mt-6 flex items-center gap-3">
+                <QuantityStepper
+                  quantity={quantity}
+                  onIncrease={() => setQuantity(product.slug, quantity + 1)}
+                  onDecrease={() => setQuantity(product.slug, quantity - 1)}
+                />
+                <Link
+                  to="/carrito"
+                  className="flex flex-1 items-center justify-center rounded-full bg-ink-900 py-3.5 text-sm font-bold text-white transition hover:bg-ink-800"
+                >
+                  Ver carrito
+                </Link>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => addItem(product.slug)}
+                className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-electric-500 py-3.5 text-sm font-bold text-white transition hover:bg-electric-400"
+              >
+                Agregar al carrito
+              </button>
+            )
+          })()}
+
           <a
             href={buildProductInquiryLink(product)}
             target="_blank"
             rel="noreferrer"
-            className="mt-6 flex items-center justify-center gap-2 rounded-full bg-electric-500 py-3.5 text-sm font-bold text-white transition hover:bg-electric-400"
+            className="mt-3 flex items-center justify-center gap-2 text-sm font-semibold text-ink-900/50 transition hover:text-electric-500"
           >
-            <WhatsAppIcon className="h-5 w-5" />
-            Pedir por WhatsApp
+            <WhatsAppIcon className="h-4 w-4" />
+            ¿Prefieres preguntar antes? Escríbenos
           </a>
 
           <Link

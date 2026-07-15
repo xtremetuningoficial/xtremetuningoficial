@@ -11,23 +11,26 @@
 - Estado del carrito: React Context + `localStorage` (no hace falta Redux/Zustand para
   este alcance).
 
-## Estructura de carpetas (actualizada a Fase 3)
+## Estructura de carpetas (actualizada a Fase 4)
 
 ```
 src/
   main.tsx
-  App.tsx                # BrowserRouter + Routes
+  App.tsx                # CartProvider + BrowserRouter + Routes
+  context/
+    CartContext.tsx        # líneas {slug, quantity} + persistencia en localStorage
   routes/
     Layout.tsx            # Header + <Outlet context={categorías}/> + Footer + WhatsApp flotante
     Home.tsx               # Hero, categorías, catálogo filtrable, misión
     ProductDetail.tsx       # Ficha de producto (/producto/:slug)
+    Cart.tsx                 # /carrito
     admin/                  # Fase 5
       Login.tsx
       Dashboard.tsx
       ProductoForm.tsx
   components/
     layout/
-      Header.tsx
+      Header.tsx            # incluye ícono de carrito con contador
       Footer.tsx
       HazardDivider.tsx
       WhatsAppFloatButton.tsx
@@ -37,13 +40,14 @@ src/
       CategorySection.tsx
       MissionBand.tsx
     catalog/
-      ProductCard.tsx
+      ProductCard.tsx        # "Agregar al carrito" o stepper si ya está en el carrito
       ProductCardSkeleton.tsx
       CatalogSection.tsx
       SearchBar.tsx
-    cart/                  # Fase 4
+    cart/
       CartItem.tsx
-      CartSummary.tsx
+      CartSummary.tsx          # totales + botón "Enviar pedido por WhatsApp"
+      QuantityStepper.tsx        # reutilizado en card, ficha de producto y carrito
   hooks/
     useCategories.ts        # fetch + estado loading/success/error
     useProducts.ts
@@ -53,7 +57,7 @@ src/
     api/
       categories.ts          # fetchCategories()
       products.ts             # fetchProducts(), fetchProductBySlug() + mapeo de fila DB → Product
-    whatsapp.ts              # helper para armar el mensaje de pedido
+    whatsapp.ts              # helpers para mensajes de WhatsApp (individual y carrito)
     format.ts                 # formatCOP()
   data/
     products.ts              # datos de siembra (solo los usa scripts/seed-products.ts)

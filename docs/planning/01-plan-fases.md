@@ -104,10 +104,22 @@ Supabase, sin errores de consola.
 
 ---
 
-## Fase 4 — Carrito y checkout por WhatsApp
+## Fase 4 — Carrito y checkout por WhatsApp ✅
 
 **Objetivo:** permitir que el visitante arme un pedido y lo envíe por WhatsApp
 pre-formateado, replicando cómo el negocio ya vende hoy.
+
+**Estado:** completa.
+- ✅ `CartContext` (`src/context/CartContext.tsx`): líneas `{slug, quantity}`
+  persistidas en `localStorage`, resueltas contra el catálogo en vivo (si un producto
+  se desactiva, se avisa y se puede vaciar en vez de romper la página).
+- ✅ `ProductCard` y la ficha de producto muestran "Agregar al carrito" o un stepper de
+  cantidad si el producto ya está en el carrito.
+- ✅ Ícono de carrito con contador en el header (persiste entre recargas, verificado).
+- ✅ `/carrito`: líneas editables, resumen con productos/instalación/total, "Vaciar
+  carrito", estado vacío.
+- ✅ `buildCartInquiryLink` arma un mensaje de WhatsApp legible con cada línea, cantidad,
+  subtotal y los tres totales — verificado con Playwright end-to-end.
 
 **Entregables:**
 - Estado de carrito en frontend (persistido en `localStorage`).

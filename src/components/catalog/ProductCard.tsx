@@ -1,11 +1,14 @@
 import { Link } from 'react-router-dom'
 import type { Product } from '../../types/product'
 import { formatCOP } from '../../lib/format'
-import { buildProductInquiryLink } from '../../lib/whatsapp'
 import { vehicleLabels } from '../../data/vehicleLabels'
-import { WhatsAppIcon } from '../layout/Header'
+import { useCart } from '../../context/CartContext'
+import { QuantityStepper } from '../cart/QuantityStepper'
 
 export function ProductCard({ product }: { product: Product }) {
+  const { quantityOf, addItem, setQuantity } = useCart()
+  const quantity = quantityOf(product.slug)
+
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-ink-900/10 bg-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-ink-900/5">
       <Link to={`/producto/${product.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-paper-100">
@@ -50,15 +53,23 @@ export function ProductCard({ product }: { product: Product }) {
           </div>
         </div>
 
-        <a
-          href={buildProductInquiryLink(product)}
-          target="_blank"
-          rel="noreferrer"
-          className="mt-4 flex items-center justify-center gap-2 rounded-full bg-electric-500 py-2.5 text-sm font-bold text-white transition hover:bg-electric-400"
-        >
-          <WhatsAppIcon className="h-4 w-4" />
-          Pedir por WhatsApp
-        </a>
+        {quantity > 0 ? (
+          <div className="mt-4">
+            <QuantityStepper
+              quantity={quantity}
+              onIncrease={() => setQuantity(product.slug, quantity + 1)}
+              onDecrease={() => setQuantity(product.slug, quantity - 1)}
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            onClick={() => addItem(product.slug)}
+            className="mt-4 flex items-center justify-center gap-2 rounded-full bg-electric-500 py-2.5 text-sm font-bold text-white transition hover:bg-electric-400"
+          >
+            Agregar al carrito
+          </button>
+        )}
       </div>
     </article>
   )

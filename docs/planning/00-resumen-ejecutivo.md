@@ -35,11 +35,11 @@ administración** para que el dueño del negocio pueda, sin tocar código:
 
 ## Alcance por fases (resumen)
 
-1. **Fase 0** — Planeación (este documento y los siguientes).
-2. **Fase 1** — Sistema de diseño + Home/catálogo con datos de ejemplo (sin backend aún).
-3. **Fase 2** — Modelado de datos y Supabase (productos, categorías, inventario, imágenes).
-4. **Fase 3** — Catálogo dinámico conectado a Supabase (listado, filtros, búsqueda, ficha de producto).
-5. **Fase 4** — Carrito de compra + checkout por WhatsApp.
+1. **Fase 0** ✅ — Planeación (este documento y los siguientes).
+2. **Fase 1** ✅ — Sistema de diseño + Home/catálogo con datos de ejemplo (sin backend aún).
+3. **Fase 2** ✅ — Modelado de datos y Supabase (productos, categorías, inventario, imágenes) — proyecto real creado y catálogo sembrado.
+4. **Fase 3** ✅ — Catálogo dinámico conectado a Supabase (listado, filtros, búsqueda, ficha de producto).
+5. **Fase 4** ✅ — Carrito de compra + checkout por WhatsApp.
 6. **Fase 5** — Panel de administración (login + CRUD de productos e inventario).
 7. **Fase 6** — Gestión de inventario avanzada (alertas de stock bajo, historial de movimientos).
 8. **Fase 7** — Pulido, SEO, performance, QA responsive y despliegue a producción.
