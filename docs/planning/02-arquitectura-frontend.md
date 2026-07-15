@@ -11,18 +11,17 @@
 - Estado del carrito: React Context + `localStorage` (no hace falta Redux/Zustand para
   este alcance).
 
-## Estructura de carpetas propuesta
+## Estructura de carpetas (actualizada a Fase 3)
 
 ```
 src/
   main.tsx
-  App.tsx
+  App.tsx                # BrowserRouter + Routes
   routes/
-    Home.tsx
-    Categoria.tsx
-    Producto.tsx
-    Carrito.tsx
-    admin/
+    Layout.tsx            # Header + <Outlet context={categorías}/> + Footer + WhatsApp flotante
+    Home.tsx               # Hero, categorías, catálogo filtrable, misión
+    ProductDetail.tsx       # Ficha de producto (/producto/:slug)
+    admin/                  # Fase 5
       Login.tsx
       Dashboard.tsx
       ProductoForm.tsx
@@ -30,25 +29,37 @@ src/
     layout/
       Header.tsx
       Footer.tsx
+      HazardDivider.tsx
       WhatsAppFloatButton.tsx
+    home/
+      Hero.tsx
+      TrustBar.tsx
+      CategorySection.tsx
+      MissionBand.tsx
     catalog/
       ProductCard.tsx
-      ProductGrid.tsx
-      CategoryPill.tsx
+      ProductCardSkeleton.tsx
+      CatalogSection.tsx
       SearchBar.tsx
-    cart/
+    cart/                  # Fase 4
       CartItem.tsx
       CartSummary.tsx
-    ui/            # botones, badges, inputs reutilizables
-  context/
-    CartContext.tsx
-    AuthContext.tsx
-  data/
-    products.ts     # datos de siembra (Fase 1), luego reemplazados por Supabase
-    categories.ts
+  hooks/
+    useCategories.ts        # fetch + estado loading/success/error
+    useProducts.ts
+    useProduct.ts
   lib/
-    supabase.ts      # cliente Supabase (Fase 2+)
-    whatsapp.ts       # helper para armar el mensaje de pedido
+    supabase.ts             # cliente Supabase
+    api/
+      categories.ts          # fetchCategories()
+      products.ts             # fetchProducts(), fetchProductBySlug() + mapeo de fila DB → Product
+    whatsapp.ts              # helper para armar el mensaje de pedido
+    format.ts                 # formatCOP()
+  data/
+    products.ts              # datos de siembra (solo los usa scripts/seed-products.ts)
+    categories.ts
+    categoryIcons.ts
+    vehicleLabels.ts
   types/
     product.ts
   assets/
@@ -58,13 +69,17 @@ src/
 
 | Ruta | Descripción | Fase |
 |---|---|---|
-| `/` | Home: hero, categorías destacadas, productos destacados | 1 |
-| `/categoria/:slug` | Listado filtrado por categoría (alarmas carro, alarmas moto, bloqueo central, radios) | 1 (mock) → 3 (real) |
-| `/producto/:id` | Ficha de producto con galería, descripción, precio + instalación | 3 |
+| `/` | Home: hero, categorías destacadas, catálogo completo | 1 (mock) → 3 (real) |
+| `/categoria/:categorySlug` | Mismo Home, filtrado por categoría (deep-linkable, compartible) | 3 |
+| `/producto/:slug` | Ficha de producto con galería, descripción, precio + instalación | 3 |
 | `/carrito` | Carrito y botón de pedido por WhatsApp | 4 |
 | `/admin/login` | Login del panel | 5 |
 | `/admin` | Dashboard: listado de productos, alertas de stock | 5, 6 |
 | `/admin/productos/nuevo`, `/admin/productos/:id` | Formulario de alta/edición | 5 |
+
+La categoría se identifica por `slug` (no por id numérico) para que las URLs sean
+legibles y compartibles (`/categoria/alarmas-moto`), igual que el producto usa `slug`
+en vez de su `uuid` interno.
 
 ## Componentes clave
 

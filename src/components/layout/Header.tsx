@@ -1,28 +1,29 @@
-import { categories } from '../../data/categories'
+import { Link } from 'react-router-dom'
+import type { Category } from '../../types/product'
 import { WHATSAPP_NUMBER_DISPLAY, GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
 
-export function Header() {
+export function Header({ categories }: { categories: Category[] }) {
   return (
     <header className="sticky top-0 z-50 bg-ink-900/95 backdrop-blur supports-[backdrop-filter]:bg-ink-900/90 border-b border-white/10">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
-        <a href="#inicio" className="flex shrink-0 items-center gap-2">
+        <Link to="/" className="flex shrink-0 items-center gap-2">
           <span className="flex h-11 w-14 items-center justify-center rounded-md bg-white p-1 sm:h-12 sm:w-16">
             <img src="/logo.png" alt="Xtreme Tuning" className="h-full w-full object-contain" />
           </span>
           <span className="hidden font-display text-lg tracking-tight text-white sm:block">
             XTREME <span className="text-cyan-400">TUNING</span>
           </span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-6 lg:flex">
           {categories.map((category) => (
-            <a
+            <Link
               key={category.slug}
-              href="#catalogo"
+              to={`/categoria/${category.slug}`}
               className="text-sm font-semibold text-white/80 transition hover:text-cyan-400"
             >
-              {category.shortName}
-            </a>
+              {category.name}
+            </Link>
           ))}
         </nav>
 

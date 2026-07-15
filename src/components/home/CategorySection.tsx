@@ -1,13 +1,19 @@
-import { categories } from '../../data/categories'
 import { categoryIcons } from '../../data/categoryIcons'
-import { products } from '../../data/products'
+import type { Category, Product } from '../../types/product'
 
 interface CategorySectionProps {
+  categories: Category[]
+  products: Product[]
   activeCategory: string
   onSelect: (slug: string) => void
 }
 
-export function CategorySection({ activeCategory, onSelect }: CategorySectionProps) {
+export function CategorySection({
+  categories,
+  products,
+  activeCategory,
+  onSelect,
+}: CategorySectionProps) {
   return (
     <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
       <header className="mb-8 flex items-end justify-between">
@@ -42,7 +48,7 @@ export function CategorySection({ activeCategory, onSelect }: CategorySectionPro
             >
               <span className="text-3xl">{categoryIcons[category.slug]}</span>
               <p className="mt-4 font-display text-base uppercase leading-tight sm:text-lg">
-                {category.shortName}
+                {category.name}
               </p>
               <p
                 className={`mt-1 font-mono text-xs ${isActive ? 'text-cyan-400' : 'text-ink-900/50'}`}

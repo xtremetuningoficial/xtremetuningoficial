@@ -1,18 +1,14 @@
+import { Link } from 'react-router-dom'
 import type { Product } from '../../types/product'
 import { formatCOP } from '../../lib/format'
 import { buildProductInquiryLink } from '../../lib/whatsapp'
+import { vehicleLabels } from '../../data/vehicleLabels'
 import { WhatsAppIcon } from '../layout/Header'
-
-const vehicleLabel: Record<Product['vehicleType'], string> = {
-  carro: '🚗 Carro',
-  moto: '🏍️ Moto',
-  universal: '🔧 Universal',
-}
 
 export function ProductCard({ product }: { product: Product }) {
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-ink-900/10 bg-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-ink-900/5">
-      <div className="relative aspect-[4/3] overflow-hidden bg-paper-100">
+      <Link to={`/producto/${product.slug}`} className="relative block aspect-[4/3] overflow-hidden bg-paper-100">
         <img
           src={product.image}
           alt={product.name}
@@ -25,14 +21,16 @@ export function ProductCard({ product }: { product: Product }) {
           </span>
         )}
         <span className="absolute right-3 top-3 rounded-full bg-ink-900/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
-          {vehicleLabel[product.vehicleType]}
+          {vehicleLabels[product.vehicleType]}
         </span>
-      </div>
+      </Link>
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
-        <h3 className="font-display text-base uppercase leading-tight text-ink-900 sm:text-lg">
-          {product.name}
-        </h3>
+        <Link to={`/producto/${product.slug}`}>
+          <h3 className="font-display text-base uppercase leading-tight text-ink-900 transition group-hover:text-electric-500 sm:text-lg">
+            {product.name}
+          </h3>
+        </Link>
 
         <ul className="mt-2.5 space-y-1 text-xs text-ink-900/60 sm:text-sm">
           {product.description.slice(0, 2).map((line) => (

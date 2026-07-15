@@ -3,7 +3,6 @@ export type VehicleType = 'carro' | 'moto' | 'universal'
 export interface Category {
   slug: string
   name: string
-  shortName: string
 }
 
 export interface Product {
@@ -16,5 +15,6 @@ export interface Product {
   installPrice: number
   description: string[]
   image: string
+  images?: string[]
   featured?: boolean
 }

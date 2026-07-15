@@ -72,9 +72,23 @@ están servidas desde Storage, no desde `public/`.
 
 ---
 
-## Fase 3 — Catálogo dinámico
+## Fase 3 — Catálogo dinámico ✅
 
 **Objetivo:** el sitio deja de usar datos hardcodeados y consulta Supabase en vivo.
+
+**Estado:** completa.
+- ✅ `src/lib/api/{categories,products}.ts` consultan Supabase (con RLS) y mapean las
+  filas al tipo `Product`/`Category` que ya usaba la UI.
+- ✅ `useCategories`, `useProducts`, `useProduct` — hooks con estados `loading` /
+  `success` / `error` (y `not-found` para producto individual).
+- ✅ React Router: `/`, `/categoria/:categorySlug`, `/producto/:slug`, layout compartido
+  (`src/routes/Layout.tsx`) con Header/Footer/botón de WhatsApp.
+- ✅ Filtro por categoría (pills + tarjetas, deep-linkable por URL) y buscador por
+  nombre (`SearchBar`), combinables.
+- ✅ Página de detalle de producto: breadcrumb, galería (preparada para múltiples
+  imágenes por producto), descripción, precio + instalación, CTA de WhatsApp.
+- ✅ Estados de carga (skeletons), error de red (con CTA de WhatsApp como respaldo) y
+  "producto no encontrado".
 
 **Entregables:**
 - Cliente de Supabase configurado en el frontend.
@@ -84,7 +98,9 @@ están servidas desde Storage, no desde `public/`.
 - Manejo de estados de carga y error (skeleton/loading, mensaje si no hay resultados).
 
 **Hecho cuando:** un producto editado en Supabase se refleja en la web sin tocar código,
-y la navegación por categoría/búsqueda funciona.
+y la navegación por categoría/búsqueda funciona. Verificado: filtrar por categoría,
+buscar por nombre y abrir una ficha de producto funcionan con los datos reales de
+Supabase, sin errores de consola.
 
 ---
 

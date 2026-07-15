@@ -1,8 +1,9 @@
-import { categories } from '../../data/categories'
+import { Link } from 'react-router-dom'
+import type { Category } from '../../types/product'
 import { WHATSAPP_NUMBER_ALT_DISPLAY, WHATSAPP_NUMBER_DISPLAY } from '../../lib/whatsapp'
 import { WhatsAppIcon } from './Header'
 
-export function Footer() {
+export function Footer({ categories }: { categories: Category[] }) {
   return (
     <footer className="bg-ink-900 text-white/70">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
@@ -21,9 +22,9 @@ export function Footer() {
           <ul className="mt-4 space-y-2.5 text-sm">
             {categories.map((category) => (
               <li key={category.slug}>
-                <a href="#catalogo" className="transition hover:text-cyan-400">
+                <Link to={`/categoria/${category.slug}`} className="transition hover:text-cyan-400">
                   {category.name}
-                </a>
+                </Link>
               </li>
             ))}
           </ul>
