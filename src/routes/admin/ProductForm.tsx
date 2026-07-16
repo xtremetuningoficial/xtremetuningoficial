@@ -1,21 +1,39 @@
-import { useEffect, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   createProduct,
   deleteProduct,
+  detectMediaType,
   fetchAdminProductById,
-  replaceProductImage,
+  MAX_MEDIA_PER_PRODUCT,
+  replaceProductMedia,
   updateProduct,
-  uploadProductImage,
+  uploadProductMedia,
+  validateMediaFile,
 } from '../../lib/api/adminProducts'
 import { fetchAdminCategories } from '../../lib/api/categories'
 import { getErrorMessage } from '../../lib/errors'
 import { StockAdjuster } from '../../components/admin/StockAdjuster'
 import { Switch } from '../../components/admin/Switch'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
-import { TrashIcon, UploadIcon } from '../../components/icons'
-import type { AdminCategory, ProductFormValues } from '../../types/admin'
-import type { VehicleType } from '../../types/product'
+import {
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CloseIcon,
+  PlayIcon,
+  TrashIcon,
+  UploadIcon,
+} from '../../components/icons'
+import type { AdminCategory, AdminProductMedia, ProductFormValues } from '../../types/admin'
+import type { MediaType, VehicleType } from '../../types/product'
+
+interface MediaSlot {
+  key: string
+  status: 'existing' | 'new'
+  url: string
+  mediaType: MediaType
+  file?: File
+}
 
 const EMPTY_FORM: ProductFormValues = {
   name: '',
@@ -38,11 +56,10 @@ export default function AdminProductForm() {
   const [categories, setCategories] = useState<AdminCategory[]>([])
   const [form, setForm] = useState<ProductFormValues>(EMPTY_FORM)
   const [existingSlug, setExistingSlug] = useState<string | null>(null)
-  const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null)
-  const [newImageFile, setNewImageFile] = useState<File | null>(null)
-  const [newImagePreview, setNewImagePreview] = useState<string | null>(null)
-  const [dragOver, setDragOver] = useState(false)
-  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [slots, setSlots] = useState<MediaSlot[]>([])
+  const [mediaError, setMediaError] = useState<string | null>(null)
+  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
+  const slotInputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
   const [loading, setLoading] = useState(isEditing)
   const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -79,7 +96,14 @@ export default function AdminProductForm() {
           description: product.description,
         })
         setExistingSlug(product.slug)
-        setExistingImageUrl(product.imageUrl)
+        setSlots(
+          product.media.map((item, index) => ({
+            key: `existing-${index}-${item.url}`,
+            status: 'existing',
+            url: item.url,
+            mediaType: item.mediaType,
+          })),
+        )
       })
       .catch(() => setLoadError('No pudimos cargar este producto.'))
       .finally(() => setLoading(false))
@@ -89,16 +113,39 @@ export default function AdminProductForm() {
     setForm((current) => ({ ...current, name }))
   }
 
-  function handleImageChange(file: File | null) {
-    if (file && !file.type.startsWith('image/')) return
-    setNewImageFile(file)
-    setNewImagePreview(file ? URL.createObjectURL(file) : null)
+  function setSlotFile(index: number, file: File | null) {
+    if (!file) return
+    const validationError = validateMediaFile(file)
+    if (validationError) {
+      setMediaError(validationError)
+      return
+    }
+    setMediaError(null)
+    setSlots((current) => {
+      const next = [...current]
+      next[index] = {
+        key: `new-${Date.now()}-${index}`,
+        status: 'new',
+        url: URL.createObjectURL(file),
+        mediaType: detectMediaType(file) ?? 'image',
+        file,
+      }
+      return next
+    })
   }
 
-  function handleDrop(event: DragEvent<HTMLDivElement>) {
-    event.preventDefault()
-    setDragOver(false)
-    handleImageChange(event.dataTransfer.files?.[0] ?? null)
+  function removeSlot(index: number) {
+    setSlots((current) => current.filter((_, i) => i !== index))
+  }
+
+  function moveSlot(index: number, direction: -1 | 1) {
+    setSlots((current) => {
+      const target = index + direction
+      if (target < 0 || target >= current.length) return current
+      const next = [...current]
+      ;[next[index], next[target]] = [next[target], next[index]]
+      return next
+    })
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -123,9 +170,16 @@ export default function AdminProductForm() {
         productSlug = created.slug
       }
 
-      if (newImageFile && productId) {
-        const url = await uploadProductImage(productSlug, newImageFile)
-        await replaceProductImage(productId, url)
+      if (productId) {
+        const resolvedMedia: AdminProductMedia[] = []
+        for (const slot of slots) {
+          if (slot.status === 'existing') {
+            resolvedMedia.push({ url: slot.url, mediaType: slot.mediaType })
+          } else if (slot.file) {
+            resolvedMedia.push(await uploadProductMedia(productSlug, slot.file))
+          }
+        }
+        await replaceProductMedia(productId, resolvedMedia)
       }
 
       navigate('/admin')
@@ -304,66 +358,153 @@ export default function AdminProductForm() {
 
         <div className="space-y-6">
           <div className="rounded-2xl border border-white/10 bg-ink-800 p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-white/50">Foto</p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-white/50">Fotos y videos</p>
+              <span className="font-mono-price text-xs text-white/40">
+                {slots.length}/{MAX_MEDIA_PER_PRODUCT}
+              </span>
+            </div>
+            <p className="mt-1 text-xs text-white/40">
+              Hasta {MAX_MEDIA_PER_PRODUCT} recursos. El primero es la foto principal del catálogo.
+            </p>
 
-            <div
-              onClick={() => fileInputRef.current?.click()}
-              onDragOver={(e) => {
-                e.preventDefault()
-                setDragOver(true)
-              }}
-              onDragLeave={() => setDragOver(false)}
-              onDrop={handleDrop}
-              className={`mt-3 cursor-pointer overflow-hidden rounded-xl border-2 border-dashed transition ${
-                dragOver ? 'border-electric-400 bg-electric-500/10' : 'border-white/15 hover:border-white/25'
-              }`}
-            >
-              {newImagePreview || existingImageUrl ? (
-                <div className="relative aspect-square">
-                  <img
-                    src={newImagePreview ?? existingImageUrl ?? ''}
-                    alt=""
-                    className="h-full w-full object-cover"
-                  />
-                  <div className="absolute inset-0 flex items-center justify-center bg-ink-900/0 opacity-0 transition hover:bg-ink-900/60 hover:opacity-100">
-                    <span className="flex items-center gap-2 rounded-full bg-ink-900/80 px-3 py-1.5 text-xs font-bold text-white">
-                      <UploadIcon className="h-3.5 w-3.5" />
-                      Cambiar foto
-                    </span>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {Array.from({ length: MAX_MEDIA_PER_PRODUCT }).map((_, index) => {
+                const slot = slots[index]
+                const isNextOpen = index === slots.length
+
+                if (!slot && !isNextOpen) {
+                  return (
+                    <div key={index} className="aspect-square rounded-xl border border-dashed border-white/10" />
+                  )
+                }
+
+                if (!slot) {
+                  return (
+                    <div key={index}>
+                      <div
+                        onClick={() => slotInputRefs[index].current?.click()}
+                        onDragOver={(e) => {
+                          e.preventDefault()
+                          setDragOverIndex(index)
+                        }}
+                        onDragLeave={() => setDragOverIndex((current) => (current === index ? null : current))}
+                        onDrop={(e) => {
+                          e.preventDefault()
+                          setDragOverIndex(null)
+                          setSlotFile(index, e.dataTransfer.files?.[0] ?? null)
+                        }}
+                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed transition ${
+                          dragOverIndex === index
+                            ? 'border-electric-400 bg-electric-500/10'
+                            : 'border-white/15 hover:border-white/25'
+                        }`}
+                      >
+                        <UploadIcon className="h-5 w-5 text-white/40" />
+                        <span className="text-center text-[10px] font-semibold leading-tight text-white/50">
+                          Agregar
+                        </span>
+                      </div>
+                      <input
+                        ref={slotInputRefs[index]}
+                        type="file"
+                        accept="image/*,video/*"
+                        onChange={(e) => {
+                          setSlotFile(index, e.target.files?.[0] ?? null)
+                          e.target.value = ''
+                        }}
+                        className="hidden"
+                      />
+                    </div>
+                  )
+                }
+
+                return (
+                  <div
+                    key={slot.key}
+                    className="group relative aspect-square overflow-hidden rounded-xl bg-ink-900 ring-1 ring-white/10"
+                  >
+                    {slot.mediaType === 'video' ? (
+                      <video src={slot.url} className="h-full w-full object-cover" muted playsInline />
+                    ) : (
+                      <img src={slot.url} alt="" className="h-full w-full object-cover" />
+                    )}
+
+                    {slot.mediaType === 'video' && (
+                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink-900/20">
+                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-900/70 text-white">
+                          <PlayIcon className="h-3.5 w-3.5" />
+                        </span>
+                      </span>
+                    )}
+
+                    {index === 0 && (
+                      <span className="absolute left-1 top-1 rounded bg-ink-900/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white/80">
+                        Principal
+                      </span>
+                    )}
+
+                    <div
+                      onClick={() => slotInputRefs[index].current?.click()}
+                      className="absolute inset-0 flex cursor-pointer items-center justify-center bg-ink-900/0 opacity-0 transition group-hover:bg-ink-900/60 group-hover:opacity-100"
+                    >
+                      <UploadIcon className="h-4 w-4 text-white" />
+                    </div>
+                    <input
+                      ref={slotInputRefs[index]}
+                      type="file"
+                      accept="image/*,video/*"
+                      onChange={(e) => {
+                        setSlotFile(index, e.target.files?.[0] ?? null)
+                        e.target.value = ''
+                      }}
+                      className="hidden"
+                    />
+
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        removeSlot(index)
+                      }}
+                      aria-label="Quitar recurso"
+                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white/80 transition hover:bg-ember-500 hover:text-white"
+                    >
+                      <CloseIcon className="h-3 w-3" />
+                    </button>
+
+                    <div className="absolute bottom-1 left-1 flex gap-0.5">
+                      <button
+                        type="button"
+                        disabled={index === 0}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          moveSlot(index, -1)
+                        }}
+                        aria-label="Mover a la izquierda"
+                        className="flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white/80 transition hover:text-electric-400 disabled:opacity-30"
+                      >
+                        <ChevronLeftIcon className="h-3 w-3" />
+                      </button>
+                      <button
+                        type="button"
+                        disabled={index === slots.length - 1}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          moveSlot(index, 1)
+                        }}
+                        aria-label="Mover a la derecha"
+                        className="flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white/80 transition hover:text-electric-400 disabled:opacity-30"
+                      >
+                        <ChevronRightIcon className="h-3 w-3" />
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="flex aspect-square flex-col items-center justify-center gap-2 px-4 text-center">
-                  <UploadIcon className="h-7 w-7 text-white/40" />
-                  <p className="text-xs font-semibold text-white/60">Arrastra una foto aquí</p>
-                  <p className="text-xs text-white/40">o haz clic para elegirla</p>
-                </div>
-              )}
+                )
+              })}
             </div>
 
-            <input
-              ref={fileInputRef}
-              type="file"
-              accept="image/*"
-              onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
-              className="hidden"
-            />
-
-            {(newImagePreview || existingImageUrl) && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation()
-                  handleImageChange(null)
-                  setExistingImageUrl(null)
-                  if (fileInputRef.current) fileInputRef.current.value = ''
-                }}
-                className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-white/50 transition hover:text-ember-400"
-              >
-                <TrashIcon className="h-3.5 w-3.5" />
-                Quitar foto
-              </button>
-            )}
+            {mediaError && <p className="mt-2 text-xs text-ember-400">{mediaError}</p>}
           </div>
 
           {isEditing && id && (

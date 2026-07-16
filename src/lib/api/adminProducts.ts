@@ -1,13 +1,15 @@
 import { supabase } from '../supabase'
 import { compressImage } from '../compressImage'
 import { slugify } from '../slugify'
-import type { AdminProduct, ProductFormValues } from '../../types/admin'
-import type { VehicleType } from '../../types/product'
+import type { AdminProduct, AdminProductMedia, ProductFormValues } from '../../types/admin'
+import type { MediaType, VehicleType } from '../../types/product'
 
 const BUCKET = 'product-images'
+const MAX_VIDEO_BYTES = 30 * 1024 * 1024
+export const MAX_MEDIA_PER_PRODUCT = 3
 
 const ADMIN_SELECT =
-  'id, slug, name, description, price, install_price, stock_quantity, is_active, is_featured, vehicle_type, categories(id, name), product_images(url, sort_order)'
+  'id, slug, name, description, price, install_price, stock_quantity, is_active, is_featured, vehicle_type, categories(id, name), product_images(url, sort_order, media_type)'
 
 interface AdminProductRow {
   id: string
@@ -21,12 +23,14 @@ interface AdminProductRow {
   is_featured: boolean
   vehicle_type: VehicleType
   categories: { id: string; name: string } | { id: string; name: string }[] | null
-  product_images: { url: string; sort_order: number }[] | null
+  product_images: { url: string; sort_order: number; media_type: MediaType }[] | null
 }
 
 function mapRow(row: AdminProductRow): AdminProduct {
   const category = Array.isArray(row.categories) ? row.categories[0] : row.categories
-  const images = [...(row.product_images ?? [])].sort((a, b) => a.sort_order - b.sort_order)
+  const media = [...(row.product_images ?? [])]
+    .sort((a, b) => a.sort_order - b.sort_order)
+    .map((item) => ({ url: item.url, mediaType: item.media_type }))
 
   return {
     id: row.id,
@@ -41,7 +45,8 @@ function mapRow(row: AdminProductRow): AdminProduct {
     isActive: row.is_active,
     isFeatured: row.is_featured,
     vehicleType: row.vehicle_type,
-    imageUrl: images[0]?.url ?? null,
+    imageUrl: media.find((item) => item.mediaType === 'image')?.url ?? null,
+    media,
   }
 }
 
@@ -112,32 +117,56 @@ export async function setProductActive(id: string, isActive: boolean): Promise<v
   if (error) throw error
 }
 
-export async function uploadProductImage(slug: string, file: File): Promise<string> {
-  const optimized = await compressImage(file)
-  const ext = optimized.name.includes('.') ? optimized.name.split('.').pop() : 'jpg'
-  const path = `${slug}-${Date.now()}.${ext}`
+export function detectMediaType(file: File): MediaType | null {
+  if (file.type.startsWith('image/')) return 'image'
+  if (file.type.startsWith('video/')) return 'video'
+  return null
+}
 
-  const { error } = await supabase.storage.from(BUCKET).upload(path, optimized, {
-    contentType: optimized.type || 'image/jpeg',
+export function validateMediaFile(file: File): string | null {
+  const mediaType = detectMediaType(file)
+  if (!mediaType) return 'Solo se permiten imágenes o videos.'
+  if (mediaType === 'video' && file.size > MAX_VIDEO_BYTES) {
+    return 'El video no puede pesar más de 30 MB.'
+  }
+  return null
+}
+
+export async function uploadProductMedia(slug: string, file: File): Promise<AdminProductMedia> {
+  const mediaType = detectMediaType(file)
+  if (!mediaType) throw new Error('Solo se permiten imágenes o videos.')
+
+  const uploadFile = mediaType === 'image' ? await compressImage(file) : file
+  const ext = uploadFile.name.includes('.') ? uploadFile.name.split('.').pop() : mediaType === 'image' ? 'jpg' : 'mp4'
+  const path = `${slug}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}.${ext}`
+
+  const { error } = await supabase.storage.from(BUCKET).upload(path, uploadFile, {
+    contentType: uploadFile.type || (mediaType === 'image' ? 'image/jpeg' : 'video/mp4'),
   })
 
   if (error) throw error
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
-  return data.publicUrl
+  return { url: data.publicUrl, mediaType }
 }
 
-export async function replaceProductImage(productId: string, url: string): Promise<void> {
+export async function replaceProductMedia(productId: string, items: AdminProductMedia[]): Promise<void> {
   const { error: deleteError } = await supabase
     .from('product_images')
     .delete()
     .eq('product_id', productId)
 
   if (deleteError) throw deleteError
+  if (items.length === 0) return
 
-  const { error: insertError } = await supabase
-    .from('product_images')
-    .insert({ product_id: productId, url, sort_order: 0 })
+  const { error: insertError } = await supabase.from('product_images').insert(
+    items.map((item, index) => ({
+      product_id: productId,
+      url: item.url,
+      sort_order: index,
+      media_type: item.mediaType,
+    })),
+  )
 
   if (insertError) throw insertError
 }

@@ -1,8 +1,8 @@
 import { supabase } from '../supabase'
-import type { Product, VehicleType } from '../../types/product'
+import type { MediaType, Product, VehicleType } from '../../types/product'
 
 const PRODUCT_SELECT =
-  'id, slug, name, description, price, install_price, is_featured, vehicle_type, categories(slug), product_images(url, sort_order)'
+  'id, slug, name, description, price, install_price, is_featured, vehicle_type, categories(slug), product_images(url, sort_order, media_type)'
 
 interface ProductRow {
   id: string
@@ -14,13 +14,13 @@ interface ProductRow {
   is_featured: boolean
   vehicle_type: VehicleType
   categories: { slug: string } | { slug: string }[] | null
-  product_images: { url: string; sort_order: number }[] | null
+  product_images: { url: string; sort_order: number; media_type: MediaType }[] | null
 }
 
 function mapRow(row: ProductRow): Product {
-  const images = [...(row.product_images ?? [])]
+  const media = [...(row.product_images ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
-    .map((image) => image.url)
+    .map((item) => ({ url: item.url, type: item.media_type }))
 
   const category = Array.isArray(row.categories) ? row.categories[0] : row.categories
 
@@ -33,8 +33,8 @@ function mapRow(row: ProductRow): Product {
     price: row.price,
     installPrice: row.install_price ?? 0,
     description: row.description ? row.description.split('\n').filter(Boolean) : [],
-    image: images[0] ?? '',
-    images,
+    image: media.find((item) => item.type === 'image')?.url ?? '',
+    media,
     featured: row.is_featured,
   }
 }

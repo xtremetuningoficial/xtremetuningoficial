@@ -34,8 +34,16 @@ create table if not exists product_images (
   id          uuid primary key default gen_random_uuid(),
   product_id  uuid not null references products(id) on delete cascade,
   url         text not null,
-  sort_order  int not null default 0
+  sort_order  int not null default 0,
+  media_type  text not null default 'image' check (media_type in ('image', 'video'))
 );
+
+-- Columna agregada después del lanzamiento inicial (galería de hasta 3
+-- fotos/videos por producto) — el "if not exists" hace que sea seguro
+-- volver a correr este script en una base de datos que ya tenía la tabla.
+alter table product_images add column if not exists media_type text not null default 'image';
+alter table product_images drop constraint if exists product_images_media_type_check;
+alter table product_images add constraint product_images_media_type_check check (media_type in ('image', 'video'));
 
 create table if not exists inventory_movements (
   id          uuid primary key default gen_random_uuid(),

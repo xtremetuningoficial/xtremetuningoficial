@@ -1,4 +1,4 @@
-import type { VehicleType } from './product'
+import type { MediaType, VehicleType } from './product'
 
 export interface AdminCategory {
   id: string
@@ -11,6 +11,11 @@ export interface AdminCategory {
 export interface CategoryFormValues {
   name: string
   slug: string
+}
+
+export interface AdminProductMedia {
+  url: string
+  mediaType: MediaType
 }
 
 export interface AdminProduct {
@@ -27,6 +32,7 @@ export interface AdminProduct {
   isFeatured: boolean
   vehicleType: VehicleType
   imageUrl: string | null
+  media: AdminProductMedia[]
 }
 
 export interface ProductFormValues {

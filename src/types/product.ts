@@ -1,8 +1,14 @@
 export type VehicleType = 'carro' | 'moto' | 'universal'
+export type MediaType = 'image' | 'video'
 
 export interface Category {
   slug: string
   name: string
+}
+
+export interface ProductMedia {
+  url: string
+  type: MediaType
 }
 
 export interface Product {
@@ -15,6 +21,6 @@ export interface Product {
   installPrice: number
   description: string[]
   image: string
-  images?: string[]
+  media: ProductMedia[]
   featured?: boolean
 }

@@ -5,11 +5,11 @@ import { formatCOP } from '../lib/format'
 import { buildProductInquiryLink, GENERAL_INQUIRY_LINK } from '../lib/whatsapp'
 import { vehicleLabels } from '../data/vehicleLabels'
 import { WhatsAppIcon } from '../components/layout/Header'
-import { CheckIcon } from '../components/icons'
+import { CheckIcon, PlayIcon } from '../components/icons'
 import { QuantityStepper } from '../components/cart/QuantityStepper'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import type { Category } from '../types/product'
+import type { Category, ProductMedia } from '../types/product'
 
 export default function ProductDetail() {
   const { slug } = useParams()
@@ -69,7 +69,7 @@ export default function ProductDetail() {
     )
   }
 
-  const gallery = product.images && product.images.length > 0 ? product.images : [product.image]
+  const gallery = product.media.length > 0 ? product.media : [{ url: product.image, type: 'image' as const }]
   const categoryName =
     categoriesState.data.find((c) => c.slug === product.categorySlug)?.name ?? product.categorySlug
 
@@ -88,7 +88,7 @@ export default function ProductDetail() {
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <Gallery images={gallery} name={product.name} />
+        <Gallery media={gallery} name={product.name} />
 
         <div>
           {(() => {
@@ -176,28 +176,44 @@ export default function ProductDetail() {
   )
 }
 
-function Gallery({ images, name }: { images: string[]; name: string }) {
+function Gallery({ media, name }: { media: ProductMedia[]; name: string }) {
   const [active, setActive] = useState(0)
+  const current = media[active]
 
   return (
     <div>
       <div className="aspect-square overflow-hidden rounded-2xl border border-ink-900/10 bg-paper-100">
-        <img src={images[active]} alt={name} className="h-full w-full object-cover" />
+        {current.type === 'video' ? (
+          <video src={current.url} controls playsInline className="h-full w-full object-cover" />
+        ) : (
+          <img src={current.url} alt={name} className="h-full w-full object-cover" />
+        )}
       </div>
 
-      {images.length > 1 && (
+      {media.length > 1 && (
         <div className="mt-3 flex gap-2">
-          {images.map((image, index) => (
+          {media.map((item, index) => (
             <button
-              key={image}
+              key={item.url}
               type="button"
               onClick={() => setActive(index)}
-              aria-label={`Ver foto ${index + 1} de ${images.length}`}
-              className={`h-16 w-16 overflow-hidden rounded-lg border-2 transition ${
+              aria-label={`Ver ${item.type === 'video' ? 'video' : 'foto'} ${index + 1} de ${media.length}`}
+              className={`relative h-16 w-16 overflow-hidden rounded-lg border-2 transition ${
                 index === active ? 'border-electric-500' : 'border-transparent opacity-70 hover:opacity-100'
               }`}
             >
-              <img src={image} alt="" className="h-full w-full object-cover" />
+              {item.type === 'video' ? (
+                <>
+                  <video src={item.url} muted playsInline className="h-full w-full object-cover" />
+                  <span className="absolute inset-0 flex items-center justify-center bg-ink-900/25">
+                    <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink-900/70 text-white">
+                      <PlayIcon className="h-3 w-3" />
+                    </span>
+                  </span>
+                </>
+              ) : (
+                <img src={item.url} alt="" className="h-full w-full object-cover" />
+              )}
             </button>
           ))}
         </div>
