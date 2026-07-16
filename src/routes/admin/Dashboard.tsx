@@ -142,12 +142,15 @@ export default function AdminDashboard() {
                   <th className="px-4 py-3 font-semibold">Instalación</th>
                   <th className="px-4 py-3 font-semibold">Stock</th>
                   <th className="px-4 py-3 font-semibold">Activo</th>
-                  <th className="px-4 py-3" />
+                  <th className="sticky right-0 border-l border-white/5 bg-ink-800 px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
                 {filtered.map((product) => (
-                  <tr key={product.id} className="border-b border-white/5 transition last:border-0 hover:bg-white/[0.03]">
+                  <tr
+                    key={product.id}
+                    className="group border-b border-white/5 transition last:border-0 hover:bg-white/[0.03]"
+                  >
                     <td className="px-4 py-3">
                       <div className="flex items-center gap-3">
                         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-lg bg-ink-900 ring-1 ring-white/10">
@@ -187,7 +190,7 @@ export default function AdminDashboard() {
                         />
                       </Tooltip>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="sticky right-0 border-l border-white/5 bg-ink-800 px-4 py-3 group-hover:bg-white/[0.03]">
                       <div className="flex items-center justify-end gap-1">
                         <Tooltip label="Editar producto">
                           <Link

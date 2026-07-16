@@ -237,7 +237,7 @@ export default function AdminCategories() {
                   <th className="px-4 py-3 font-semibold">Nombre</th>
                   <th className="px-4 py-3 font-semibold">Slug</th>
                   <th className="px-4 py-3 font-semibold">Productos</th>
-                  <th className="px-4 py-3" />
+                  <th className="sticky right-0 border-l border-white/5 bg-ink-800 px-4 py-3" />
                 </tr>
               </thead>
               <tbody>
@@ -248,7 +248,7 @@ export default function AdminCategories() {
                   return (
                     <tr
                       key={category.id}
-                      className="border-b border-white/5 transition last:border-0 hover:bg-white/[0.03]"
+                      className="group border-b border-white/5 transition last:border-0 hover:bg-white/[0.03]"
                     >
                       <td className="px-4 py-3">
                         <div className="flex flex-col gap-0.5">
@@ -306,7 +306,7 @@ export default function AdminCategories() {
                           {category.productCount}
                         </span>
                       </td>
-                      <td className="px-4 py-3">
+                      <td className="sticky right-0 border-l border-white/5 bg-ink-800 px-4 py-3 group-hover:bg-white/[0.03]">
                         <div className="flex items-center justify-end gap-1">
                           {isEditing ? (
                             <>

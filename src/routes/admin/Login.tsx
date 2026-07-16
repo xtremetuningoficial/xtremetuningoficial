@@ -37,11 +37,17 @@ export default function AdminLogin() {
 
   return (
     <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-900 px-4">
-      <div className="circuit-bg pointer-events-none absolute inset-0 opacity-[0.08]" aria-hidden="true" />
+      <div className="circuit-bg pointer-events-none absolute inset-0 opacity-[0.14]" aria-hidden="true" />
       <div
-        className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-electric-500/10 blur-3xl"
+        className="pointer-events-none absolute left-1/2 top-1/3 h-96 w-96 -translate-x-1/2 -translate-y-1/2 rounded-full bg-electric-500/15 blur-3xl"
         aria-hidden="true"
       />
+      <div
+        className="pointer-events-none absolute bottom-0 right-1/4 h-72 w-72 translate-y-1/3 rounded-full bg-ember-500/10 blur-3xl"
+        aria-hidden="true"
+      />
+      <div className="hazard-stripes pointer-events-none absolute left-0 top-0 h-full w-2.5 opacity-40" aria-hidden="true" />
+      <div className="hazard-stripes pointer-events-none absolute right-0 top-0 h-full w-2.5 opacity-40" aria-hidden="true" />
 
       <form
         onSubmit={handleSubmit}
@@ -52,8 +58,8 @@ export default function AdminLogin() {
         <div className="p-6 sm:p-8">
           <div className="relative mx-auto flex h-20 w-20 items-center justify-center">
             <span className="pulse-ring absolute inset-0 rounded-full border-2 border-cyan-400/40" />
-            <span className="flex h-14 w-20 items-center justify-center">
-              <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
+            <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-ink-900 ring-1 ring-white/10">
+              <img src="/logo.webp" alt="Xtreme Tuning" className="h-10 w-14 object-contain" />
             </span>
           </div>
 
