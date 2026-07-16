@@ -18,6 +18,7 @@ const AdminLayout = lazy(() =>
 )
 const AdminDashboard = lazy(() => import('./routes/admin/Dashboard'))
 const AdminProductForm = lazy(() => import('./routes/admin/ProductForm'))
+const AdminCategories = lazy(() => import('./routes/admin/Categories'))
 
 function AdminFallback() {
   return (
@@ -84,6 +85,14 @@ export default function App() {
                   element={
                     <Suspense fallback={<AdminFallback />}>
                       <AdminProductForm />
+                    </Suspense>
+                  }
+                />
+                <Route
+                  path="categorias"
+                  element={
+                    <Suspense fallback={<AdminFallback />}>
+                      <AdminCategories />
                     </Suspense>
                   }
                 />

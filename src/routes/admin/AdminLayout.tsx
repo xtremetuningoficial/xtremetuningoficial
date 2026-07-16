@@ -1,5 +1,10 @@
-import { Link, Outlet } from 'react-router-dom'
+import { Link, NavLink, Outlet } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+
+const NAV_ITEMS = [
+  { to: '/admin', label: 'Productos', end: true },
+  { to: '/admin/categorias', label: 'Categorías', end: false },
+]
 
 export function AdminLayout() {
   const { signOut, session } = useAuth()
@@ -37,6 +42,24 @@ export function AdminLayout() {
             </button>
           </div>
         </div>
+        <nav className="mx-auto flex max-w-7xl gap-1 px-4 sm:px-6">
+          {NAV_ITEMS.map((item) => (
+            <NavLink
+              key={item.to}
+              to={item.to}
+              end={item.end}
+              className={({ isActive }) =>
+                `border-b-2 px-3 py-2 text-xs font-bold uppercase tracking-wide transition ${
+                  isActive
+                    ? 'border-electric-400 text-white'
+                    : 'border-transparent text-white/50 hover:text-white'
+                }`
+              }
+            >
+              {item.label}
+            </NavLink>
+          ))}
+        </nav>
         <div className="hazard-stripes h-[3px] w-full opacity-70" aria-hidden="true" />
       </header>
 

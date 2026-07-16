@@ -4,6 +4,13 @@ export interface AdminCategory {
   id: string
   slug: string
   name: string
+  sortOrder: number
+  productCount: number
+}
+
+export interface CategoryFormValues {
+  name: string
+  slug: string
 }
 
 export interface AdminProduct {

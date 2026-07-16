@@ -1,4 +1,4 @@
-import { categoryIcons } from '../../data/categoryIcons'
+import { categoryIcons, DEFAULT_CATEGORY_ICON } from '../../data/categoryIcons'
 import type { Category, Product } from '../../types/product'
 
 interface CategorySectionProps {
@@ -31,7 +31,7 @@ export function CategorySection({
         {categories.map((category) => {
           const count = products.filter((p) => p.categorySlug === category.slug).length
           const isActive = activeCategory === category.slug
-          const Icon = categoryIcons[category.slug]
+          const Icon = categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON
 
           return (
             <button

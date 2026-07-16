@@ -1,6 +1,6 @@
 import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
-import { categoryIcons } from '../../data/categoryIcons'
+import { categoryIcons, DEFAULT_CATEGORY_ICON } from '../../data/categoryIcons'
 import type { Category, Product } from '../../types/product'
 import { GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
 import { GridIcon } from '../icons'
@@ -63,7 +63,7 @@ export function CatalogSection({
               <FilterPill
                 key={category.slug}
                 label={category.name}
-                icon={categoryIcons[category.slug]}
+                icon={categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON}
                 active={activeCategory === category.slug}
                 onClick={() => onSelect(category.slug)}
               />
