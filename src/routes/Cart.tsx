@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 import { useCart } from '../context/CartContext'
 import { useProducts } from '../hooks/useProducts'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { CartItem } from '../components/cart/CartItem'
 import { CartSummary } from '../components/cart/CartSummary'
 
 export default function Cart() {
   const { lines, clear } = useCart()
   const { status, data: products } = useProducts()
+  useDocumentTitle('Tu carrito')
 
   if (lines.length === 0) {
     return (
@@ -97,7 +99,7 @@ export default function Cart() {
           <CartSummary items={items} onClear={clear} />
           <Link
             to="/"
-            className="mt-4 block text-center text-sm font-semibold text-ink-900/50 transition hover:text-electric-500"
+            className="mt-4 block text-center text-sm font-semibold text-ink-900/60 transition hover:text-electric-500"
           >
             ← Seguir comprando
           </Link>

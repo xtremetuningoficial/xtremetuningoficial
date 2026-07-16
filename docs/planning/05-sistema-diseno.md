@@ -25,7 +25,7 @@ usarlos con disciplina, no reproducirlos literalmente.
 | `electric-500` | `#145EFF` | Color primario de marca (del logo). CTAs principales, links, focus. |
 | `cyan-400` | `#22D3EE` | Acento secundario (del logo). Glows, hovers, detalles sobre fondo oscuro. |
 | `hazard-400` | `#FFC400` | Firma visual (del aviso físico). Franjas tipo cinta de peligro, badges de "instalación incluida", detalles de alta atención — usado con moderación, nunca como fondo grande. |
-| `ember-500` | `#FF6A1A` | Acento terciario (del aviso físico). Precio de instalación, etiquetas de oferta. |
+| `ember-500` | `#AB3D0F` | Acento terciario (del aviso físico, oscurecido en Fase 7 para pasar contraste WCAG AA — el naranja vivo original `#FF6A1A` medía 2.6:1 sobre fondos claros, muy por debajo del 4.5:1 requerido). Precio de instalación, etiquetas de oferta. |
 | `paper-50` | `#F5F7FA` | Fondo del catálogo y zonas de lectura larga (no blanco puro: reduce fatiga visual). |
 
 Neutrales derivados de `ink-900` (tintas al 10/20/40/70%) para bordes, texto
@@ -104,6 +104,11 @@ desvanece en loop lento (2.5s), como el barrido de un sistema de alarma armado.
 ## Accesibilidad y calidad mínima
 
 - Contraste AA mínimo en todo texto sobre `ink-900` y `paper-50`.
+- **Texto "apagado" (secundario/caption):** mínimo `ink-900/60` sobre fondos claros y
+  `white/50` sobre fondos oscuros — opacidades menores (`/40`, `/50` sobre claro) no
+  pasan 4.5:1 con los tamaños de letra pequeños que usa el sitio (detectado y
+  corregido en la auditoría Lighthouse de la Fase 7). Excepciones válidas: placeholders
+  de input, texto de campos deshabilitados, e íconos puramente decorativos.
 - Foco de teclado visible (anillo `cyan-400` de 2px) en todos los elementos
   interactivos.
 - Animaciones del pulso de seguridad respetan `prefers-reduced-motion`.

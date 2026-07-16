@@ -207,9 +207,54 @@ movimientos queda registrado y consultable. Verificado.
 
 ---
 
-## Fase 7 — Pulido, SEO y despliegue
+## Fase 7 — Pulido, SEO y despliegue 🚧 (código listo, falta el despliegue real)
 
 **Objetivo:** dejar el sitio listo para producción y visible en buscadores.
+
+**Decisiones tomadas con el dueño:** hosting en **Vercel**, subdominio gratuito por
+ahora (sin dominio propio todavía), despliegue por CLI local (sin GitHub), analítica
+con **Vercel Analytics** (cero configuración extra al ya estar en Vercel).
+
+**Estado:**
+- ✅ SEO on-page: `index.html` con título, meta descripción, Open Graph y Twitter
+  Card (usa `banner.jpg`, la foto real del local); `lang="es"`; título de página
+  dinámico por ruta (`useDocumentTitle`).
+- ✅ `robots.txt` + `scripts/generate-sitemap.ts` (`npm run seo:sitemap -- <url>`):
+  genera `sitemap.xml` con categorías y productos reales desde Supabase, y actualiza
+  `robots.txt` con la línea `Sitemap:` — hay que volver a correrlo con la URL final
+  una vez desplegado (ver `06-despliegue.md`).
+- ✅ Optimización de imágenes: `scripts/seed-products.ts` ahora comprime a WebP
+  (~1000px, calidad 80) con `sharp` antes de subir a Storage — las 13 fotos del
+  catálogo ya se resembraron así (ej. una bajó de varios cientos de KB a 80 KB). El
+  panel admin comprime igual en el navegador (`compressImage.ts`, WebP con fallback a
+  JPEG) antes de subir fotos nuevas. Los assets estáticos (`logo.webp`, `local.webp`)
+  también se optimizaron y la foto del local se carga con `loading="lazy"`.
+- ✅ Code-splitting: las rutas `/admin/*` se cargan con `React.lazy` — un comprador
+  nunca descarga el código del panel de administración.
+- ✅ Auditoría Lighthouse (contra `vite preview` local, sin las ventajas de CDN/Brotli
+  que sí tendrá Vercel): **Accesibilidad 100, Buenas prácticas 96, SEO 100,
+  Rendimiento 69.** Se corrigieron en el camino: 5 patrones de contraste de color
+  insuficiente en todo el sitio (texto "apagado" con opacidad muy baja — se volvió una
+  convención documentada: mínimo `/60` sobre fondos claros, `/50` sobre fondos
+  oscuros), y un layout shift causado por el intercambio de fuente web (se cambió
+  `font-display` de `swap` a `optional`).
+- ⚠️ **Rendimiento por debajo de 85**: el cuello de botella medido es "Render Delay"
+  (93% del LCP) — el tiempo que toma descargar/parsear/ejecutar el bundle de React
+  antes de poder pintar cualquier contenido, bajo la simulación de red lenta/CPU
+  limitada de Lighthouse. Es una limitación estructural de un sitio 100% renderizado
+  en el cliente (sin SSR/SSG), no algo que se resuelva con más ajustes puntuales.
+  Superar 85 de forma consistente requeriría migrar a un framework con
+  server-side/static rendering (Next.js, Astro, etc.) — no se hizo porque es un cambio
+  arquitectónico grande, fuera del alcance razonable de "pulido". El resultado real en
+  producción sobre Vercel (HTTP/2, Brotli, CDN) debería ser mejor que esta medición
+  local; vale la pena volver a auditar ya desplegado.
+- ✅ `vercel.json` con rewrites para que las rutas de React Router funcionen al
+  recargar/entrar directo (ej. `/producto/algo`).
+- ✅ Vercel Analytics instalado (`<Analytics />`) — no requiere cuenta ni dominio
+  aparte, se activa solo al desplegar en Vercel.
+- ⏳ **Pendiente (acción del usuario):** desplegar de verdad. Ver
+  [`06-despliegue.md`](./06-despliegue.md) para los comandos exactos de la CLI de
+  Vercel — es un paso interactivo (login) que solo el dueño puede correr.
 
 **Entregables:**
 - SEO on-page: títulos, meta descripciones, Open Graph (para que se vea bien al
@@ -222,6 +267,9 @@ movimientos queda registrado y consultable. Verificado.
 
 **Hecho cuando:** el sitio está publicado en el dominio final, pasa una auditoría
 Lighthouse razonable (>85 en las categorías principales) y comparte bien en redes.
+Accesibilidad/Buenas prácticas/SEO ya superan 85; Rendimiento (69) queda documentado
+como limitación conocida de la arquitectura CSR — publicar y volver a medir en
+producción antes de decidir si vale la pena invertir en SSR.
 
 ---
 

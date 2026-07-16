@@ -7,6 +7,7 @@ import { CatalogSection } from '../components/catalog/CatalogSection'
 import { MissionBand } from '../components/home/MissionBand'
 import { HazardDivider } from '../components/layout/HazardDivider'
 import { useProducts } from '../hooks/useProducts'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Category } from '../types/product'
 
 interface CategoriesContext {
@@ -20,6 +21,9 @@ export default function Home() {
   const categoriesState = useOutletContext<CategoriesContext>()
   const productsState = useProducts()
   const activeCategory = categorySlug ?? 'all'
+
+  const activeCategoryName = categoriesState.data.find((c) => c.slug === categorySlug)?.name
+  useDocumentTitle(activeCategoryName)
 
   useEffect(() => {
     if (categorySlug) {

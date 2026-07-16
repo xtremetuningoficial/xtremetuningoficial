@@ -41,15 +41,15 @@ export function Hero() {
 
           <dl className="mt-10 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/10 pt-6 font-mono">
             <div>
-              <dt className="text-[11px] uppercase tracking-wide text-white/40">Catálogo</dt>
+              <dt className="text-[11px] uppercase tracking-wide text-white/50">Catálogo</dt>
               <dd className="text-lg font-bold text-white">13+ productos</dd>
             </div>
             <div>
-              <dt className="text-[11px] uppercase tracking-wide text-white/40">Instalación</dt>
+              <dt className="text-[11px] uppercase tracking-wide text-white/50">Instalación</dt>
               <dd className="text-lg font-bold text-white">Profesional</dd>
             </div>
             <div>
-              <dt className="text-[11px] uppercase tracking-wide text-white/40">Garantía</dt>
+              <dt className="text-[11px] uppercase tracking-wide text-white/50">Garantía</dt>
               <dd className="text-lg font-bold text-white">Oficial</dd>
             </div>
           </dl>
@@ -72,7 +72,7 @@ export function Hero() {
             <span className="absolute inset-8 rounded-full bg-ink-800 ring-1 ring-white/10" />
             <span className="relative flex h-32 w-48 items-center justify-center rounded-2xl bg-white p-3 shadow-2xl shadow-black/40 sm:h-40 sm:w-60">
               <img
-                src="/logo.png"
+                src="/logo.webp"
                 alt="Xtreme Tuning — Lujos y Accesorios"
                 className="h-full w-full object-contain"
               />

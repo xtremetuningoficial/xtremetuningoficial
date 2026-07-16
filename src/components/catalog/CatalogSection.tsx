@@ -106,7 +106,7 @@ export function CatalogSection({
             </div>
 
             {filtered.length === 0 && (
-              <p className="py-16 text-center text-ink-900/50">
+              <p className="py-16 text-center text-ink-900/60">
                 No encontramos productos con ese criterio. Escríbenos por WhatsApp y te contamos
                 qué tenemos disponible.
               </p>

@@ -51,7 +51,7 @@ export function CategorySection({
                 {category.name}
               </p>
               <p
-                className={`mt-1 font-mono text-xs ${isActive ? 'text-cyan-400' : 'text-ink-900/50'}`}
+                className={`mt-1 font-mono text-xs ${isActive ? 'text-cyan-400' : 'text-ink-900/60'}`}
               >
                 {count} producto{count === 1 ? '' : 's'}
               </p>

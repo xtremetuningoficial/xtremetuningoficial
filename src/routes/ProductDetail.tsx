@@ -7,6 +7,7 @@ import { vehicleLabels } from '../data/vehicleLabels'
 import { WhatsAppIcon } from '../components/layout/Header'
 import { QuantityStepper } from '../components/cart/QuantityStepper'
 import { useCart } from '../context/CartContext'
+import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Category } from '../types/product'
 
 export default function ProductDetail() {
@@ -14,6 +15,8 @@ export default function ProductDetail() {
   const { status, data: product, error } = useProduct(slug)
   const categoriesState = useOutletContext<{ data: Category[] }>()
   const { quantityOf, addItem, setQuantity } = useCart()
+
+  useDocumentTitle(product?.name)
 
   if (status === 'loading') {
     return (
@@ -71,7 +74,7 @@ export default function ProductDetail() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-      <nav className="mb-6 flex items-center gap-1.5 text-xs text-ink-900/50 sm:text-sm">
+      <nav className="mb-6 flex items-center gap-1.5 text-xs text-ink-900/60 sm:text-sm">
         <Link to="/" className="hover:text-electric-500">
           Inicio
         </Link>
@@ -108,7 +111,7 @@ export default function ProductDetail() {
 
           <div className="mt-6 flex flex-wrap items-end gap-4 rounded-2xl border border-ink-900/10 bg-white p-5 font-mono-price">
             <div>
-              <p className="text-xs uppercase tracking-wide text-ink-900/40">Producto</p>
+              <p className="text-xs uppercase tracking-wide text-ink-900/60">Producto</p>
               <p className="text-2xl font-bold text-ink-900 sm:text-3xl">{formatCOP(product.price)}</p>
             </div>
             <div>
@@ -148,7 +151,7 @@ export default function ProductDetail() {
             href={buildProductInquiryLink(product)}
             target="_blank"
             rel="noreferrer"
-            className="mt-3 flex items-center justify-center gap-2 text-sm font-semibold text-ink-900/50 transition hover:text-electric-500"
+            className="mt-3 flex items-center justify-center gap-2 text-sm font-semibold text-ink-900/60 transition hover:text-electric-500"
           >
             <WhatsAppIcon className="h-4 w-4" />
             ¿Prefieres preguntar antes? Escríbenos
@@ -156,7 +159,7 @@ export default function ProductDetail() {
 
           <Link
             to={`/categoria/${product.categorySlug}`}
-            className="mt-4 block text-center text-sm font-semibold text-ink-900/50 transition hover:text-electric-500"
+            className="mt-4 block text-center text-sm font-semibold text-ink-900/60 transition hover:text-electric-500"
           >
             ← Ver más en esta categoría
           </Link>

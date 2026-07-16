@@ -1,11 +1,13 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../../context/AuthContext'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 
 export default function AdminLogin() {
   const { session, signIn } = useAuth()
   const navigate = useNavigate()
   const location = useLocation()
+  useDocumentTitle('Iniciar sesión')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState<string | null>(null)
@@ -40,7 +42,7 @@ export default function AdminLogin() {
         className="w-full max-w-sm rounded-2xl border border-white/10 bg-ink-800 p-6 sm:p-8"
       >
         <span className="mx-auto flex h-14 w-20 items-center justify-center rounded-md bg-white p-1.5">
-          <img src="/logo.png" alt="Xtreme Tuning" className="h-full w-full object-contain" />
+          <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
         </span>
 
         <h1 className="mt-5 text-center font-display text-xl uppercase text-white">

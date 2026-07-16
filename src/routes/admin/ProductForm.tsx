@@ -12,6 +12,7 @@ import { fetchAdminCategories } from '../../lib/api/categories'
 import { slugify } from '../../lib/slugify'
 import { getErrorMessage } from '../../lib/errors'
 import { StockAdjuster } from '../../components/admin/StockAdjuster'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import type { AdminCategory, ProductFormValues } from '../../types/admin'
 import type { VehicleType } from '../../types/product'
 
@@ -32,6 +33,7 @@ export default function AdminProductForm() {
   const { id } = useParams()
   const isEditing = Boolean(id)
   const navigate = useNavigate()
+  useDocumentTitle(isEditing ? 'Editar producto' : 'Nuevo producto')
 
   const [categories, setCategories] = useState<AdminCategory[]>([])
   const [form, setForm] = useState<ProductFormValues>(EMPTY_FORM)
@@ -166,7 +168,7 @@ export default function AdminProductForm() {
         <h1 className="font-display text-2xl uppercase text-ink-900">
           {isEditing ? 'Editar producto' : 'Nuevo producto'}
         </h1>
-        <Link to="/admin" className="text-sm font-semibold text-ink-900/50 hover:text-electric-500">
+        <Link to="/admin" className="text-sm font-semibold text-ink-900/60 hover:text-electric-500">
           ← Volver
         </Link>
       </div>
@@ -297,7 +299,7 @@ export default function AdminProductForm() {
 
         <div className="space-y-5">
           <div className="rounded-2xl border border-ink-900/10 bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/40">Foto</p>
+            <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/60">Foto</p>
             <div className="mt-3 aspect-square overflow-hidden rounded-xl bg-paper-100">
               {newImagePreview || existingImageUrl ? (
                 <img
@@ -366,7 +368,7 @@ export default function AdminProductForm() {
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-ink-900/50">{label}</span>
+      <span className="mb-1 block text-xs font-semibold text-ink-900/60">{label}</span>
       {children}
     </label>
   )

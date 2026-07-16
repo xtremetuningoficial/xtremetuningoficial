@@ -9,7 +9,7 @@ export function Footer({ categories }: { categories: Category[] }) {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
           <span className="mb-4 inline-flex h-14 w-20 items-center justify-center rounded-md bg-white p-1.5">
-            <img src="/logo.png" alt="Xtreme Tuning" className="h-full w-full object-contain" />
+            <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
           </span>
           <p className="max-w-xs text-sm leading-relaxed">
             Soluciones integrales en accesorios y electricidad automotriz: productos de
@@ -58,7 +58,7 @@ export function Footer({ categories }: { categories: Category[] }) {
         </div>
       </div>
 
-      <div className="border-t border-white/10 py-5 text-center text-xs text-white/40">
+      <div className="border-t border-white/10 py-5 text-center text-xs text-white/50">
         © {new Date().getFullYear()} Xtreme Tuning · Lujos y Accesorios. Precios sujetos a
         cambio sin previo aviso.
       </div>

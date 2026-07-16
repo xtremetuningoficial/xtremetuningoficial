@@ -49,9 +49,9 @@ export function StockAdjuster({ productId, stock, onStockChange }: StockAdjuster
 
   return (
     <div className="rounded-2xl border border-ink-900/10 bg-white p-5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/40">Inventario</p>
+      <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/60">Inventario</p>
       <p className="mt-2 font-mono-price text-3xl font-bold text-ink-900">
-        {stock} <span className="text-sm font-normal text-ink-900/40">en stock</span>
+        {stock} <span className="text-sm font-normal text-ink-900/60">en stock</span>
       </p>
 
       <div className="mt-4 space-y-2">
@@ -107,12 +107,12 @@ export function StockAdjuster({ productId, stock, onStockChange }: StockAdjuster
       </div>
 
       <div className="mt-5 border-t border-ink-900/10 pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/40">Historial</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/60">Historial</p>
 
         {loadingMovements ? (
-          <p className="mt-2 text-xs text-ink-900/40">Cargando...</p>
+          <p className="mt-2 text-xs text-ink-900/60">Cargando...</p>
         ) : movements.length === 0 ? (
-          <p className="mt-2 text-xs text-ink-900/40">Sin movimientos todavía.</p>
+          <p className="mt-2 text-xs text-ink-900/60">Sin movimientos todavía.</p>
         ) : (
           <ul className="mt-2 max-h-56 space-y-2 overflow-y-auto text-xs">
             {movements.map((movement) => (
@@ -126,7 +126,7 @@ export function StockAdjuster({ productId, stock, onStockChange }: StockAdjuster
                   </span>
                   <span className="ml-2 text-ink-900/60">{MOVEMENT_REASON_LABELS[movement.reason]}</span>
                   {movement.note && (
-                    <span className="ml-1 truncate text-ink-900/40">— {movement.note}</span>
+                    <span className="ml-1 truncate text-ink-900/60">— {movement.note}</span>
                   )}
                 </div>
                 <span className="shrink-0 font-mono-price text-ink-900/30">

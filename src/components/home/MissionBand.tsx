@@ -23,8 +23,9 @@ export function MissionBand() {
           <div className="absolute -inset-2 -z-10 rounded-2xl bg-hazard-400/20 blur-2xl" />
           <div className="overflow-hidden rounded-2xl border border-white/10 shadow-2xl shadow-black/40">
             <img
-              src="/local.jpg"
+              src="/local.webp"
               alt="Local de Xtreme Tuning — Lujos y Accesorios"
+              loading="lazy"
               className="h-64 w-full object-cover sm:h-80"
             />
           </div>

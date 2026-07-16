@@ -42,7 +42,7 @@ administración** para que el dueño del negocio pueda, sin tocar código:
 5. **Fase 4** ✅ — Carrito de compra + checkout por WhatsApp.
 6. **Fase 5** ✅ — Panel de administración (login + CRUD de productos e inventario).
 7. **Fase 6** ✅ — Gestión de inventario avanzada (alertas de stock bajo, historial de movimientos).
-8. **Fase 7** — Pulido, SEO, performance, QA responsive y despliegue a producción.
+8. **Fase 7** 🚧 — Pulido, SEO, performance y despliegue — código listo, falta que el dueño corra el despliegue (ver `06-despliegue.md`).
 9. **Fase 8 (futuro)** — Pagos en línea, cuentas de cliente, historial de pedidos, reportes.
 
 Ver el detalle de cada fase, sus entregables y criterios de "hecho" en

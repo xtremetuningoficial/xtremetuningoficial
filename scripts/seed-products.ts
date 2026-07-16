@@ -7,10 +7,14 @@
 import 'dotenv/config'
 import { createClient } from '@supabase/supabase-js'
 import { readFileSync } from 'node:fs'
-import { extname, resolve } from 'node:path'
+import { resolve } from 'node:path'
+import sharp from 'sharp'
 import WebSocket from 'ws'
 import { categories } from '../src/data/categories.ts'
 import { products } from '../src/data/products.ts'
+
+const MAX_WIDTH = 1000
+const WEBP_QUALITY = 80
 
 const SUPABASE_URL = process.env.VITE_SUPABASE_URL
 const SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -27,13 +31,6 @@ if (!SUPABASE_URL || !SERVICE_ROLE_KEY) {
 const supabase = createClient(SUPABASE_URL, SERVICE_ROLE_KEY, {
   realtime: { transport: WebSocket as never },
 })
-
-function contentTypeFor(path: string): string {
-  const ext = extname(path).toLowerCase()
-  if (ext === '.png') return 'image/png'
-  if (ext === '.webp') return 'image/webp'
-  return 'image/jpeg'
-}
 
 async function seedCategories(): Promise<Map<string, string>> {
   console.log(`Sembrando ${categories.length} categorías...`)
@@ -87,12 +84,15 @@ async function seedProducts(categoryIdBySlug: Map<string, string>) {
     if (productError) throw new Error(`Producto "${product.name}": ${productError.message}`)
 
     const localImagePath = resolve('public', product.image.replace(/^\//, ''))
-    const fileBuffer = readFileSync(localImagePath)
-    const storagePath = `${product.slug}${extname(localImagePath)}`
+    const optimized = await sharp(readFileSync(localImagePath))
+      .resize({ width: MAX_WIDTH, withoutEnlargement: true })
+      .webp({ quality: WEBP_QUALITY })
+      .toBuffer()
+    const storagePath = `${product.slug}.webp`
 
     const { error: uploadError } = await supabase.storage
       .from(BUCKET)
-      .upload(storagePath, fileBuffer, { upsert: true, contentType: contentTypeFor(localImagePath) })
+      .upload(storagePath, optimized, { upsert: true, contentType: 'image/webp' })
 
     if (uploadError) throw new Error(`Imagen de "${product.name}": ${uploadError.message}`)
 

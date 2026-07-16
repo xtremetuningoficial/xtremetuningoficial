@@ -25,13 +25,13 @@ export function CartItem({ product, quantity }: { product: Product; quantity: nu
             type="button"
             onClick={() => removeItem(product.slug)}
             aria-label={`Quitar ${product.name} del carrito`}
-            className="shrink-0 text-ink-900/40 transition hover:text-ember-500"
+            className="shrink-0 text-ink-900/60 transition hover:text-ember-500"
           >
             ✕
           </button>
         </div>
 
-        <p className="font-mono-price text-xs text-ink-900/50">
+        <p className="font-mono-price text-xs text-ink-900/60">
           {formatCOP(product.price)} + instalación {formatCOP(product.installPrice)}
         </p>
 

@@ -1,0 +1,5 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+
+Sitemap: https://xtreme-tuning.vercel.app/sitemap.xml

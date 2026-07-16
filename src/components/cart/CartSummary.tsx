@@ -36,14 +36,14 @@ export function CartSummary({ items, onClear }: { items: CartInquiryItem[]; onCl
         Enviar pedido por WhatsApp
       </a>
 
-      <p className="mt-3 text-center text-xs text-ink-900/40">
+      <p className="mt-3 text-center text-xs text-ink-900/60">
         Coordinamos disponibilidad, pago e instalación por WhatsApp.
       </p>
 
       <button
         type="button"
         onClick={onClear}
-        className="mt-4 block w-full text-center text-xs font-semibold text-ink-900/40 transition hover:text-ember-500"
+        className="mt-4 block w-full text-center text-xs font-semibold text-ink-900/60 transition hover:text-ember-500"
       >
         Vaciar carrito
       </button>

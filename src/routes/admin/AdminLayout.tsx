@@ -10,7 +10,7 @@ export function AdminLayout() {
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link to="/admin" className="flex items-center gap-2">
             <span className="flex h-9 w-12 items-center justify-center rounded-md bg-white p-1">
-              <img src="/logo.png" alt="Xtreme Tuning" className="h-full w-full object-contain" />
+              <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
             </span>
             <span className="font-display text-sm uppercase tracking-wide text-white">
               Panel de administración
@@ -18,7 +18,7 @@ export function AdminLayout() {
           </Link>
 
           <div className="flex items-center gap-4">
-            <span className="hidden font-mono text-xs text-white/40 sm:block">{session?.user.email}</span>
+            <span className="hidden font-mono text-xs text-white/50 sm:block">{session?.user.email}</span>
             <Link
               to="/"
               className="text-xs font-semibold text-white/60 transition hover:text-cyan-400"

@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { compressImage } from '../compressImage'
 import type { AdminProduct, ProductFormValues } from '../../types/admin'
 import type { VehicleType } from '../../types/product'
 
@@ -102,11 +103,12 @@ export async function setProductActive(id: string, isActive: boolean): Promise<v
 }
 
 export async function uploadProductImage(slug: string, file: File): Promise<string> {
-  const ext = file.name.includes('.') ? file.name.split('.').pop() : 'jpg'
+  const optimized = await compressImage(file)
+  const ext = optimized.name.includes('.') ? optimized.name.split('.').pop() : 'jpg'
   const path = `${slug}-${Date.now()}.${ext}`
 
-  const { error } = await supabase.storage.from(BUCKET).upload(path, file, {
-    contentType: file.type || 'image/jpeg',
+  const { error } = await supabase.storage.from(BUCKET).upload(path, optimized, {
+    contentType: optimized.type || 'image/jpeg',
   })
 
   if (error) throw error

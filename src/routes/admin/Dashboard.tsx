@@ -3,9 +3,11 @@ import { Link } from 'react-router-dom'
 import { deleteProduct, fetchAdminProducts, setProductActive } from '../../lib/api/adminProducts'
 import { formatCOP } from '../../lib/format'
 import { useLowStockThreshold } from '../../hooks/useLowStockThreshold'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import type { AdminProduct } from '../../types/admin'
 
 export default function AdminDashboard() {
+  useDocumentTitle('Panel de administración')
   const [status, setStatus] = useState<'loading' | 'success' | 'error'>('loading')
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [search, setSearch] = useState('')
@@ -58,7 +60,7 @@ export default function AdminDashboard() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-display text-2xl uppercase text-ink-900">Productos</h1>
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-xs font-semibold text-ink-900/50">
+          <label className="flex items-center gap-2 text-xs font-semibold text-ink-900/60">
             Umbral de stock bajo
             <input
               type="number"
@@ -109,7 +111,7 @@ export default function AdminDashboard() {
         <div className="mt-6 overflow-x-auto rounded-2xl border border-ink-900/10 bg-white">
           <table className="w-full min-w-[720px] text-left text-sm">
             <thead>
-              <tr className="border-b border-ink-900/10 text-xs uppercase tracking-wide text-ink-900/40">
+              <tr className="border-b border-ink-900/10 text-xs uppercase tracking-wide text-ink-900/60">
                 <th className="px-4 py-3">Producto</th>
                 <th className="px-4 py-3">Categoría</th>
                 <th className="px-4 py-3">Precio</th>
@@ -151,7 +153,7 @@ export default function AdminDashboard() {
                       className={`rounded-full px-2.5 py-1 text-xs font-bold ${
                         product.isActive
                           ? 'bg-electric-500/10 text-electric-500'
-                          : 'bg-ink-900/10 text-ink-900/50'
+                          : 'bg-ink-900/10 text-ink-900/60'
                       }`}
                     >
                       {product.isActive ? 'Activo' : 'Agotado'}
@@ -181,7 +183,7 @@ export default function AdminDashboard() {
           </table>
 
           {filtered.length === 0 && (
-            <p className="px-4 py-10 text-center text-sm text-ink-900/50">
+            <p className="px-4 py-10 text-center text-sm text-ink-900/60">
               No hay productos que coincidan con "{search}".
             </p>
           )}

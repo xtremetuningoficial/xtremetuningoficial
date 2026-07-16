@@ -11,7 +11,7 @@ export function Header({ categories }: { categories: Category[] }) {
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
         <Link to="/" className="flex shrink-0 items-center gap-2">
           <span className="flex h-11 w-14 items-center justify-center rounded-md bg-white p-1 sm:h-12 sm:w-16">
-            <img src="/logo.png" alt="Xtreme Tuning" className="h-full w-full object-contain" />
+            <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
           </span>
           <span className="hidden font-display text-lg tracking-tight text-white sm:block">
             XTREME <span className="text-cyan-400">TUNING</span>
@@ -35,7 +35,7 @@ export function Header({ categories }: { categories: Category[] }) {
             href="tel:+573508277999"
             className="hidden text-right text-xs font-mono text-white/60 sm:block"
           >
-            <span className="block text-white/40">Línea directa</span>
+            <span className="block text-white/50">Línea directa</span>
             {WHATSAPP_NUMBER_DISPLAY}
           </a>
           <Link

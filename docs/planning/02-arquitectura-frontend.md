@@ -11,12 +11,13 @@
 - Estado del carrito: React Context + `localStorage` (no hace falta Redux/Zustand para
   este alcance).
 
-## Estructura de carpetas (actualizada a Fase 6)
+## Estructura de carpetas (actualizada a Fase 7)
 
 ```
 src/
-  main.tsx
+  main.tsx                # monta <App/> + <Analytics/> (Vercel Analytics)
   App.tsx                # AuthProvider + CartProvider + BrowserRouter + Routes
+                          # /admin/* con React.lazy — no pesa en el bundle público
   context/
     CartContext.tsx        # líneas {slug, quantity} + persistencia en localStorage
     AuthContext.tsx          # sesión de Supabase Auth (signIn/signOut)
@@ -58,10 +59,12 @@ src/
     useProducts.ts
     useProduct.ts
     useLowStockThreshold.ts   # umbral configurable, persistido en localStorage
+    useDocumentTitle.ts        # título de pestaña dinámico por ruta
   lib/
     supabase.ts             # cliente Supabase
     slugify.ts                # nombre → slug (usado en el formulario de producto)
     errors.ts                  # getErrorMessage() — los errores de Supabase no son instancias de Error
+    compressImage.ts            # resize + WebP (fallback JPEG) en el navegador antes de subir a Storage
     api/
       categories.ts          # fetchCategories(), fetchAdminCategories() (con id)
       products.ts             # fetchProducts(), fetchProductBySlug() + mapeo de fila DB → Product
@@ -80,8 +83,11 @@ src/
   assets/
 
 scripts/
-  seed-products.ts          # siembra inicial de categorías/productos/imágenes
+  seed-products.ts          # siembra categorías/productos, comprime imágenes a WebP con sharp
   create-admin-user.ts        # crea o resetea el usuario del panel (Admin API + service_role key)
+  generate-sitemap.ts           # sitemap.xml + robots.txt desde el catálogo real (npm run seo:sitemap -- <url>)
+
+vercel.json                 # rewrites de SPA para que /producto/:slug etc. funcionen al recargar
 ```
 
 ## Páginas / rutas
