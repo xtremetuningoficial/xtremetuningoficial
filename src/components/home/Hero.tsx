@@ -70,11 +70,11 @@ export function Hero() {
               style={{ animationDelay: '1.7s' }}
             />
             <span className="absolute inset-8 rounded-full bg-ink-800 ring-1 ring-white/10" />
-            <span className="relative flex h-32 w-48 items-center justify-center rounded-2xl bg-white p-3 shadow-2xl shadow-black/40 sm:h-40 sm:w-60">
+            <span className="relative flex h-32 w-48 items-center justify-center sm:h-40 sm:w-60">
               <img
                 src="/logo.webp"
                 alt="Xtreme Tuning — Lujos y Accesorios"
-                className="h-full w-full object-contain"
+                className="h-full w-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
               />
             </span>
           </div>

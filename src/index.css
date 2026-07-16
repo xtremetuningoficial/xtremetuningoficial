@@ -18,10 +18,6 @@
 }
 
 @layer base {
-  html {
-    scroll-behavior: smooth;
-  }
-
   body {
     font-family: var(--font-body);
     background-color: var(--color-paper-50);

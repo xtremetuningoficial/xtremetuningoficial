@@ -41,7 +41,7 @@ export default function AdminLogin() {
         onSubmit={handleSubmit}
         className="w-full max-w-sm rounded-2xl border border-white/10 bg-ink-800 p-6 sm:p-8"
       >
-        <span className="mx-auto flex h-14 w-20 items-center justify-center rounded-md bg-white p-1.5">
+        <span className="mx-auto flex h-14 w-20 items-center justify-center">
           <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
         </span>
 

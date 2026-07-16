@@ -5,6 +5,7 @@ import { TrustBar } from '../components/home/TrustBar'
 import { CategorySection } from '../components/home/CategorySection'
 import { CatalogSection } from '../components/catalog/CatalogSection'
 import { MissionBand } from '../components/home/MissionBand'
+import { VisitStore } from '../components/home/VisitStore'
 import { HazardDivider } from '../components/layout/HazardDivider'
 import { useProducts } from '../hooks/useProducts'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -54,6 +55,7 @@ export default function Home() {
         onSelect={handleSelectCategory}
       />
       <MissionBand />
+      <VisitStore />
     </>
   )
 }

@@ -1,16 +1,21 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Category } from '../../types/product'
 import { WHATSAPP_NUMBER_DISPLAY, GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
 import { useCart } from '../../context/CartContext'
+import { Tooltip } from '../ui/Tooltip'
+import { ShareQrModal } from './ShareQrModal'
 
 export function Header({ categories }: { categories: Category[] }) {
   const { count } = useCart()
+  const [qrOpen, setQrOpen] = useState(false)
 
   return (
-    <header className="sticky top-0 z-50 bg-ink-900/95 backdrop-blur supports-[backdrop-filter]:bg-ink-900/90 border-b border-white/10">
+    <>
+      <header className="sticky top-0 z-50 bg-ink-900/95 backdrop-blur supports-[backdrop-filter]:bg-ink-900/90 border-b border-white/10">
       <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-2.5 sm:px-6">
         <Link to="/" className="flex shrink-0 items-center gap-2">
-          <span className="flex h-11 w-14 items-center justify-center rounded-md bg-white p-1 sm:h-12 sm:w-16">
+          <span className="flex h-11 w-14 items-center justify-center sm:h-12 sm:w-16">
             <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
           </span>
           <span className="hidden font-display text-lg tracking-tight text-white sm:block">
@@ -32,24 +37,36 @@ export function Header({ categories }: { categories: Category[] }) {
 
         <div className="flex items-center gap-2 sm:gap-3">
           <a
-            href="tel:+573508277999"
+            href="tel:+573118664441"
             className="hidden text-right text-xs font-mono text-white/60 sm:block"
           >
             <span className="block text-white/50">Línea directa</span>
             {WHATSAPP_NUMBER_DISPLAY}
           </a>
-          <Link
-            to="/carrito"
-            aria-label="Ver carrito"
-            className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white transition hover:border-cyan-400 hover:text-cyan-400"
-          >
-            <CartIcon className="h-5 w-5" />
-            {count > 0 && (
-              <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-hazard-400 px-1 text-[11px] font-bold text-ink-900">
-                {count}
-              </span>
-            )}
-          </Link>
+          <Tooltip label="Compartir tienda (QR)">
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
+              aria-label="Generar código QR para compartir la tienda"
+              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white transition hover:border-cyan-400 hover:text-cyan-400"
+            >
+              <QrIcon className="h-5 w-5" />
+            </button>
+          </Tooltip>
+          <Tooltip label="Ver carrito">
+            <Link
+              to="/carrito"
+              aria-label="Ver carrito"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-white transition hover:border-cyan-400 hover:text-cyan-400"
+            >
+              <CartIcon className="h-5 w-5" />
+              {count > 0 && (
+                <span className="absolute -right-1.5 -top-1.5 flex h-5 min-w-5 items-center justify-center rounded-full bg-hazard-400 px-1 text-[11px] font-bold text-ink-900">
+                  {count}
+                </span>
+              )}
+            </Link>
+          </Tooltip>
           <a
             href={GENERAL_INQUIRY_LINK}
             target="_blank"
@@ -63,6 +80,8 @@ export function Header({ categories }: { categories: Category[] }) {
         </div>
       </div>
     </header>
+    {qrOpen && <ShareQrModal onClose={() => setQrOpen(false)} />}
+    </>
   )
 }
 
@@ -81,6 +100,51 @@ export function CartIcon({ className = 'h-5 w-5' }: { className?: string }) {
       <circle cx="9" cy="20" r="1.4" fill="currentColor" stroke="none" />
       <circle cx="18" cy="20" r="1.4" fill="currentColor" stroke="none" />
       <path d="M2.5 3h2l2.4 12.2a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 7.5H6" />
+    </svg>
+  )
+}
+
+export function FacebookIcon({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="currentColor" className={className} aria-hidden="true">
+      <path d="M13.5 21v-7.6h2.55l.38-2.96h-2.93V8.55c0-.86.24-1.44 1.47-1.44h1.57V4.46c-.27-.04-1.2-.12-2.29-.12-2.26 0-3.81 1.38-3.81 3.92v2.19H7.98v2.96h2.56V21h2.96z" />
+    </svg>
+  )
+}
+
+export function PinIcon({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="M12 21s-7-6.1-7-11.5A7 7 0 0 1 19 9.5C19 14.9 12 21 12 21z" />
+      <circle cx="12" cy="9.5" r="2.5" />
+    </svg>
+  )
+}
+
+export function QrIcon({ className = 'h-5 w-5' }: { className?: string }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth="2"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <rect x="3" y="3" width="7" height="7" rx="1" />
+      <rect x="14" y="3" width="7" height="7" rx="1" />
+      <rect x="3" y="14" width="7" height="7" rx="1" />
+      <path d="M14 14h3v3h-3zM14 20h7M20 14v3M17 20v1M20 20v1" strokeLinecap="round" />
     </svg>
   )
 }

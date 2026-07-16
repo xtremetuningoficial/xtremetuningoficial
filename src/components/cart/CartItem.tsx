@@ -3,6 +3,7 @@ import type { Product } from '../../types/product'
 import { formatCOP } from '../../lib/format'
 import { useCart } from '../../context/CartContext'
 import { QuantityStepper } from './QuantityStepper'
+import { Tooltip } from '../ui/Tooltip'
 
 export function CartItem({ product, quantity }: { product: Product; quantity: number }) {
   const { setQuantity, removeItem } = useCart()
@@ -21,14 +22,16 @@ export function CartItem({ product, quantity }: { product: Product; quantity: nu
               {product.name}
             </h3>
           </Link>
-          <button
-            type="button"
-            onClick={() => removeItem(product.slug)}
-            aria-label={`Quitar ${product.name} del carrito`}
-            className="shrink-0 text-ink-900/60 transition hover:text-ember-500"
-          >
-            ✕
-          </button>
+          <Tooltip label="Quitar del carrito">
+            <button
+              type="button"
+              onClick={() => removeItem(product.slug)}
+              aria-label={`Quitar ${product.name} del carrito`}
+              className="shrink-0 text-ink-900/60 transition hover:text-ember-500"
+            >
+              ✕
+            </button>
+          </Tooltip>
         </div>
 
         <p className="font-mono-price text-xs text-ink-900/60">

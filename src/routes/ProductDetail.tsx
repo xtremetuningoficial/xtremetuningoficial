@@ -185,6 +185,7 @@ function Gallery({ images, name }: { images: string[]; name: string }) {
               key={image}
               type="button"
               onClick={() => setActive(index)}
+              aria-label={`Ver foto ${index + 1} de ${images.length}`}
               className={`h-16 w-16 overflow-hidden rounded-lg border-2 transition ${
                 index === active ? 'border-electric-500' : 'border-transparent opacity-70 hover:opacity-100'
               }`}

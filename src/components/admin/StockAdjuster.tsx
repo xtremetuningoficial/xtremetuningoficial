@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { adjustStock, fetchMovements } from '../../lib/api/inventory'
 import { formatDateTime } from '../../lib/format'
 import { getErrorMessage } from '../../lib/errors'
+import { Tooltip } from '../ui/Tooltip'
 import { MOVEMENT_REASON_LABELS, type InventoryMovement, type MovementReason } from '../../types/admin'
 
 interface StockAdjusterProps {
@@ -56,24 +57,30 @@ export function StockAdjuster({ productId, stock, onStockChange }: StockAdjuster
 
       <div className="mt-4 space-y-2">
         <div className="flex gap-2">
-          <input
-            type="number"
-            min={1}
-            value={amount}
-            onChange={(e) => setAmount(Math.max(1, Number(e.target.value)))}
-            className="input w-20"
-          />
-          <select
-            value={reason}
-            onChange={(e) => setReason(e.target.value as MovementReason)}
-            className="input flex-1"
-          >
-            {Object.entries(MOVEMENT_REASON_LABELS).map(([value, label]) => (
-              <option key={value} value={value}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Tooltip label="Cantidad de unidades a mover">
+            <input
+              type="number"
+              min={1}
+              value={amount}
+              onChange={(e) => setAmount(Math.max(1, Number(e.target.value)))}
+              aria-label="Cantidad de unidades a mover"
+              className="input w-20"
+            />
+          </Tooltip>
+          <Tooltip label="Motivo del movimiento" className="flex-1">
+            <select
+              value={reason}
+              onChange={(e) => setReason(e.target.value as MovementReason)}
+              aria-label="Motivo del movimiento"
+              className="input"
+            >
+              {Object.entries(MOVEMENT_REASON_LABELS).map(([value, label]) => (
+                <option key={value} value={value}>
+                  {label}
+                </option>
+              ))}
+            </select>
+          </Tooltip>
         </div>
 
         <input
@@ -81,26 +88,31 @@ export function StockAdjuster({ productId, stock, onStockChange }: StockAdjuster
           placeholder="Nota (opcional)"
           value={note}
           onChange={(e) => setNote(e.target.value)}
+          aria-label="Nota del movimiento (opcional)"
           className="input"
         />
 
         <div className="flex gap-2">
-          <button
-            type="button"
-            disabled={applying}
-            onClick={() => apply(1)}
-            className="flex-1 rounded-full bg-electric-500 py-2 text-sm font-bold text-white transition hover:bg-electric-400 disabled:opacity-60"
-          >
-            + Entrada
-          </button>
-          <button
-            type="button"
-            disabled={applying}
-            onClick={() => apply(-1)}
-            className="flex-1 rounded-full border border-ember-500 py-2 text-sm font-bold text-ember-500 transition hover:bg-ember-500/10 disabled:opacity-60"
-          >
-            − Salida
-          </button>
+          <Tooltip label="Sumar unidades al stock (ej. llegó mercancía)" className="flex-1">
+            <button
+              type="button"
+              disabled={applying}
+              onClick={() => apply(1)}
+              className="w-full rounded-full bg-electric-500 py-2 text-sm font-bold text-white transition hover:bg-electric-400 disabled:opacity-60"
+            >
+              + Entrada
+            </button>
+          </Tooltip>
+          <Tooltip label="Restar unidades del stock (ej. venta en tienda)" className="flex-1">
+            <button
+              type="button"
+              disabled={applying}
+              onClick={() => apply(-1)}
+              className="w-full rounded-full border border-ember-500 py-2 text-sm font-bold text-ember-500 transition hover:bg-ember-500/10 disabled:opacity-60"
+            >
+              − Salida
+            </button>
+          </Tooltip>
         </div>
 
         {error && <p className="text-xs text-ember-500">{error}</p>}

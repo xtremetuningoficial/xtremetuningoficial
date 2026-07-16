@@ -1,10 +1,9 @@
-import { WHATSAPP_NUMBER_ALT_DISPLAY, WHATSAPP_NUMBER_DISPLAY } from '../../lib/whatsapp'
+import { WHATSAPP_NUMBER_DISPLAY } from '../../lib/whatsapp'
 import { WhatsAppIcon } from '../layout/Header'
 
 const items = [
   { label: 'WhatsApp', value: WHATSAPP_NUMBER_DISPLAY, icon: 'whatsapp' as const },
-  { label: 'WhatsApp', value: WHATSAPP_NUMBER_ALT_DISPLAY, icon: 'whatsapp' as const },
-  { label: 'Pagos', value: 'Nequi · Daviplata', icon: 'pay' as const },
+  { label: 'Pagos', value: 'Nequi · Daviplata · Addi', icon: 'pay' as const },
   { label: 'Tarjetas', value: 'Visa · Mastercard', icon: 'card' as const },
 ]
 

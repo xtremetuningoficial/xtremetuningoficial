@@ -9,7 +9,7 @@ export function AdminLayout() {
       <header className="sticky top-0 z-50 border-b border-white/10 bg-ink-900">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
           <Link to="/admin" className="flex items-center gap-2">
-            <span className="flex h-9 w-12 items-center justify-center rounded-md bg-white p-1">
+            <span className="flex h-9 w-12 items-center justify-center">
               <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
             </span>
             <span className="font-display text-sm uppercase tracking-wide text-white">

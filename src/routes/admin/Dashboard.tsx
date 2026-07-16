@@ -4,6 +4,8 @@ import { deleteProduct, fetchAdminProducts, setProductActive } from '../../lib/a
 import { formatCOP } from '../../lib/format'
 import { useLowStockThreshold } from '../../hooks/useLowStockThreshold'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { LowStockBell } from '../../components/admin/LowStockBell'
+import { Tooltip } from '../../components/ui/Tooltip'
 import type { AdminProduct } from '../../types/admin'
 
 export default function AdminDashboard() {
@@ -60,16 +62,6 @@ export default function AdminDashboard() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-display text-2xl uppercase text-ink-900">Productos</h1>
         <div className="flex flex-wrap items-center gap-3">
-          <label className="flex items-center gap-2 text-xs font-semibold text-ink-900/60">
-            Umbral de stock bajo
-            <input
-              type="number"
-              min={0}
-              value={threshold}
-              onChange={(e) => setThreshold(Math.max(0, Number(e.target.value)))}
-              className="w-16 rounded-full border border-ink-900/15 bg-white px-3 py-1.5 text-center text-sm text-ink-900 focus:border-electric-500"
-            />
-          </label>
           <input
             type="search"
             value={search}
@@ -77,21 +69,23 @@ export default function AdminDashboard() {
             placeholder="Buscar por nombre..."
             className="rounded-full border border-ink-900/15 bg-white px-4 py-2 text-sm focus:border-electric-500"
           />
-          <Link
-            to="/admin/productos/nuevo"
-            className="rounded-full bg-electric-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-electric-400"
-          >
-            + Nuevo producto
-          </Link>
+          {status === 'success' && (
+            <LowStockBell
+              lowStockProducts={lowStockProducts}
+              threshold={threshold}
+              onThresholdChange={setThreshold}
+            />
+          )}
+          <Tooltip label="Crear un producto nuevo">
+            <Link
+              to="/admin/productos/nuevo"
+              className="rounded-full bg-electric-500 px-4 py-2 text-sm font-bold text-white transition hover:bg-electric-400"
+            >
+              + Nuevo producto
+            </Link>
+          </Tooltip>
         </div>
       </div>
-
-      {status === 'success' && lowStockProducts.length > 0 && (
-        <p className="mt-4 rounded-lg bg-hazard-400/15 px-3 py-2 text-sm font-semibold text-ink-900">
-          ⚠ {lowStockProducts.length} producto{lowStockProducts.length === 1 ? '' : 's'} con stock bajo
-          (≤ {threshold}): {lowStockProducts.map((p) => p.name).join(', ')}
-        </p>
-      )}
 
       {status === 'loading' && (
         <div className="mt-8 space-y-3">
@@ -146,18 +140,22 @@ export default function AdminDashboard() {
                     )}
                   </td>
                   <td className="px-4 py-3">
-                    <button
-                      type="button"
-                      disabled={busySlug === product.slug}
-                      onClick={() => handleToggleActive(product)}
-                      className={`rounded-full px-2.5 py-1 text-xs font-bold ${
-                        product.isActive
-                          ? 'bg-electric-500/10 text-electric-500'
-                          : 'bg-ink-900/10 text-ink-900/60'
-                      }`}
+                    <Tooltip
+                      label={product.isActive ? 'Clic para marcar como agotado' : 'Clic para marcar como activo'}
                     >
-                      {product.isActive ? 'Activo' : 'Agotado'}
-                    </button>
+                      <button
+                        type="button"
+                        disabled={busySlug === product.slug}
+                        onClick={() => handleToggleActive(product)}
+                        className={`rounded-full px-2.5 py-1 text-xs font-bold ${
+                          product.isActive
+                            ? 'bg-electric-500/10 text-electric-500'
+                            : 'bg-ink-900/10 text-ink-900/60'
+                        }`}
+                      >
+                        {product.isActive ? 'Activo' : 'Agotado'}
+                      </button>
+                    </Tooltip>
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-3">

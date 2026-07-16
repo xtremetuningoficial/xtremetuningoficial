@@ -1,9 +1,8 @@
 import type { Product } from '../types/product'
 import { formatCOP } from './format'
 
-export const WHATSAPP_NUMBER = '573508277999'
-export const WHATSAPP_NUMBER_DISPLAY = '350 827 7999'
-export const WHATSAPP_NUMBER_ALT_DISPLAY = '311 866 4441'
+export const WHATSAPP_NUMBER = '573118664441'
+export const WHATSAPP_NUMBER_DISPLAY = '311 866 4441'
 
 export function buildWhatsAppLink(message: string): string {
   return `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`

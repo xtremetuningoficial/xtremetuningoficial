@@ -276,6 +276,46 @@ producción antes de decidir si vale la pena invertir en SSR.
 
 ---
 
+## Ajustes post-lanzamiento (2026-07-16) ✅
+
+Ronda de correcciones y features pedidas tras revisar el sitio ya con datos reales:
+
+- **Bug crítico resuelto** — pantalla en blanco al hacer scroll antes de "Visítanos en
+  tienda". Causa raíz: `scroll-behavior: smooth` global en `<html>` hacía que el
+  `scrollIntoView()` (al entrar a una categoría) y el ancla `#catalogo` del Hero
+  animaran el scroll a lo largo de miles de píxeles; durante esa animación el header
+  `position: sticky` se desincronizaba del repintado del navegador y "flotaba" en una
+  posición vieja, dejando un hueco en blanco. Se descartaron lazy-loading, arrays
+  vacíos e hidratación (el sitio es 100% cliente, sin SSR) antes de aislar la causa
+  real con capturas antes/después. Fix: se quitó `scroll-behavior: smooth`.
+- Número de WhatsApp corregido en todo el sitio (header, botón flotante, footer,
+  enlaces de pedido individual y de carrito) a `+57 311 8664441` — se eliminó el
+  número anterior y el segundo número "alterno" que ya no aplica.
+- Footer/contacto: enlace a Facebook, dirección física (`Transversal 78h bis # 48 a 24
+  sur`) y Addi agregado a medios de pago.
+- Nueva sección "Nuestra visión" junto a la misión existente (`MissionBand.tsx`, dos
+  columnas: misión en cian, visión en dorado).
+- "Visítanos en tienda" pasó de una foto fija a un carrusel (`StoreCarousel.tsx`):
+  autoplay con pausa en hover/touch, flechas, dots, swipe táctil. Array de imágenes en
+  `src/data/storeImages.ts`, fácil de extender con fotos reales.
+- Logo con transparencia real aprovechada — se quitó el fondo blanco que se le había
+  puesto encima en la Fase 1 (el PNG/WebP siempre tuvo canal alfa).
+- Botón para generar QR de la tienda (`ShareQrModal.tsx`, librería `qrcode`) con
+  descarga de la imagen.
+- Alerta de stock bajo del panel admin: pasó de un banner fijo a una campana con
+  badge (`LowStockBell.tsx`) que despliega un popover solo al hacer clic — ya no
+  ocupa espacio permanente en el layout.
+- Tooltips (`src/components/ui/Tooltip.tsx`, CSS puro con hover + foco + `:active`
+  para que también funcione al tap en mobile) en los controles de solo ícono del
+  sitio y del panel: carrito, QR, quitar del carrito, +/- de cantidad, campana de
+  stock bajo, ajuste de inventario, toggle activo/agotado.
+
+**Estado:** verificado end-to-end en navegador (incluida una regresión de scroll
+nativo con mouse wheel tras el fix). Pendiente de desplegar junto con el resto de la
+Fase 7.
+
+---
+
 ## Fase 8 — Futuro (fuera del alcance inicial)
 
 Ideas para iterar después de validar el negocio en línea:
