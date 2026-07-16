@@ -36,61 +36,78 @@ export default function AdminLogin() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-ink-900 px-4">
+    <div className="relative flex min-h-screen items-center justify-center overflow-hidden bg-ink-900 px-4">
+      <div className="circuit-bg pointer-events-none absolute inset-0 opacity-[0.08]" aria-hidden="true" />
+      <div
+        className="pointer-events-none absolute left-1/2 top-1/2 h-72 w-72 -translate-x-1/2 -translate-y-1/2 rounded-full bg-electric-500/10 blur-3xl"
+        aria-hidden="true"
+      />
+
       <form
         onSubmit={handleSubmit}
-        className="w-full max-w-sm rounded-2xl border border-white/10 bg-ink-800 p-6 sm:p-8"
+        className="relative w-full max-w-sm overflow-hidden rounded-2xl border border-white/10 bg-ink-800 shadow-2xl shadow-black/40"
       >
-        <span className="mx-auto flex h-14 w-20 items-center justify-center">
-          <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
-        </span>
+        <div className="hazard-stripes h-1.5 w-full" aria-hidden="true" />
 
-        <h1 className="mt-5 text-center font-display text-xl uppercase text-white">
-          Panel de administración
-        </h1>
-        <p className="mt-1 text-center text-sm text-white/50">Ingresa con tu correo y contraseña</p>
-
-        <div className="mt-6 space-y-4">
-          <div>
-            <label htmlFor="email" className="mb-1 block text-xs font-semibold text-white/60">
-              Correo
-            </label>
-            <input
-              id="email"
-              type="email"
-              required
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full rounded-lg border border-white/15 bg-ink-900 px-3 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-electric-500"
-              placeholder="tucorreo@xtremetuning.com"
-            />
+        <div className="p-6 sm:p-8">
+          <div className="relative mx-auto flex h-20 w-20 items-center justify-center">
+            <span className="pulse-ring absolute inset-0 rounded-full border-2 border-cyan-400/40" />
+            <span className="flex h-14 w-20 items-center justify-center">
+              <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
+            </span>
           </div>
 
-          <div>
-            <label htmlFor="password" className="mb-1 block text-xs font-semibold text-white/60">
-              Contraseña
-            </label>
-            <input
-              id="password"
-              type="password"
-              required
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full rounded-lg border border-white/15 bg-ink-900 px-3 py-2.5 text-sm text-white placeholder:text-white/30 focus:border-electric-500"
-              placeholder="••••••••"
-            />
+          <h1 className="mt-4 text-center font-display text-xl uppercase text-white">
+            Panel de administración
+          </h1>
+          <p className="mt-1 text-center text-sm text-white/50">Ingresa con tu correo y contraseña</p>
+
+          <div className="mt-6 space-y-4">
+            <div>
+              <label htmlFor="email" className="mb-1 block text-xs font-semibold text-white/60">
+                Correo
+              </label>
+              <input
+                id="email"
+                type="email"
+                required
+                autoComplete="username"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className="input"
+                placeholder="tucorreo@xtremetuning.com"
+              />
+            </div>
+
+            <div>
+              <label htmlFor="password" className="mb-1 block text-xs font-semibold text-white/60">
+                Contraseña
+              </label>
+              <input
+                id="password"
+                type="password"
+                required
+                autoComplete="current-password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                className="input"
+                placeholder="••••••••"
+              />
+            </div>
           </div>
+
+          {error && (
+            <p className="mt-4 rounded-lg bg-ember-500/10 px-3 py-2 text-sm text-ember-400">{error}</p>
+          )}
+
+          <button
+            type="submit"
+            disabled={submitting}
+            className="mt-6 flex w-full items-center justify-center rounded-full bg-electric-500 py-3 text-sm font-bold text-white transition hover:bg-electric-400 disabled:opacity-60"
+          >
+            {submitting ? 'Ingresando...' : 'Ingresar'}
+          </button>
         </div>
-
-        {error && <p className="mt-4 text-sm text-ember-500">{error}</p>}
-
-        <button
-          type="submit"
-          disabled={submitting}
-          className="mt-6 flex w-full items-center justify-center rounded-full bg-electric-500 py-3 text-sm font-bold text-white transition hover:bg-electric-400 disabled:opacity-60"
-        >
-          {submitting ? 'Ingresando...' : 'Ingresar'}
-        </button>
       </form>
     </div>
   )

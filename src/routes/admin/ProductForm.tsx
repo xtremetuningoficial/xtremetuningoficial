@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
+import { useEffect, useRef, useState, type DragEvent, type FormEvent, type ReactNode } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import {
   createProduct,
@@ -12,7 +12,9 @@ import { fetchAdminCategories } from '../../lib/api/categories'
 import { slugify } from '../../lib/slugify'
 import { getErrorMessage } from '../../lib/errors'
 import { StockAdjuster } from '../../components/admin/StockAdjuster'
+import { Switch } from '../../components/admin/Switch'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { TrashIcon, UploadIcon } from '../../components/icons'
 import type { AdminCategory, ProductFormValues } from '../../types/admin'
 import type { VehicleType } from '../../types/product'
 
@@ -41,6 +43,8 @@ export default function AdminProductForm() {
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null)
   const [newImageFile, setNewImageFile] = useState<File | null>(null)
   const [newImagePreview, setNewImagePreview] = useState<string | null>(null)
+  const [dragOver, setDragOver] = useState(false)
+  const fileInputRef = useRef<HTMLInputElement>(null)
   const [loading, setLoading] = useState(isEditing)
   const [categoriesLoading, setCategoriesLoading] = useState(true)
   const [loadError, setLoadError] = useState<string | null>(null)
@@ -93,8 +97,15 @@ export default function AdminProductForm() {
   }
 
   function handleImageChange(file: File | null) {
+    if (file && !file.type.startsWith('image/')) return
     setNewImageFile(file)
     setNewImagePreview(file ? URL.createObjectURL(file) : null)
+  }
+
+  function handleDrop(event: DragEvent<HTMLDivElement>) {
+    event.preventDefault()
+    setDragOver(false)
+    handleImageChange(event.dataTransfer.files?.[0] ?? null)
   }
 
   async function handleSubmit(event: FormEvent) {
@@ -151,12 +162,17 @@ export default function AdminProductForm() {
   }
 
   if (loading) {
-    return <div className="h-64 animate-pulse rounded-2xl bg-white" />
+    return (
+      <div className="space-y-4">
+        <div className="h-8 w-48 animate-pulse rounded bg-ink-800" />
+        <div className="h-96 animate-pulse rounded-2xl bg-ink-800" />
+      </div>
+    )
   }
 
   if (loadError) {
     return (
-      <div className="rounded-2xl bg-ember-500/10 px-4 py-8 text-center text-ember-500">
+      <div className="rounded-2xl bg-ember-500/10 px-4 py-8 text-center text-ember-400">
         {loadError}
       </div>
     )
@@ -165,160 +181,207 @@ export default function AdminProductForm() {
   return (
     <div>
       <div className="flex items-center justify-between">
-        <h1 className="font-display text-2xl uppercase text-ink-900">
-          {isEditing ? 'Editar producto' : 'Nuevo producto'}
-        </h1>
-        <Link to="/admin" className="text-sm font-semibold text-ink-900/60 hover:text-electric-500">
+        <div>
+          <h1 className="font-display text-2xl uppercase text-white sm:text-3xl">
+            {isEditing ? 'Editar producto' : 'Nuevo producto'}
+          </h1>
+          {isEditing && <p className="mt-1 font-mono-price text-xs text-white/50">{form.slug}</p>}
+        </div>
+        <Link to="/admin" className="text-sm font-semibold text-white/60 transition hover:text-cyan-400">
           ← Volver
         </Link>
       </div>
 
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-8 lg:grid-cols-[1fr_320px]">
-        <div className="space-y-5 rounded-2xl border border-ink-900/10 bg-white p-5 sm:p-6">
-          <Field label="Nombre">
-            <input
-              type="text"
-              required
-              value={form.name}
-              onChange={(e) => handleNameChange(e.target.value)}
-              className="input"
-            />
-          </Field>
-
-          <Field label="Slug (URL)">
-            <input
-              type="text"
-              required
-              value={form.slug}
-              onChange={(e) => {
-                setSlugTouched(true)
-                setForm((current) => ({ ...current, slug: e.target.value }))
-              }}
-              className="input font-mono-price"
-            />
-          </Field>
-
-          <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Categoría">
-              <select
+      <form onSubmit={handleSubmit} className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
+        <div className="space-y-6 rounded-2xl border border-white/10 bg-ink-800 p-5 sm:p-6">
+          <Section title="Información general">
+            <Field label="Nombre">
+              <input
+                type="text"
                 required
-                value={form.categoryId}
-                onChange={(e) => setForm((current) => ({ ...current, categoryId: e.target.value }))}
+                value={form.name}
+                onChange={(e) => handleNameChange(e.target.value)}
                 className="input"
-              >
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.name}
-                  </option>
-                ))}
-              </select>
+              />
             </Field>
 
-            <Field label="Tipo de vehículo">
-              <select
-                value={form.vehicleType}
-                onChange={(e) =>
-                  setForm((current) => ({ ...current, vehicleType: e.target.value as VehicleType }))
-                }
-                className="input"
-              >
-                <option value="carro">Carro</option>
-                <option value="moto">Moto</option>
-                <option value="universal">Universal</option>
-              </select>
-            </Field>
-          </div>
-
-          <Field label="Descripción (una característica por línea)">
-            <textarea
-              rows={5}
-              value={form.description}
-              onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
-              className="input"
-              placeholder={'Protección con código variable Anti-Scan\nBloqueo de motor y función Anti-Hijack'}
-            />
-          </Field>
-
-          <div className="grid gap-5 sm:grid-cols-3">
-            <Field label="Precio (COP)">
+            <Field label="Slug (URL)">
               <input
-                type="number"
-                min={0}
+                type="text"
                 required
-                value={form.price}
-                onChange={(e) => setForm((current) => ({ ...current, price: Number(e.target.value) }))}
-                className="input"
+                value={form.slug}
+                onChange={(e) => {
+                  setSlugTouched(true)
+                  setForm((current) => ({ ...current, slug: e.target.value }))
+                }}
+                className="input font-mono-price"
               />
             </Field>
-            <Field label="Instalación (COP)">
-              <input
-                type="number"
-                min={0}
-                value={form.installPrice}
-                onChange={(e) =>
-                  setForm((current) => ({ ...current, installPrice: Number(e.target.value) }))
-                }
-                className="input"
-              />
-            </Field>
-            <Field label={isEditing ? 'Stock (ajústalo abajo)' : 'Stock inicial'}>
-              <input
-                type="number"
-                min={0}
-                disabled={isEditing}
-                value={form.stockQuantity}
-                onChange={(e) =>
-                  setForm((current) => ({ ...current, stockQuantity: Number(e.target.value) }))
-                }
-                className="input disabled:bg-paper-50 disabled:text-ink-900/50"
-              />
-            </Field>
-          </div>
 
-          <div className="flex flex-wrap gap-6">
-            <label className="flex items-center gap-2 text-sm text-ink-900/70">
-              <input
-                type="checkbox"
-                checked={form.isFeatured}
-                onChange={(e) => setForm((current) => ({ ...current, isFeatured: e.target.checked }))}
-                className="h-4 w-4 accent-electric-500"
+            <div className="grid gap-5 sm:grid-cols-2">
+              <Field label="Categoría">
+                <select
+                  required
+                  value={form.categoryId}
+                  onChange={(e) => setForm((current) => ({ ...current, categoryId: e.target.value }))}
+                  className="input"
+                >
+                  {categories.map((category) => (
+                    <option key={category.id} value={category.id}>
+                      {category.name}
+                    </option>
+                  ))}
+                </select>
+              </Field>
+
+              <Field label="Tipo de vehículo">
+                <select
+                  value={form.vehicleType}
+                  onChange={(e) =>
+                    setForm((current) => ({ ...current, vehicleType: e.target.value as VehicleType }))
+                  }
+                  className="input"
+                >
+                  <option value="carro">Carro</option>
+                  <option value="moto">Moto</option>
+                  <option value="universal">Universal</option>
+                </select>
+              </Field>
+            </div>
+
+            <Field label="Descripción (una característica por línea)">
+              <textarea
+                rows={5}
+                value={form.description}
+                onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
+                className="input"
+                placeholder={'Protección con código variable Anti-Scan\nBloqueo de motor y función Anti-Hijack'}
               />
-              Destacado ("Más pedido")
-            </label>
-            <label className="flex items-center gap-2 text-sm text-ink-900/70">
-              <input
-                type="checkbox"
-                checked={form.isActive}
-                onChange={(e) => setForm((current) => ({ ...current, isActive: e.target.checked }))}
-                className="h-4 w-4 accent-electric-500"
-              />
-              Visible en la tienda
-            </label>
-          </div>
+            </Field>
+          </Section>
+
+          <Section title="Precio e inventario">
+            <div className="grid gap-5 sm:grid-cols-3">
+              <Field label="Precio (COP)">
+                <input
+                  type="number"
+                  min={0}
+                  required
+                  value={form.price}
+                  onChange={(e) => setForm((current) => ({ ...current, price: Number(e.target.value) }))}
+                  className="input"
+                />
+              </Field>
+              <Field label="Instalación (COP)">
+                <input
+                  type="number"
+                  min={0}
+                  value={form.installPrice}
+                  onChange={(e) =>
+                    setForm((current) => ({ ...current, installPrice: Number(e.target.value) }))
+                  }
+                  className="input"
+                />
+              </Field>
+              <Field label={isEditing ? 'Stock (ajústalo →)' : 'Stock inicial'}>
+                <input
+                  type="number"
+                  min={0}
+                  disabled={isEditing}
+                  value={form.stockQuantity}
+                  onChange={(e) =>
+                    setForm((current) => ({ ...current, stockQuantity: Number(e.target.value) }))
+                  }
+                  className="input"
+                />
+              </Field>
+            </div>
+          </Section>
+
+          <Section title="Visibilidad">
+            <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
+              <label className="flex items-center gap-3 text-sm text-white/80">
+                <Switch
+                  checked={form.isFeatured}
+                  onChange={(checked) => setForm((current) => ({ ...current, isFeatured: checked }))}
+                  label="Destacado"
+                />
+                Destacado ("Más pedido")
+              </label>
+              <label className="flex items-center gap-3 text-sm text-white/80">
+                <Switch
+                  checked={form.isActive}
+                  onChange={(checked) => setForm((current) => ({ ...current, isActive: checked }))}
+                  label="Visible en la tienda"
+                />
+                Visible en la tienda
+              </label>
+            </div>
+          </Section>
         </div>
 
-        <div className="space-y-5">
-          <div className="rounded-2xl border border-ink-900/10 bg-white p-5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/60">Foto</p>
-            <div className="mt-3 aspect-square overflow-hidden rounded-xl bg-paper-100">
+        <div className="space-y-6">
+          <div className="rounded-2xl border border-white/10 bg-ink-800 p-5">
+            <p className="text-xs font-semibold uppercase tracking-wide text-white/50">Foto</p>
+
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => {
+                e.preventDefault()
+                setDragOver(true)
+              }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={handleDrop}
+              className={`mt-3 cursor-pointer overflow-hidden rounded-xl border-2 border-dashed transition ${
+                dragOver ? 'border-electric-400 bg-electric-500/10' : 'border-white/15 hover:border-white/25'
+              }`}
+            >
               {newImagePreview || existingImageUrl ? (
-                <img
-                  src={newImagePreview ?? existingImageUrl ?? ''}
-                  alt=""
-                  className="h-full w-full object-cover"
-                />
+                <div className="relative aspect-square">
+                  <img
+                    src={newImagePreview ?? existingImageUrl ?? ''}
+                    alt=""
+                    className="h-full w-full object-cover"
+                  />
+                  <div className="absolute inset-0 flex items-center justify-center bg-ink-900/0 opacity-0 transition hover:bg-ink-900/60 hover:opacity-100">
+                    <span className="flex items-center gap-2 rounded-full bg-ink-900/80 px-3 py-1.5 text-xs font-bold text-white">
+                      <UploadIcon className="h-3.5 w-3.5" />
+                      Cambiar foto
+                    </span>
+                  </div>
+                </div>
               ) : (
-                <div className="flex h-full items-center justify-center text-sm text-ink-900/30">
-                  Sin imagen
+                <div className="flex aspect-square flex-col items-center justify-center gap-2 px-4 text-center">
+                  <UploadIcon className="h-7 w-7 text-white/40" />
+                  <p className="text-xs font-semibold text-white/60">Arrastra una foto aquí</p>
+                  <p className="text-xs text-white/40">o haz clic para elegirla</p>
                 </div>
               )}
             </div>
+
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/*"
               onChange={(e) => handleImageChange(e.target.files?.[0] ?? null)}
-              className="mt-3 block w-full text-xs text-ink-900/60 file:mr-3 file:rounded-full file:border-0 file:bg-electric-500/10 file:px-3 file:py-2 file:text-xs file:font-bold file:text-electric-500"
+              className="hidden"
             />
+
+            {(newImagePreview || existingImageUrl) && (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  handleImageChange(null)
+                  setExistingImageUrl(null)
+                  if (fileInputRef.current) fileInputRef.current.value = ''
+                }}
+                className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-white/50 transition hover:text-ember-400"
+              >
+                <TrashIcon className="h-3.5 w-3.5" />
+                Quitar foto
+              </button>
+            )}
           </div>
 
           {isEditing && id && (
@@ -332,7 +395,7 @@ export default function AdminProductForm() {
           )}
 
           {submitError && (
-            <p className="rounded-lg bg-ember-500/10 px-3 py-2 text-sm text-ember-500">{submitError}</p>
+            <p className="rounded-lg bg-ember-500/10 px-3 py-2 text-sm text-ember-400">{submitError}</p>
           )}
 
           <button
@@ -354,8 +417,9 @@ export default function AdminProductForm() {
               type="button"
               onClick={handleDelete}
               disabled={submitting}
-              className="block w-full text-center text-sm font-semibold text-ember-500 hover:underline"
+              className="flex w-full items-center justify-center gap-1.5 text-center text-sm font-semibold text-ember-400 hover:underline"
             >
+              <TrashIcon className="h-3.5 w-3.5" />
               Eliminar producto
             </button>
           )}
@@ -365,10 +429,19 @@ export default function AdminProductForm() {
   )
 }
 
+function Section({ title, children }: { title: string; children: ReactNode }) {
+  return (
+    <div className="space-y-5 border-t border-white/10 pt-5 first:border-0 first:pt-0">
+      <p className="text-xs font-bold uppercase tracking-widest text-cyan-400">{title}</p>
+      {children}
+    </div>
+  )
+}
+
 function Field({ label, children }: { label: string; children: ReactNode }) {
   return (
     <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-ink-900/60">{label}</span>
+      <span className="mb-1 block text-xs font-semibold text-white/60">{label}</span>
       {children}
     </label>
   )

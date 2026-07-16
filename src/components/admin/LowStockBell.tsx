@@ -38,7 +38,7 @@ export function LowStockBell({ lowStockProducts, threshold, onThresholdChange }:
           onClick={() => setOpen((o) => !o)}
           aria-label="Ver alertas de stock bajo"
           aria-expanded={open}
-          className="relative flex h-9 w-9 items-center justify-center rounded-full border border-ink-900/15 bg-white text-ink-900/70 transition hover:border-electric-500/50"
+          className="relative flex h-9 w-9 items-center justify-center rounded-full border border-white/15 bg-ink-800 text-white/70 transition hover:border-electric-400/50 hover:text-white"
         >
           <BellIcon className="h-5 w-5" />
           {lowStockProducts.length > 0 && (
@@ -50,32 +50,32 @@ export function LowStockBell({ lowStockProducts, threshold, onThresholdChange }:
       </Tooltip>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-ink-900/10 bg-white p-4 shadow-xl">
-          <label className="flex items-center justify-between gap-2 text-xs font-semibold text-ink-900/60">
+        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-white/10 bg-ink-800 p-4 shadow-2xl shadow-black/40">
+          <label className="flex items-center justify-between gap-2 text-xs font-semibold text-white/60">
             Umbral de stock bajo
             <input
               type="number"
               min={0}
               value={threshold}
               onChange={(e) => onThresholdChange(Math.max(0, Number(e.target.value)))}
-              className="w-16 rounded-full border border-ink-900/15 bg-white px-3 py-1.5 text-center text-sm text-ink-900 focus:border-electric-500"
+              className="input w-16 text-center"
             />
           </label>
 
-          <div className="mt-3 max-h-64 overflow-y-auto border-t border-ink-900/10 pt-3">
+          <div className="mt-3 max-h-64 overflow-y-auto border-t border-white/10 pt-3">
             {lowStockProducts.length === 0 ? (
-              <p className="text-sm text-ink-900/60">Ningún producto activo está bajo el umbral.</p>
+              <p className="text-sm text-white/50">Ningún producto activo está bajo el umbral.</p>
             ) : (
-              <ul className="space-y-2">
+              <ul className="space-y-1">
                 {lowStockProducts.map((product) => (
                   <li key={product.id}>
                     <Link
                       to={`/admin/productos/${product.id}`}
                       onClick={() => setOpen(false)}
-                      className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm transition hover:bg-paper-50"
+                      className="flex items-center justify-between gap-2 rounded-lg px-2 py-1.5 text-sm transition hover:bg-white/5"
                     >
-                      <span className="text-ink-900">{product.name}</span>
-                      <span className="shrink-0 rounded-full bg-hazard-400/20 px-2 py-0.5 text-xs font-bold text-ember-500">
+                      <span className="text-white">{product.name}</span>
+                      <span className="shrink-0 rounded-full bg-hazard-400/15 px-2 py-0.5 text-xs font-bold text-hazard-400">
                         {product.stockQuantity} en stock
                       </span>
                     </Link>

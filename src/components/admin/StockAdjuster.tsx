@@ -49,10 +49,10 @@ export function StockAdjuster({ productId, stock, onStockChange }: StockAdjuster
   }
 
   return (
-    <div className="rounded-2xl border border-ink-900/10 bg-white p-5">
-      <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/60">Inventario</p>
-      <p className="mt-2 font-mono-price text-3xl font-bold text-ink-900">
-        {stock} <span className="text-sm font-normal text-ink-900/60">en stock</span>
+    <div className="rounded-2xl border border-white/10 bg-ink-800 p-5">
+      <p className="text-xs font-semibold uppercase tracking-wide text-white/50">Inventario</p>
+      <p className="mt-2 font-mono-price text-3xl font-bold text-white">
+        {stock} <span className="text-sm font-normal text-white/50">en stock</span>
       </p>
 
       <div className="mt-4 space-y-2">
@@ -108,40 +108,40 @@ export function StockAdjuster({ productId, stock, onStockChange }: StockAdjuster
               type="button"
               disabled={applying}
               onClick={() => apply(-1)}
-              className="w-full rounded-full border border-ember-500 py-2 text-sm font-bold text-ember-500 transition hover:bg-ember-500/10 disabled:opacity-60"
+              className="w-full rounded-full border border-ember-400 py-2 text-sm font-bold text-ember-400 transition hover:bg-ember-500/10 disabled:opacity-60"
             >
               − Salida
             </button>
           </Tooltip>
         </div>
 
-        {error && <p className="text-xs text-ember-500">{error}</p>}
+        {error && <p className="text-xs text-ember-400">{error}</p>}
       </div>
 
-      <div className="mt-5 border-t border-ink-900/10 pt-4">
-        <p className="text-xs font-semibold uppercase tracking-wide text-ink-900/60">Historial</p>
+      <div className="mt-5 border-t border-white/10 pt-4">
+        <p className="text-xs font-semibold uppercase tracking-wide text-white/50">Historial</p>
 
         {loadingMovements ? (
-          <p className="mt-2 text-xs text-ink-900/60">Cargando...</p>
+          <p className="mt-2 text-xs text-white/50">Cargando...</p>
         ) : movements.length === 0 ? (
-          <p className="mt-2 text-xs text-ink-900/60">Sin movimientos todavía.</p>
+          <p className="mt-2 text-xs text-white/50">Sin movimientos todavía.</p>
         ) : (
           <ul className="mt-2 max-h-56 space-y-2 overflow-y-auto text-xs">
             {movements.map((movement) => (
               <li key={movement.id} className="flex items-center justify-between gap-2">
                 <div className="min-w-0">
                   <span
-                    className={`font-mono-price font-bold ${movement.change >= 0 ? 'text-electric-500' : 'text-ember-500'}`}
+                    className={`font-mono-price font-bold ${movement.change >= 0 ? 'text-electric-400' : 'text-ember-400'}`}
                   >
                     {movement.change >= 0 ? '+' : ''}
                     {movement.change}
                   </span>
-                  <span className="ml-2 text-ink-900/60">{MOVEMENT_REASON_LABELS[movement.reason]}</span>
+                  <span className="ml-2 text-white/50">{MOVEMENT_REASON_LABELS[movement.reason]}</span>
                   {movement.note && (
-                    <span className="ml-1 truncate text-ink-900/60">— {movement.note}</span>
+                    <span className="ml-1 truncate text-white/50">— {movement.note}</span>
                   )}
                 </div>
-                <span className="shrink-0 font-mono-price text-ink-900/30">
+                <span className="shrink-0 font-mono-price text-white/50">
                   {formatDateTime(movement.createdAt)}
                 </span>
               </li>
