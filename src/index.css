@@ -78,6 +78,15 @@
     );
   }
 
+  .scrollbar-none {
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .scrollbar-none::-webkit-scrollbar {
+    display: none;
+  }
+
   .circuit-bg {
     background-image:
       linear-gradient(var(--color-ink-700) 1px, transparent 1px),

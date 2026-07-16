@@ -4,6 +4,7 @@ import { Hero } from '../components/home/Hero'
 import { TrustBar } from '../components/home/TrustBar'
 import { CategorySection } from '../components/home/CategorySection'
 import { CatalogSection } from '../components/catalog/CatalogSection'
+import { SoundServiceSection } from '../components/home/SoundServiceSection'
 import { MissionBand } from '../components/home/MissionBand'
 import { VisitStore } from '../components/home/VisitStore'
 import { HazardDivider } from '../components/layout/HazardDivider'
@@ -54,6 +55,7 @@ export default function Home() {
         activeCategory={activeCategory}
         onSelect={handleSelectCategory}
       />
+      <SoundServiceSection />
       <MissionBand />
       <VisitStore />
     </>

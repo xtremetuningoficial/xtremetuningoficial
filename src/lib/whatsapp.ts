@@ -23,6 +23,10 @@ export const GENERAL_INQUIRY_LINK = buildWhatsAppLink(
   'Hola Xtreme Tuning, quiero más información sobre sus productos.',
 )
 
+export const SOUND_SERVICE_INQUIRY_LINK = buildWhatsAppLink(
+  'Hola Xtreme Tuning, quiero cotizar una adaptación o instalación de equipo de sonido para mi vehículo.',
+)
+
 export interface CartInquiryItem {
   product: Product
   quantity: number
