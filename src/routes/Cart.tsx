@@ -4,6 +4,7 @@ import { useProducts } from '../hooks/useProducts'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import { CartItem } from '../components/cart/CartItem'
 import { CartSummary } from '../components/cart/CartSummary'
+import { CartIcon } from '../components/layout/Header'
 
 export default function Cart() {
   const { lines, clear } = useCart()
@@ -13,7 +14,7 @@ export default function Cart() {
   if (lines.length === 0) {
     return (
       <section className="mx-auto max-w-2xl px-4 py-24 text-center sm:px-6">
-        <p className="text-4xl">🛒</p>
+        <CartIcon className="mx-auto h-12 w-12 text-ink-900/30" />
         <p className="mt-4 font-display text-xl uppercase text-ink-900">Tu carrito está vacío</p>
         <p className="mt-2 text-sm text-ink-900/60">
           Agrega productos del catálogo para armar tu pedido.

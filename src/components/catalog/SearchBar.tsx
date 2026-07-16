@@ -1,3 +1,5 @@
+import { SearchIcon } from '../icons'
+
 interface SearchBarProps {
   value: string
   onChange: (value: string) => void
@@ -8,7 +10,7 @@ export function SearchBar({ value, onChange }: SearchBarProps) {
     <label className="relative block w-full sm:max-w-xs">
       <span className="sr-only">Buscar producto</span>
       <span className="pointer-events-none absolute inset-y-0 left-3 flex items-center text-ink-900/40">
-        🔍
+        <SearchIcon className="h-4 w-4" />
       </span>
       <input
         type="search"

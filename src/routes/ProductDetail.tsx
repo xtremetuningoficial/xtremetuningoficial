@@ -5,6 +5,7 @@ import { formatCOP } from '../lib/format'
 import { buildProductInquiryLink, GENERAL_INQUIRY_LINK } from '../lib/whatsapp'
 import { vehicleLabels } from '../data/vehicleLabels'
 import { WhatsAppIcon } from '../components/layout/Header'
+import { CheckIcon } from '../components/icons'
 import { QuantityStepper } from '../components/cart/QuantityStepper'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
@@ -90,9 +91,15 @@ export default function ProductDetail() {
         <Gallery images={gallery} name={product.name} />
 
         <div>
-          <span className="inline-flex items-center gap-1 rounded-full bg-ink-900/5 px-2.5 py-1 text-xs font-semibold text-ink-900/70">
-            {vehicleLabels[product.vehicleType]}
-          </span>
+          {(() => {
+            const VehicleIcon = vehicleLabels[product.vehicleType].icon
+            return (
+              <span className="inline-flex items-center gap-1.5 rounded-full bg-ink-900/5 px-2.5 py-1 text-xs font-semibold text-ink-900/70">
+                <VehicleIcon className="h-3.5 w-3.5" />
+                {vehicleLabels[product.vehicleType].label}
+              </span>
+            )
+          })()}
 
           <h1 className="mt-3 font-display text-2xl uppercase leading-tight text-ink-900 sm:text-3xl">
             {product.name}
@@ -102,7 +109,7 @@ export default function ProductDetail() {
             <ul className="mt-5 space-y-2 text-sm text-ink-900/70 sm:text-base">
               {product.description.map((line) => (
                 <li key={line} className="flex gap-2">
-                  <span className="mt-0.5 text-electric-500">✓</span>
+                  <CheckIcon className="mt-0.5 h-4 w-4 shrink-0 text-electric-500" />
                   <span>{line}</span>
                 </li>
               ))}

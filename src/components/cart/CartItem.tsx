@@ -4,6 +4,7 @@ import { formatCOP } from '../../lib/format'
 import { useCart } from '../../context/CartContext'
 import { QuantityStepper } from './QuantityStepper'
 import { Tooltip } from '../ui/Tooltip'
+import { CloseIcon } from '../icons'
 
 export function CartItem({ product, quantity }: { product: Product; quantity: number }) {
   const { setQuantity, removeItem } = useCart()
@@ -29,7 +30,7 @@ export function CartItem({ product, quantity }: { product: Product; quantity: nu
               aria-label={`Quitar ${product.name} del carrito`}
               className="shrink-0 text-ink-900/60 transition hover:text-ember-500"
             >
-              ✕
+              <CloseIcon className="h-4 w-4" />
             </button>
           </Tooltip>
         </div>

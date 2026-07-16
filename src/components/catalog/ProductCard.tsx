@@ -4,10 +4,12 @@ import { formatCOP } from '../../lib/format'
 import { vehicleLabels } from '../../data/vehicleLabels'
 import { useCart } from '../../context/CartContext'
 import { QuantityStepper } from '../cart/QuantityStepper'
+import { CheckIcon } from '../icons'
 
 export function ProductCard({ product }: { product: Product }) {
   const { quantityOf, addItem, setQuantity } = useCart()
   const quantity = quantityOf(product.slug)
+  const VehicleIcon = vehicleLabels[product.vehicleType].icon
 
   return (
     <article className="group flex flex-col overflow-hidden rounded-2xl border border-ink-900/10 bg-white transition hover:-translate-y-0.5 hover:shadow-lg hover:shadow-ink-900/5">
@@ -23,8 +25,9 @@ export function ProductCard({ product }: { product: Product }) {
             Más pedido
           </span>
         )}
-        <span className="absolute right-3 top-3 rounded-full bg-ink-900/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
-          {vehicleLabels[product.vehicleType]}
+        <span className="absolute right-3 top-3 flex items-center gap-1 rounded-full bg-ink-900/80 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
+          <VehicleIcon className="h-3 w-3" />
+          {vehicleLabels[product.vehicleType].label}
         </span>
       </Link>
 
@@ -38,7 +41,7 @@ export function ProductCard({ product }: { product: Product }) {
         <ul className="mt-2.5 space-y-1 text-xs text-ink-900/60 sm:text-sm">
           {product.description.slice(0, 2).map((line) => (
             <li key={line} className="flex gap-1.5">
-              <span className="text-electric-500">✓</span>
+              <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-electric-500" />
               <span className="leading-snug">{line}</span>
             </li>
           ))}

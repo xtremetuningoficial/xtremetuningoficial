@@ -1,7 +1,9 @@
 import { useMemo, useState } from 'react'
+import type { ComponentType } from 'react'
 import { categoryIcons } from '../../data/categoryIcons'
 import type { Category, Product } from '../../types/product'
 import { GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
+import { GridIcon } from '../icons'
 import { ProductCard } from './ProductCard'
 import { ProductCardSkeleton } from './ProductCardSkeleton'
 import { SearchBar } from './SearchBar'
@@ -53,7 +55,7 @@ export function CatalogSection({
           <div className="flex flex-wrap gap-2">
             <FilterPill
               label="Todos"
-              icon="✨"
+              icon={GridIcon}
               active={activeCategory === 'all'}
               onClick={() => onSelect('all')}
             />
@@ -120,12 +122,12 @@ export function CatalogSection({
 
 function FilterPill({
   label,
-  icon,
+  icon: Icon,
   active,
   onClick,
 }: {
   label: string
-  icon: string
+  icon: ComponentType<{ className?: string }>
   active: boolean
   onClick: () => void
 }) {
@@ -139,7 +141,7 @@ function FilterPill({
           : 'border-ink-900/15 bg-white text-ink-900/70 hover:border-electric-500/50'
       }`}
     >
-      <span>{icon}</span>
+      <Icon className="h-4 w-4" />
       {label}
     </button>
   )

@@ -1,5 +1,6 @@
 import { WHATSAPP_NUMBER_DISPLAY } from '../../lib/whatsapp'
 import { WhatsAppIcon } from '../layout/Header'
+import { CardIcon, PhonePaymentIcon } from '../icons'
 
 const items = [
   { label: 'WhatsApp', value: WHATSAPP_NUMBER_DISPLAY, icon: 'whatsapp' as const },
@@ -16,9 +17,9 @@ export function TrustBar() {
             {item.icon === 'whatsapp' ? (
               <WhatsAppIcon className="h-4 w-4 text-[#1fbe5c]" />
             ) : item.icon === 'pay' ? (
-              <span className="text-base">📲</span>
+              <PhonePaymentIcon className="h-4 w-4 text-ink-900/60" />
             ) : (
-              <span className="text-base">💳</span>
+              <CardIcon className="h-4 w-4 text-ink-900/60" />
             )}
             <span className="font-mono text-xs font-semibold text-ink-900/70 sm:text-sm">
               {item.value}
