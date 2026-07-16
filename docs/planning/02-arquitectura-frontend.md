@@ -11,23 +11,26 @@
 - Estado del carrito: React Context + `localStorage` (no hace falta Redux/Zustand para
   este alcance).
 
-## Estructura de carpetas (actualizada a Fase 4)
+## Estructura de carpetas (actualizada a Fase 5)
 
 ```
 src/
   main.tsx
-  App.tsx                # CartProvider + BrowserRouter + Routes
+  App.tsx                # AuthProvider + CartProvider + BrowserRouter + Routes
   context/
     CartContext.tsx        # líneas {slug, quantity} + persistencia en localStorage
+    AuthContext.tsx          # sesión de Supabase Auth (signIn/signOut)
   routes/
     Layout.tsx            # Header + <Outlet context={categorías}/> + Footer + WhatsApp flotante
     Home.tsx               # Hero, categorías, catálogo filtrable, misión
     ProductDetail.tsx       # Ficha de producto (/producto/:slug)
     Cart.tsx                 # /carrito
-    admin/                  # Fase 5
-      Login.tsx
-      Dashboard.tsx
-      ProductoForm.tsx
+    admin/
+      RequireAuth.tsx          # protege /admin/* (redirige a /admin/login)
+      AdminLayout.tsx            # topbar + <Outlet/>, sin Header/Footer públicos
+      Login.tsx                   # /admin/login
+      Dashboard.tsx                 # /admin — listado, búsqueda, toggle activo, eliminar
+      ProductForm.tsx                 # /admin/productos/nuevo y /admin/productos/:id
   components/
     layout/
       Header.tsx            # incluye ícono de carrito con contador
@@ -47,16 +50,18 @@ src/
     cart/
       CartItem.tsx
       CartSummary.tsx          # totales + botón "Enviar pedido por WhatsApp"
-      QuantityStepper.tsx        # reutilizado en card, ficha de producto y carrito
+      QuantityStepper.tsx        # reutilizado en card, ficha de producto, carrito y admin
   hooks/
     useCategories.ts        # fetch + estado loading/success/error
     useProducts.ts
     useProduct.ts
   lib/
     supabase.ts             # cliente Supabase
+    slugify.ts                # nombre → slug (usado en el formulario de producto)
     api/
-      categories.ts          # fetchCategories()
+      categories.ts          # fetchCategories(), fetchAdminCategories() (con id)
       products.ts             # fetchProducts(), fetchProductBySlug() + mapeo de fila DB → Product
+      adminProducts.ts          # CRUD admin: create/update/delete/setActive + upload de imagen
     whatsapp.ts              # helpers para mensajes de WhatsApp (individual y carrito)
     format.ts                 # formatCOP()
   data/
@@ -66,7 +71,12 @@ src/
     vehicleLabels.ts
   types/
     product.ts
+    admin.ts                  # AdminProduct, AdminCategory, ProductFormValues
   assets/
+
+scripts/
+  seed-products.ts          # siembra inicial de categorías/productos/imágenes
+  create-admin-user.ts        # crea o resetea el usuario del panel (Admin API + service_role key)
 ```
 
 ## Páginas / rutas

@@ -34,6 +34,23 @@
   }
 }
 
+@layer components {
+  .input {
+    width: 100%;
+    border-radius: 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--color-ink-900) 15%, transparent);
+    background-color: white;
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    color: var(--color-ink-900);
+  }
+
+  .input:focus {
+    outline: none;
+    border-color: var(--color-electric-500);
+  }
+}
+
 @layer utilities {
   .font-display {
     font-family: var(--font-display);

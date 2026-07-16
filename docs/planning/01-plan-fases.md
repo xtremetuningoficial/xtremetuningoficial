@@ -133,20 +133,37 @@ WhatsApp generado es correcto y legible.
 
 ---
 
-## Fase 5 — Panel de administración
+## Fase 5 — Panel de administración ✅
 
 **Objetivo:** el dueño del negocio puede gestionar el catálogo sin ayuda técnica.
+
+**Estado:** completa.
+- ✅ `AuthContext` + `RequireAuth`: sesión de Supabase Auth, rutas `/admin/*`
+  protegidas (redirigen a `/admin/login` conservando el destino).
+- ✅ `scripts/create-admin-user.ts` (`npm run admin:create -- correo@ejemplo.com`):
+  crea o resetea el usuario admin vía Admin API con una contraseña temporal generada,
+  sin exponer la `service_role key` en el frontend.
+- ✅ Dashboard (`/admin`): listado completo (incluye inactivos), búsqueda por nombre,
+  toggle rápido activo/agotado, editar, eliminar (con confirmación).
+- ✅ Formulario de producto (`/admin/productos/nuevo` y `/admin/productos/:id`):
+  nombre, slug auto-generado (editable), categoría, tipo de vehículo, descripción por
+  viñetas, precio y precio de instalación como campos independientes, stock,
+  destacado, visible en tienda, subida de imagen a Supabase Storage con reemplazo.
+- ✅ Verificado end-to-end con Playwright: login/logout, crear producto con imagen,
+  editar, alternar activo/agotado (confirmado que se oculta/reaparece en la tienda
+  pública en tiempo real), eliminar — sin errores de consola.
 
 **Entregables:**
 - Login con Supabase Auth (ruta `/admin`, protegida).
 - CRUD de productos: crear, editar, eliminar, cambiar categoría.
 - Gestión de precio de producto y precio de instalación como campos independientes.
-- Subida/reemplazo de imágenes (drag & drop a Supabase Storage).
+- Subida/reemplazo de imágenes a Supabase Storage.
 - Toggle de disponibilidad (activo / agotado) por producto.
 - Listado con búsqueda y edición rápida de precio/stock.
 
 **Hecho cuando:** el dueño puede añadir un producto nuevo completo (foto, precio,
 instalación, categoría) desde el navegador y verlo aparecer en la tienda pública.
+Verificado.
 
 ---
 

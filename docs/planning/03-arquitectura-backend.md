@@ -25,7 +25,9 @@ justifica desde el día uno.
 ## Autenticación
 
 - Un único rol relevante por ahora: **admin** (el dueño / quien gestione el
-  inventario). Se crea manualmente en Supabase Auth (email + contraseña); no hay
+  inventario). Se crea con `npm run admin:create -- correo@ejemplo.com`
+  (`scripts/create-admin-user.ts`, usa la Admin API con la `service_role key`, genera
+  una contraseña temporal) o manualmente desde el dashboard de Supabase; no hay
   registro público de administradores.
 - El catálogo público (`/`, `/categoria/:slug`, `/producto/:id`) **no requiere login**.
 - Las rutas `/admin/*` verifican sesión de Supabase Auth en el cliente y además están
