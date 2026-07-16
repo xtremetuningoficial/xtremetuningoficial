@@ -57,6 +57,17 @@ export function Hero() {
 
         <div className="flex justify-center lg:justify-end">
           <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
+            <div className="absolute -inset-16 overflow-hidden rounded-full sm:-inset-24" aria-hidden="true">
+              <img
+                src="/carrusel-1.webp"
+                alt=""
+                className="h-full w-full scale-110 object-cover object-[60%_35%] opacity-80 grayscale contrast-125"
+              />
+              <div className="absolute inset-0 bg-electric-500/20 mix-blend-color" />
+              <div className="absolute inset-0 bg-ink-900/50 mix-blend-multiply" />
+              <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_28%,var(--color-ink-900)_70%)]" />
+            </div>
+
             <span
               className="pulse-ring absolute inset-0 rounded-full border-2 border-cyan-400/50"
               style={{ animationDelay: '0s' }}
