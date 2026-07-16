@@ -9,7 +9,6 @@ import {
   uploadProductImage,
 } from '../../lib/api/adminProducts'
 import { fetchAdminCategories } from '../../lib/api/categories'
-import { slugify } from '../../lib/slugify'
 import { getErrorMessage } from '../../lib/errors'
 import { StockAdjuster } from '../../components/admin/StockAdjuster'
 import { Switch } from '../../components/admin/Switch'
@@ -20,7 +19,6 @@ import type { VehicleType } from '../../types/product'
 
 const EMPTY_FORM: ProductFormValues = {
   name: '',
-  slug: '',
   categoryId: '',
   vehicleType: 'carro',
   price: 0,
@@ -39,7 +37,7 @@ export default function AdminProductForm() {
 
   const [categories, setCategories] = useState<AdminCategory[]>([])
   const [form, setForm] = useState<ProductFormValues>(EMPTY_FORM)
-  const [slugTouched, setSlugTouched] = useState(false)
+  const [existingSlug, setExistingSlug] = useState<string | null>(null)
   const [existingImageUrl, setExistingImageUrl] = useState<string | null>(null)
   const [newImageFile, setNewImageFile] = useState<File | null>(null)
   const [newImagePreview, setNewImagePreview] = useState<string | null>(null)
@@ -71,7 +69,6 @@ export default function AdminProductForm() {
         }
         setForm({
           name: product.name,
-          slug: product.slug,
           categoryId: product.categoryId ?? '',
           vehicleType: product.vehicleType,
           price: product.price,
@@ -81,19 +78,15 @@ export default function AdminProductForm() {
           isActive: product.isActive,
           description: product.description,
         })
+        setExistingSlug(product.slug)
         setExistingImageUrl(product.imageUrl)
-        setSlugTouched(true)
       })
       .catch(() => setLoadError('No pudimos cargar este producto.'))
       .finally(() => setLoading(false))
   }, [id])
 
   function handleNameChange(name: string) {
-    setForm((current) => ({
-      ...current,
-      name,
-      slug: slugTouched ? current.slug : slugify(name),
-    }))
+    setForm((current) => ({ ...current, name }))
   }
 
   function handleImageChange(file: File | null) {
@@ -112,15 +105,15 @@ export default function AdminProductForm() {
     event.preventDefault()
     setSubmitError(null)
 
-    if (!form.name.trim() || !form.slug.trim() || !form.categoryId) {
-      setSubmitError('Nombre, slug y categoría son obligatorios.')
+    if (!form.name.trim() || !form.categoryId) {
+      setSubmitError('Nombre y categoría son obligatorios.')
       return
     }
 
     setSubmitting(true)
     try {
       let productId = id
-      let productSlug = form.slug
+      let productSlug = existingSlug ?? ''
 
       if (isEditing && id) {
         await updateProduct(id, form)
@@ -185,7 +178,9 @@ export default function AdminProductForm() {
           <h1 className="font-display text-2xl uppercase text-white sm:text-3xl">
             {isEditing ? 'Editar producto' : 'Nuevo producto'}
           </h1>
-          {isEditing && <p className="mt-1 font-mono-price text-xs text-white/50">{form.slug}</p>}
+          {isEditing && existingSlug && (
+            <p className="mt-1 font-mono-price text-xs text-white/50">{existingSlug}</p>
+          )}
         </div>
         <Link to="/admin" className="text-sm font-semibold text-white/60 transition hover:text-cyan-400">
           ← Volver
@@ -202,19 +197,6 @@ export default function AdminProductForm() {
                 value={form.name}
                 onChange={(e) => handleNameChange(e.target.value)}
                 className="input"
-              />
-            </Field>
-
-            <Field label="Slug (URL)">
-              <input
-                type="text"
-                required
-                value={form.slug}
-                onChange={(e) => {
-                  setSlugTouched(true)
-                  setForm((current) => ({ ...current, slug: e.target.value }))
-                }}
-                className="input font-mono-price"
               />
             </Field>
 

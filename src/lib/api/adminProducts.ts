@@ -1,5 +1,6 @@
 import { supabase } from '../supabase'
 import { compressImage } from '../compressImage'
+import { slugify } from '../slugify'
 import type { AdminProduct, ProductFormValues } from '../../types/admin'
 import type { VehicleType } from '../../types/product'
 
@@ -63,7 +64,6 @@ export async function fetchAdminProductById(id: string): Promise<AdminProduct | 
 
 function toRow(values: ProductFormValues) {
   return {
-    slug: values.slug,
     name: values.name,
     category_id: values.categoryId,
     vehicle_type: values.vehicleType,
@@ -76,15 +76,25 @@ function toRow(values: ProductFormValues) {
   }
 }
 
-export async function createProduct(values: ProductFormValues): Promise<{ id: string; slug: string }> {
-  const { data, error } = await supabase
-    .from('products')
-    .insert(toRow(values))
-    .select('id, slug')
-    .single()
+const DUPLICATE_SLUG_ERROR = '23505'
 
-  if (error) throw error
-  return data
+export async function createProduct(values: ProductFormValues): Promise<{ id: string; slug: string }> {
+  const baseSlug = slugify(values.name)
+  const row = toRow(values)
+
+  for (let attempt = 1; attempt <= 30; attempt += 1) {
+    const slug = attempt === 1 ? baseSlug : `${baseSlug}-${attempt}`
+    const { data, error } = await supabase
+      .from('products')
+      .insert({ ...row, slug })
+      .select('id, slug')
+      .single()
+
+    if (!error) return data
+    if (error.code !== DUPLICATE_SLUG_ERROR) throw error
+  }
+
+  throw new Error('No pudimos generar un slug único para este producto.')
 }
 
 export async function updateProduct(id: string, values: ProductFormValues): Promise<void> {

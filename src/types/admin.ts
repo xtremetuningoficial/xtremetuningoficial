@@ -31,7 +31,6 @@ export interface AdminProduct {
 
 export interface ProductFormValues {
   name: string
-  slug: string
   categoryId: string
   vehicleType: VehicleType
   price: number
