@@ -48,14 +48,17 @@ con foto/precio/precio de instalación, y el dueño la aprueba visualmente.
 inventario se pueda gestionar sin tocar código.
 
 **Estado:**
-- ✅ Proyecto real de Supabase creado (`gmrqnivtfiyuihvlysxk`), credenciales en `.env`.
-- ✅ Esquema aplicado en producción: tablas, RLS y bucket `product-images` (ver
-  `supabase/schema.sql`).
-- ✅ Catálogo sembrado: 4 categorías, 13 productos y sus 13 fotos subidas a Storage vía
-  `npm run db:seed` (`scripts/seed-products.ts`), verificado accesible por la API
-  pública con la `anon key`.
-- ✅ Cliente de Supabase para el frontend en `src/lib/supabase.ts` (aún no conectado a
-  la UI — eso es la Fase 3).
+- ✅ Proyecto real de Supabase creado, credenciales en `.env`. Se migró de proyecto una
+  vez (`gmrqnivtfiyuihvlysxk` → `tdmbvrdmywnomqmvunhj`, 2026-07-16) — el esquema, el
+  catálogo y el usuario admin se re-crearon sin problema en el proyecto nuevo, lo que
+  confirma que `supabase/schema.sql` + `npm run db:seed` + `npm run admin:create` son
+  reproducibles de punta a punta contra un proyecto Supabase en blanco.
+- ✅ Esquema aplicado en producción: tablas, RLS, la función `adjust_product_stock`
+  (Fase 6) y bucket `product-images` (ver `supabase/schema.sql`).
+- ✅ Catálogo sembrado: 4 categorías, 13 productos y sus 13 fotos (WebP) subidas a
+  Storage vía `npm run db:seed` (`scripts/seed-products.ts`), verificado accesible por
+  la API pública con la `anon key`.
+- ✅ Cliente de Supabase para el frontend en `src/lib/supabase.ts`.
 
 **Entregables:**
 - Proyecto Supabase creado (Postgres + Auth + Storage).
