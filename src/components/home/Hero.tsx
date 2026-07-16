@@ -6,6 +6,17 @@ export function Hero() {
       <div className="circuit-bg pointer-events-none absolute inset-0 opacity-[0.12]" />
       <div className="pointer-events-none absolute -left-24 top-1/2 h-72 w-72 -translate-y-1/2 rounded-full bg-electric-500/20 blur-3xl" />
 
+      {/* Foto real del local, a color, cubriendo todo el costado derecho en desktop */}
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-[52%] lg:block" aria-hidden="true">
+        <img
+          src="/carrusel-1.webp"
+          alt=""
+          className="h-full w-full object-cover object-[65%_40%]"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-ink-900 via-ink-900/25 to-ink-900/10" />
+        <div className="absolute inset-0 bg-gradient-to-b from-ink-900/50 via-transparent to-ink-900/60" />
+      </div>
+
       <div className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:gap-6 lg:py-24">
         <div>
           <span className="inline-flex items-center gap-2 rounded-full border border-hazard-400/40 bg-hazard-400/10 px-3 py-1 text-xs font-bold tracking-wide text-hazard-400">
@@ -57,14 +68,13 @@ export function Hero() {
 
         <div className="flex justify-center lg:justify-end">
           <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
-            <div className="absolute -inset-16 overflow-hidden rounded-full sm:-inset-24" aria-hidden="true">
+            {/* En mobile/tablet no hay panel de fondo, así que la foto envuelve el aro aquí */}
+            <div className="absolute -inset-16 overflow-hidden rounded-full sm:-inset-24 lg:hidden" aria-hidden="true">
               <img
                 src="/carrusel-1.webp"
                 alt=""
-                className="h-full w-full scale-110 object-cover object-[60%_35%] opacity-80 grayscale contrast-125"
+                className="h-full w-full scale-110 object-cover object-[60%_35%]"
               />
-              <div className="absolute inset-0 bg-electric-500/20 mix-blend-color" />
-              <div className="absolute inset-0 bg-ink-900/50 mix-blend-multiply" />
               <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_28%,var(--color-ink-900)_70%)]" />
             </div>
 
@@ -80,12 +90,13 @@ export function Hero() {
               className="pulse-ring absolute inset-0 rounded-full border-2 border-cyan-400/50"
               style={{ animationDelay: '1.7s' }}
             />
-            <span className="absolute inset-8 rounded-full bg-ink-800 ring-1 ring-white/10" />
+            {/* Sombra suave y difusa (no un disco sólido) concentrada solo tras el isotipo, para que el resto del aro deje ver la foto a color */}
+            <span className="absolute left-1/2 top-1/2 h-44 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(10,14,23,0.94)_0%,rgba(10,14,23,0.6)_55%,transparent_82%)] sm:h-56 sm:w-80" />
             <span className="relative flex h-32 w-48 items-center justify-center sm:h-40 sm:w-60">
               <img
                 src="/logo.webp"
                 alt="Xtreme Tuning — Lujos y Accesorios"
-                className="h-full w-full object-contain drop-shadow-[0_4px_12px_rgba(0,0,0,0.5)]"
+                className="h-full w-full object-contain drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)]"
               />
             </span>
           </div>
