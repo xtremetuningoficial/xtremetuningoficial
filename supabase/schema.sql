@@ -120,3 +120,48 @@ create policy "product_images_bucket_admin_update" on storage.objects
 drop policy if exists "product_images_bucket_admin_delete" on storage.objects;
 create policy "product_images_bucket_admin_delete" on storage.objects
   for delete using (bucket_id = 'product-images' and auth.role() = 'authenticated');
+
+-- ── Ajuste de inventario (Fase 6) ────────────────────────────────────────
+-- Registra el movimiento y actualiza products.stock_quantity en una sola
+-- transacción atómica: si el stock quedaría negativo, se revierte todo.
+
+create or replace function adjust_product_stock(
+  p_product_id uuid,
+  p_change int,
+  p_reason text,
+  p_note text default null
+)
+returns int
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  new_stock int;
+begin
+  if auth.role() <> 'authenticated' then
+    raise exception 'No autorizado';
+  end if;
+
+  insert into inventory_movements (product_id, change, reason, note)
+  values (p_product_id, p_change, p_reason, p_note);
+
+  update products
+  set stock_quantity = stock_quantity + p_change
+  where id = p_product_id
+  returning stock_quantity into new_stock;
+
+  if new_stock is null then
+    raise exception 'Producto no encontrado';
+  end if;
+
+  if new_stock < 0 then
+    raise exception 'El stock no puede quedar negativo';
+  end if;
+
+  return new_stock;
+end;
+$$;
+
+revoke execute on function adjust_product_stock(uuid, int, text, text) from anon;
+grant execute on function adjust_product_stock(uuid, int, text, text) to authenticated;

@@ -167,9 +167,32 @@ Verificado.
 
 ---
 
-## Fase 6 — Gestión de inventario avanzada
+## Fase 6 — Gestión de inventario avanzada ✅
 
 **Objetivo:** llevar control de existencias reales, no solo disponible/agotado.
+
+**Estado:** completa.
+- ✅ Función `adjust_product_stock` (Postgres, `security definer`): inserta el
+  movimiento y actualiza `products.stock_quantity` en una sola transacción atómica;
+  bloquea que el stock quede negativo (revierte todo si pasa) y solo la puede llamar
+  un usuario autenticado (`revoke`/`grant` explícitos, verificado con una llamada
+  anónima real que devuelve "No autorizado").
+- ✅ `StockAdjuster` en el formulario de edición: stock actual, entrada/salida con
+  motivo (venta en tienda, ingreso de mercancía, ajuste, venta en línea) y nota
+  opcional, historial de los últimos 20 movimientos con fecha.
+- ✅ El campo "Stock" pasa a ser de solo lectura al editar (se ajusta desde
+  `StockAdjuster`, con auditoría); al crear un producto se define el stock inicial
+  directamente.
+- ✅ Umbral de stock bajo configurable en el Dashboard (persistido en `localStorage`
+  del admin), con banner de alerta y badge "Stock bajo" por fila cuando un producto
+  activo cae en o por debajo del umbral.
+- ✅ Verificado end-to-end: +5/−3 mueven el stock correctamente y quedan en el
+  historial con su motivo y nota; un intento de dejar el stock negativo se bloquea y
+  no se aplica; el mensaje de error específico de la base de datos se muestra tal
+  cual (se corrigió un bug real encontrado en la prueba: los errores de Supabase no
+  son instancias de `Error`, así que `error instanceof Error` los ignoraba — afectaba
+  también a los mensajes de error del formulario de producto desde la Fase 5, ahora
+  centralizado en `lib/errors.ts`).
 
 **Entregables:**
 - Campo de cantidad en stock por producto.
@@ -180,7 +203,7 @@ Verificado.
   mercancía, ajuste).
 
 **Hecho cuando:** el stock se puede ajustar desde el panel y el histórico de
-movimientos queda registrado y consultable.
+movimientos queda registrado y consultable. Verificado.
 
 ---
 

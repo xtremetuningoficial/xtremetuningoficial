@@ -34,3 +34,20 @@ export interface ProductFormValues {
   isActive: boolean
   description: string
 }
+
+export type MovementReason = 'venta_tienda' | 'ingreso_mercancia' | 'ajuste' | 'venta_online'
+
+export const MOVEMENT_REASON_LABELS: Record<MovementReason, string> = {
+  venta_tienda: 'Venta en tienda',
+  ingreso_mercancia: 'Ingreso de mercancía',
+  ajuste: 'Ajuste',
+  venta_online: 'Venta en línea',
+}
+
+export interface InventoryMovement {
+  id: string
+  change: number
+  reason: MovementReason
+  note: string | null
+  createdAt: string
+}

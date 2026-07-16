@@ -10,6 +10,8 @@ import {
 } from '../../lib/api/adminProducts'
 import { fetchAdminCategories } from '../../lib/api/categories'
 import { slugify } from '../../lib/slugify'
+import { getErrorMessage } from '../../lib/errors'
+import { StockAdjuster } from '../../components/admin/StockAdjuster'
 import type { AdminCategory, ProductFormValues } from '../../types/admin'
 import type { VehicleType } from '../../types/product'
 
@@ -122,7 +124,7 @@ export default function AdminProductForm() {
 
       navigate('/admin')
     } catch (error) {
-      const message = error instanceof Error ? error.message : 'Error desconocido'
+      const message = getErrorMessage(error)
       setSubmitError(
         message.includes('duplicate key')
           ? 'Ya existe un producto con ese slug. Cámbialo e intenta de nuevo.'
@@ -141,7 +143,7 @@ export default function AdminProductForm() {
       await deleteProduct(id)
       navigate('/admin')
     } catch (error) {
-      setSubmitError(error instanceof Error ? error.message : 'No pudimos eliminar el producto.')
+      setSubmitError(getErrorMessage(error))
       setSubmitting(false)
     }
   }
@@ -257,15 +259,16 @@ export default function AdminProductForm() {
                 className="input"
               />
             </Field>
-            <Field label="Stock">
+            <Field label={isEditing ? 'Stock (ajústalo abajo)' : 'Stock inicial'}>
               <input
                 type="number"
                 min={0}
+                disabled={isEditing}
                 value={form.stockQuantity}
                 onChange={(e) =>
                   setForm((current) => ({ ...current, stockQuantity: Number(e.target.value) }))
                 }
-                className="input"
+                className="input disabled:bg-paper-50 disabled:text-ink-900/50"
               />
             </Field>
           </div>
@@ -315,6 +318,16 @@ export default function AdminProductForm() {
               className="mt-3 block w-full text-xs text-ink-900/60 file:mr-3 file:rounded-full file:border-0 file:bg-electric-500/10 file:px-3 file:py-2 file:text-xs file:font-bold file:text-electric-500"
             />
           </div>
+
+          {isEditing && id && (
+            <StockAdjuster
+              productId={id}
+              stock={form.stockQuantity}
+              onStockChange={(newStock) =>
+                setForm((current) => ({ ...current, stockQuantity: newStock }))
+              }
+            />
+          )}
 
           {submitError && (
             <p className="rounded-lg bg-ember-500/10 px-3 py-2 text-sm text-ember-500">{submitError}</p>

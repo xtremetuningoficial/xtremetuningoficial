@@ -43,6 +43,13 @@ create table inventory_movements (
 );
 ```
 
+**Fase 6:** los movimientos nunca se insertan directamente desde el frontend. Se
+crean a través de la función `adjust_product_stock(p_product_id, p_change, p_reason,
+p_note)` (`supabase/schema.sql`), que inserta el movimiento y actualiza
+`products.stock_quantity` en una sola transacción atómica, y bloquea (revierte todo)
+si el resultado dejaría el stock en negativo. Solo la puede ejecutar un usuario
+autenticado.
+
 `price` e `install_price` se modelan como columnas separadas porque **todo** el
 catálogo actual del negocio sigue este patrón (precio del producto + precio de
 instalación aparte), no como un solo total.

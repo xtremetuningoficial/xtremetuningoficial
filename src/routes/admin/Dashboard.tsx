@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { deleteProduct, fetchAdminProducts, setProductActive } from '../../lib/api/adminProducts'
 import { formatCOP } from '../../lib/format'
+import { useLowStockThreshold } from '../../hooks/useLowStockThreshold'
 import type { AdminProduct } from '../../types/admin'
 
 export default function AdminDashboard() {
@@ -9,6 +10,7 @@ export default function AdminDashboard() {
   const [products, setProducts] = useState<AdminProduct[]>([])
   const [search, setSearch] = useState('')
   const [busySlug, setBusySlug] = useState<string | null>(null)
+  const [threshold, setThreshold] = useLowStockThreshold()
 
   async function load() {
     setStatus('loading')
@@ -49,12 +51,23 @@ export default function AdminDashboard() {
   }
 
   const filtered = products.filter((p) => p.name.toLowerCase().includes(search.trim().toLowerCase()))
+  const lowStockProducts = products.filter((p) => p.isActive && p.stockQuantity <= threshold)
 
   return (
     <div>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         <h1 className="font-display text-2xl uppercase text-ink-900">Productos</h1>
         <div className="flex flex-wrap items-center gap-3">
+          <label className="flex items-center gap-2 text-xs font-semibold text-ink-900/50">
+            Umbral de stock bajo
+            <input
+              type="number"
+              min={0}
+              value={threshold}
+              onChange={(e) => setThreshold(Math.max(0, Number(e.target.value)))}
+              className="w-16 rounded-full border border-ink-900/15 bg-white px-3 py-1.5 text-center text-sm text-ink-900 focus:border-electric-500"
+            />
+          </label>
           <input
             type="search"
             value={search}
@@ -70,6 +83,13 @@ export default function AdminDashboard() {
           </Link>
         </div>
       </div>
+
+      {status === 'success' && lowStockProducts.length > 0 && (
+        <p className="mt-4 rounded-lg bg-hazard-400/15 px-3 py-2 text-sm font-semibold text-ink-900">
+          ⚠ {lowStockProducts.length} producto{lowStockProducts.length === 1 ? '' : 's'} con stock bajo
+          (≤ {threshold}): {lowStockProducts.map((p) => p.name).join(', ')}
+        </p>
+      )}
 
       {status === 'loading' && (
         <div className="mt-8 space-y-3">
@@ -115,7 +135,14 @@ export default function AdminDashboard() {
                   <td className="px-4 py-3 font-mono-price text-ember-500">
                     {formatCOP(product.installPrice)}
                   </td>
-                  <td className="px-4 py-3 font-mono-price">{product.stockQuantity}</td>
+                  <td className="px-4 py-3">
+                    <span className="font-mono-price">{product.stockQuantity}</span>
+                    {product.isActive && product.stockQuantity <= threshold && (
+                      <span className="ml-2 rounded-full bg-hazard-400/20 px-2 py-0.5 text-[10px] font-bold uppercase text-ember-500">
+                        Stock bajo
+                      </span>
+                    )}
+                  </td>
                   <td className="px-4 py-3">
                     <button
                       type="button"

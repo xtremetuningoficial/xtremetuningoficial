@@ -11,7 +11,7 @@
 - Estado del carrito: React Context + `localStorage` (no hace falta Redux/Zustand para
   este alcance).
 
-## Estructura de carpetas (actualizada a Fase 5)
+## Estructura de carpetas (actualizada a Fase 6)
 
 ```
 src/
@@ -29,9 +29,11 @@ src/
       RequireAuth.tsx          # protege /admin/* (redirige a /admin/login)
       AdminLayout.tsx            # topbar + <Outlet/>, sin Header/Footer públicos
       Login.tsx                   # /admin/login
-      Dashboard.tsx                 # /admin — listado, búsqueda, toggle activo, eliminar
+      Dashboard.tsx                 # /admin — listado, búsqueda, umbral de stock bajo, toggle, eliminar
       ProductForm.tsx                 # /admin/productos/nuevo y /admin/productos/:id
   components/
+    admin/
+      StockAdjuster.tsx        # entrada/salida de stock con motivo + historial (solo al editar)
     layout/
       Header.tsx            # incluye ícono de carrito con contador
       Footer.tsx
@@ -55,15 +57,18 @@ src/
     useCategories.ts        # fetch + estado loading/success/error
     useProducts.ts
     useProduct.ts
+    useLowStockThreshold.ts   # umbral configurable, persistido en localStorage
   lib/
     supabase.ts             # cliente Supabase
     slugify.ts                # nombre → slug (usado en el formulario de producto)
+    errors.ts                  # getErrorMessage() — los errores de Supabase no son instancias de Error
     api/
       categories.ts          # fetchCategories(), fetchAdminCategories() (con id)
       products.ts             # fetchProducts(), fetchProductBySlug() + mapeo de fila DB → Product
       adminProducts.ts          # CRUD admin: create/update/delete/setActive + upload de imagen
+      inventory.ts               # fetchMovements(), adjustStock() (rpc adjust_product_stock)
     whatsapp.ts              # helpers para mensajes de WhatsApp (individual y carrito)
-    format.ts                 # formatCOP()
+    format.ts                 # formatCOP(), formatDateTime()
   data/
     products.ts              # datos de siembra (solo los usa scripts/seed-products.ts)
     categories.ts
@@ -71,7 +76,7 @@ src/
     vehicleLabels.ts
   types/
     product.ts
-    admin.ts                  # AdminProduct, AdminCategory, ProductFormValues
+    admin.ts                  # AdminProduct, AdminCategory, ProductFormValues, InventoryMovement
   assets/
 
 scripts/
