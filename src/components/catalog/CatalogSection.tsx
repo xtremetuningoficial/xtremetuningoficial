@@ -2,6 +2,7 @@ import { useMemo, useState } from 'react'
 import type { ComponentType } from 'react'
 import { categoryIcons, DEFAULT_CATEGORY_ICON } from '../../data/categoryIcons'
 import type { Category, Product } from '../../types/product'
+import type { RatingSummary } from '../../types/review'
 import { GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
 import { GridIcon } from '../icons'
 import { ProductCard } from './ProductCard'
@@ -14,6 +15,7 @@ interface CatalogSectionProps {
   status: 'loading' | 'success' | 'error'
   activeCategory: string
   onSelect: (slug: string) => void
+  ratings?: Record<string, RatingSummary>
 }
 
 export function CatalogSection({
@@ -22,6 +24,7 @@ export function CatalogSection({
   status,
   activeCategory,
   onSelect,
+  ratings,
 }: CatalogSectionProps) {
   const [search, setSearch] = useState('')
 
@@ -103,7 +106,7 @@ export function CatalogSection({
           <>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
               {filtered.map((product) => (
-                <ProductCard key={product.id} product={product} />
+                <ProductCard key={product.id} product={product} rating={ratings?.[product.id]} />
               ))}
             </div>
 

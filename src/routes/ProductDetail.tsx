@@ -1,12 +1,15 @@
 import { useState } from 'react'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { useProduct } from '../hooks/useProduct'
-import { formatCOP } from '../lib/format'
+import { useProductReviews } from '../hooks/useProductReviews'
+import { formatCOP, formatDateTime } from '../lib/format'
 import { buildProductInquiryLink, GENERAL_INQUIRY_LINK } from '../lib/whatsapp'
 import { vehicleLabels } from '../data/vehicleLabels'
 import { WhatsAppIcon } from '../components/layout/Header'
 import { CheckIcon, PlayIcon } from '../components/icons'
 import { QuantityStepper } from '../components/cart/QuantityStepper'
+import { StarRating } from '../components/reviews/StarRating'
+import { ReviewForm } from '../components/reviews/ReviewForm'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Category, ProductMedia } from '../types/product'
@@ -14,6 +17,7 @@ import type { Category, ProductMedia } from '../types/product'
 export default function ProductDetail() {
   const { slug } = useParams()
   const { status, data: product, error } = useProduct(slug)
+  const { reviews, status: reviewsStatus } = useProductReviews(product?.id)
   const categoriesState = useOutletContext<{ data: Category[] }>()
   const { quantityOf, addItem, setQuantity } = useCart()
 
@@ -105,6 +109,16 @@ export default function ProductDetail() {
             {product.name}
           </h1>
 
+          {reviewsStatus === 'success' && reviews.length > 0 && (
+            <a href="#resenas" className="mt-2 flex items-center gap-2">
+              <StarRating value={reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length} size="sm" />
+              <span className="text-sm text-ink-900/60">
+                {(reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length).toFixed(1)} ·{' '}
+                {reviews.length} {reviews.length === 1 ? 'reseña' : 'reseñas'}
+              </span>
+            </a>
+          )}
+
           {product.description.length > 0 && (
             <ul className="mt-5 space-y-2 text-sm text-ink-900/70 sm:text-base">
               {product.description.map((line) => (
@@ -170,6 +184,51 @@ export default function ProductDetail() {
           >
             ← Ver más en esta categoría
           </Link>
+        </div>
+      </div>
+
+      <div id="resenas" className="mt-14 scroll-mt-20 border-t border-ink-900/10 pt-10 sm:mt-16">
+        <h2 className="font-display text-xl uppercase text-ink-900 sm:text-2xl">Reseñas de este producto</h2>
+
+        <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
+          <div>
+            {reviewsStatus === 'loading' && (
+              <div className="space-y-3">
+                {Array.from({ length: 2 }).map((_, i) => (
+                  <div key={i} className="h-20 animate-pulse rounded-xl bg-paper-100" />
+                ))}
+              </div>
+            )}
+
+            {reviewsStatus === 'success' && reviews.length === 0 && (
+              <p className="rounded-2xl border border-ink-900/10 bg-white p-6 text-sm text-ink-900/60">
+                Este producto todavía no tiene reseñas — ¡sé el primero en calificarlo!
+              </p>
+            )}
+
+            {reviewsStatus === 'success' && reviews.length > 0 && (
+              <ul className="space-y-4">
+                {reviews.map((review) => (
+                  <li key={review.id} className="rounded-2xl border border-ink-900/10 bg-white p-5">
+                    <div className="flex flex-wrap items-center justify-between gap-2">
+                      <StarRating value={review.rating} size="sm" />
+                      <span className="font-mono text-xs text-ink-900/40">
+                        {formatDateTime(review.createdAt)}
+                      </span>
+                    </div>
+                    {review.comment && (
+                      <p className="mt-3 text-sm leading-relaxed text-ink-900/70">{review.comment}</p>
+                    )}
+                    <p className="mt-3 text-xs font-semibold uppercase tracking-wide text-ink-900/50">
+                      {review.authorName}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            )}
+          </div>
+
+          <ReviewForm targetType="product" productId={product.id} title="Califica este producto" />
         </div>
       </div>
     </section>

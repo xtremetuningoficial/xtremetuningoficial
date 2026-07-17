@@ -1,12 +1,14 @@
 import { Link } from 'react-router-dom'
 import type { Product } from '../../types/product'
+import type { RatingSummary } from '../../types/review'
 import { formatCOP } from '../../lib/format'
 import { vehicleLabels } from '../../data/vehicleLabels'
 import { useCart } from '../../context/CartContext'
 import { QuantityStepper } from '../cart/QuantityStepper'
+import { StarRating } from '../reviews/StarRating'
 import { CheckIcon } from '../icons'
 
-export function ProductCard({ product }: { product: Product }) {
+export function ProductCard({ product, rating }: { product: Product; rating?: RatingSummary }) {
   const { quantityOf, addItem, setQuantity } = useCart()
   const quantity = quantityOf(product.slug)
   const VehicleIcon = vehicleLabels[product.vehicleType].icon
@@ -37,6 +39,13 @@ export function ProductCard({ product }: { product: Product }) {
             {product.name}
           </h3>
         </Link>
+
+        {rating && rating.count > 0 && (
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <StarRating value={rating.average} size="sm" />
+            <span className="text-xs text-ink-900/50">({rating.count})</span>
+          </div>
+        )}
 
         <ul className="mt-2.5 space-y-1 text-xs text-ink-900/60 sm:text-sm">
           {product.description.slice(0, 2).map((line) => (

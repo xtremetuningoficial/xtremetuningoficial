@@ -6,9 +6,11 @@ import { CategorySection } from '../components/home/CategorySection'
 import { CatalogSection } from '../components/catalog/CatalogSection'
 import { SoundServiceSection } from '../components/home/SoundServiceSection'
 import { MissionBand } from '../components/home/MissionBand'
+import { TestimonialsSection } from '../components/home/TestimonialsSection'
 import { VisitStore } from '../components/home/VisitStore'
 import { HazardDivider } from '../components/layout/HazardDivider'
 import { useProducts } from '../hooks/useProducts'
+import { useProductRatings } from '../hooks/useProductRatings'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Category } from '../types/product'
 
@@ -22,6 +24,7 @@ export default function Home() {
   const navigate = useNavigate()
   const categoriesState = useOutletContext<CategoriesContext>()
   const productsState = useProducts()
+  const productRatings = useProductRatings()
   const activeCategory = categorySlug ?? 'all'
 
   const activeCategoryName = categoriesState.data.find((c) => c.slug === categorySlug)?.name
@@ -54,9 +57,11 @@ export default function Home() {
         status={productsState.status}
         activeCategory={activeCategory}
         onSelect={handleSelectCategory}
+        ratings={productRatings}
       />
       <SoundServiceSection />
       <MissionBand />
+      <TestimonialsSection />
       <VisitStore />
     </>
   )

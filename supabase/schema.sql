@@ -173,3 +173,38 @@ $$;
 
 revoke execute on function adjust_product_stock(uuid, int, text, text) from anon;
 grant execute on function adjust_product_stock(uuid, int, text, text) to authenticated;
+
+-- ── Calificaciones y reseñas ─────────────────────────────────────────────
+-- target_type='site' cubre la experiencia general (tienda + servicio);
+-- target_type='product' califica un producto puntual del catálogo.
+-- Toda reseña nueva entra con is_approved=false y solo se ve públicamente
+-- una vez que el admin la aprueba desde el panel.
+
+create table if not exists reviews (
+  id            uuid primary key default gen_random_uuid(),
+  target_type   text not null check (target_type in ('site', 'product')),
+  product_id    uuid references products(id) on delete cascade,
+  rating        int not null check (rating between 1 and 5),
+  author_name   text not null,
+  comment       text,
+  is_approved   boolean not null default false,
+  created_at    timestamptz not null default now(),
+  constraint reviews_product_id_matches_target check (
+    (target_type = 'product' and product_id is not null) or
+    (target_type = 'site' and product_id is null)
+  )
+);
+
+alter table reviews enable row level security;
+
+drop policy if exists "reviews_public_read_approved" on reviews;
+create policy "reviews_public_read_approved" on reviews
+  for select using (is_approved = true);
+
+drop policy if exists "reviews_public_insert" on reviews;
+create policy "reviews_public_insert" on reviews
+  for insert with check (is_approved = false);
+
+drop policy if exists "reviews_admin_all" on reviews;
+create policy "reviews_admin_all" on reviews
+  for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');

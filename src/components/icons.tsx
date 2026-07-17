@@ -479,3 +479,20 @@ export function SpeakerMuteIcon({ className = 'h-5 w-5' }: IconProps) {
     </svg>
   )
 }
+
+export function StarIcon({ className = 'h-5 w-5', filled = false }: IconProps & { filled?: boolean }) {
+  return (
+    <svg
+      viewBox="0 0 24 24"
+      fill={filled ? 'currentColor' : 'none'}
+      stroke="currentColor"
+      strokeWidth="1.5"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+      aria-hidden="true"
+    >
+      <path d="m12 2.5 2.9 6.3 6.9.7-5.2 4.7 1.5 6.8L12 17.8l-6.1 3.2 1.5-6.8-5.2-4.7 6.9-.7Z" />
+    </svg>
+  )
+}
