@@ -50,7 +50,7 @@ export function LowStockBell({ lowStockProducts, threshold, onThresholdChange }:
       </Tooltip>
 
       {open && (
-        <div className="absolute right-0 top-full z-50 mt-2 w-80 rounded-2xl border border-white/10 bg-ink-800 p-4 shadow-2xl shadow-black/40">
+        <div className="absolute left-0 top-full z-50 mt-2 w-80 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-ink-800 p-4 shadow-2xl shadow-black/40 sm:left-auto sm:right-0">
           <label className="flex items-center justify-between gap-2 text-xs font-semibold text-white/60">
             Umbral de stock bajo
             <input

@@ -46,7 +46,7 @@ export function CategoriesMenu({ categories }: { categories: Category[] }) {
       {open && (
         <div
           role="menu"
-          className="absolute left-0 top-full z-50 mt-2 w-72 rounded-2xl border border-white/10 bg-ink-800 p-2 shadow-2xl shadow-black/40"
+          className="absolute left-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-ink-800 p-2 shadow-2xl shadow-black/40"
         >
           {categories.map((category) => {
             const Icon = categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON
