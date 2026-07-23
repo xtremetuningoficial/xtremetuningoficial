@@ -27,6 +27,10 @@ export const SOUND_SERVICE_INQUIRY_LINK = buildWhatsAppLink(
   'Hola Xtreme Tuning, quiero cotizar una adaptación o instalación de equipo de sonido para mi vehículo.',
 )
 
+export const TINT_SERVICE_INQUIRY_LINK = buildWhatsAppLink(
+  'Hola Xtreme Tuning, quiero cotizar un polarizado para mi vehículo.',
+)
+
 export interface CartInquiryItem {
   product: Product
   quantity: number

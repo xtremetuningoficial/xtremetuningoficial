@@ -1,7 +1,8 @@
-import { useEffect, useRef, useState } from 'react'
+import { useRef } from 'react'
 import { soundMedia, type SoundMediaItem } from '../../data/soundMedia'
 import { SOUND_SERVICE_INQUIRY_LINK } from '../../lib/whatsapp'
-import { ChevronLeftIcon, ChevronRightIcon, SpeakerIcon, SpeakerMuteIcon } from '../icons'
+import { ChevronLeftIcon, ChevronRightIcon } from '../icons'
+import { MutedVideoCard } from '../media/MutedVideoCard'
 
 export function SoundServiceSection() {
   const scrollerRef = useRef<HTMLDivElement>(null)
@@ -50,7 +51,14 @@ export function SoundServiceSection() {
           >
             {soundMedia.map((item, index) => (
               <div key={item.src} data-card className="w-[78%] shrink-0 snap-start sm:w-[46%] lg:w-[31%]">
-                {item.type === 'video' ? <VideoCard item={item} /> : <ImageCard item={item} eager={index < 2} />}
+                {item.type === 'video' ? (
+                  <MutedVideoCard
+                    src={item.src}
+                    className="aspect-[4/5] rounded-2xl border border-white/10"
+                  />
+                ) : (
+                  <ImageCard item={item} eager={index < 2} />
+                )}
               </div>
             ))}
           </div>
@@ -90,61 +98,3 @@ function ImageCard({ item, eager }: { item: Extract<SoundMediaItem, { type: 'ima
   )
 }
 
-function VideoCard({ item }: { item: Extract<SoundMediaItem, { type: 'video' }> }) {
-  const videoRef = useRef<HTMLVideoElement>(null)
-  const cardRef = useRef<HTMLDivElement>(null)
-  const [muted, setMuted] = useState(true)
-
-  useEffect(() => {
-    const card = cardRef.current
-    const video = videoRef.current
-    if (!card || !video) return
-
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) video.play().catch(() => {})
-        else video.pause()
-      },
-      { threshold: 0.5 },
-    )
-    observer.observe(card)
-    return () => observer.disconnect()
-  }, [])
-
-  function toggleMute() {
-    const video = videoRef.current
-    if (!video) return
-    video.muted = !video.muted
-    setMuted(video.muted)
-  }
-
-  return (
-    <div
-      ref={cardRef}
-      className="group relative aspect-[4/5] overflow-hidden rounded-2xl border border-white/10 bg-ink-800"
-    >
-      <video
-        ref={videoRef}
-        src={item.src}
-        muted
-        loop
-        playsInline
-        preload="metadata"
-        className="h-full w-full object-cover"
-      />
-
-      <span className="pointer-events-none absolute left-3 top-3 rounded-full bg-ink-900/70 px-2.5 py-1 text-[11px] font-bold uppercase tracking-wide text-white/80 backdrop-blur">
-        Video
-      </span>
-
-      <button
-        type="button"
-        onClick={toggleMute}
-        aria-label={muted ? 'Activar el sonido del video' : 'Silenciar el video'}
-        className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-ink-900/70 text-white backdrop-blur transition hover:bg-ink-900/90"
-      >
-        {muted ? <SpeakerMuteIcon className="h-4 w-4" /> : <SpeakerIcon className="h-4 w-4" />}
-      </button>
-    </div>
-  )
-}

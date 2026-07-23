@@ -5,6 +5,7 @@ import { TrustBar } from '../components/home/TrustBar'
 import { CategorySection } from '../components/home/CategorySection'
 import { CatalogSection } from '../components/catalog/CatalogSection'
 import { SoundServiceSection } from '../components/home/SoundServiceSection'
+import { PolarizadoSection } from '../components/home/PolarizadoSection'
 import { MissionBand } from '../components/home/MissionBand'
 import { TestimonialsSection } from '../components/home/TestimonialsSection'
 import { VisitStore } from '../components/home/VisitStore'
@@ -60,6 +61,7 @@ export default function Home() {
         ratings={productRatings}
       />
       <SoundServiceSection />
+      <PolarizadoSection />
       <MissionBand />
       <TestimonialsSection />
       <VisitStore />
