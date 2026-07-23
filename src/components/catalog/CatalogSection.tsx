@@ -5,6 +5,7 @@ import type { Category, Product } from '../../types/product'
 import type { RatingSummary } from '../../types/review'
 import { GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
 import { GridIcon } from '../icons'
+import { Tooltip } from '../ui/Tooltip'
 import { ProductCard } from './ProductCard'
 import { ProductCardSkeleton } from './ProductCardSkeleton'
 import { SearchBar } from './SearchBar'
@@ -55,7 +56,7 @@ export function CatalogSection({
             <SearchBar value={search} onChange={setSearch} />
           </div>
 
-          <div className="flex flex-wrap gap-2">
+          <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
             <FilterPill
               label="Todos"
               icon={GridIcon}
@@ -135,17 +136,19 @@ function FilterPill({
   onClick: () => void
 }) {
   return (
-    <button
-      type="button"
-      onClick={onClick}
-      className={`flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-semibold transition ${
-        active
-          ? 'border-electric-500 bg-electric-500 text-white'
-          : 'border-ink-900/15 bg-white text-ink-900/70 hover:border-electric-500/50'
-      }`}
-    >
-      <Icon className="h-4 w-4" />
-      {label}
-    </button>
+    <Tooltip label={label} className="shrink-0">
+      <button
+        type="button"
+        onClick={onClick}
+        className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-semibold transition ${
+          active
+            ? 'border-electric-500 bg-electric-500 text-white'
+            : 'border-ink-900/15 bg-white text-ink-900/70 hover:border-electric-500/50'
+        }`}
+      >
+        <Icon className="h-4 w-4 shrink-0" />
+        <span className="max-w-[150px] truncate sm:max-w-[240px]">{label}</span>
+      </button>
+    </Tooltip>
   )
 }

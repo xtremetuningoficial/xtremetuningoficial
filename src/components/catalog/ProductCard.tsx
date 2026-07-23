@@ -35,23 +35,25 @@ export function ProductCard({ product, rating }: { product: Product; rating?: Ra
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
         <Link to={`/producto/${product.slug}`}>
-          <h3 className="font-display text-base uppercase leading-tight text-ink-900 transition group-hover:text-electric-500 sm:text-lg">
+          <h3 className="line-clamp-2 min-h-[2.5em] font-display text-base uppercase leading-tight text-ink-900 transition group-hover:text-electric-500 sm:min-h-[2.6em] sm:text-lg">
             {product.name}
           </h3>
         </Link>
 
-        {rating && rating.count > 0 && (
-          <div className="mt-1.5 flex items-center gap-1.5">
-            <StarRating value={rating.average} size="sm" />
-            <span className="text-xs text-ink-900/50">({rating.count})</span>
-          </div>
-        )}
+        <div className="mt-1.5 h-4">
+          {rating && rating.count > 0 && (
+            <div className="flex items-center gap-1.5">
+              <StarRating value={rating.average} size="sm" />
+              <span className="text-xs text-ink-900/50">({rating.count})</span>
+            </div>
+          )}
+        </div>
 
-        <ul className="mt-2.5 space-y-1 text-xs text-ink-900/60 sm:text-sm">
+        <ul className="mt-1 min-h-[64px] space-y-1 text-xs text-ink-900/60 sm:min-h-[72px] sm:text-sm">
           {product.description.slice(0, 2).map((line) => (
             <li key={line} className="flex gap-1.5">
               <CheckIcon className="mt-0.5 h-3 w-3 shrink-0 text-electric-500" />
-              <span className="leading-snug">{line}</span>
+              <span className="line-clamp-2 leading-snug">{line}</span>
             </li>
           ))}
         </ul>
