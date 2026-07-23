@@ -9,12 +9,16 @@ import {
 import { slugify } from '../../lib/slugify'
 import { getErrorMessage } from '../../lib/errors'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { categoryIcons, DEFAULT_CATEGORY_ICON } from '../../data/categoryIcons'
 import { Tooltip } from '../../components/ui/Tooltip'
+import { StatTile } from '../../components/admin/StatTile'
 import {
   CheckIcon,
   ChevronDownIcon,
   ChevronUpIcon,
   CloseIcon,
+  LayersIcon,
+  PackageIcon,
   PencilIcon,
   PlusIcon,
   TrashIcon,
@@ -160,6 +164,8 @@ export default function AdminCategories() {
     }
   }
 
+  const totalProducts = categories.reduce((sum, c) => sum + c.productCount, 0)
+
   return (
     <div>
       <div className="flex flex-col gap-1">
@@ -168,6 +174,13 @@ export default function AdminCategories() {
           Organiza cómo se agrupan los productos en la tienda y en el catálogo.
         </p>
       </div>
+
+      {status === 'success' && (
+        <div className="mt-6 grid grid-cols-2 gap-3 sm:gap-4 lg:max-w-md">
+          <StatTile label="Categorías" value={String(categories.length)} icon={LayersIcon} accent="electric" />
+          <StatTile label="Productos" value={String(totalProducts)} icon={PackageIcon} accent="white" />
+        </div>
+      )}
 
       <form
         onSubmit={handleAdd}
@@ -216,7 +229,7 @@ export default function AdminCategories() {
       {status === 'loading' && (
         <div className="mt-6 space-y-3">
           {Array.from({ length: 4 }).map((_, i) => (
-            <div key={i} className="h-14 animate-pulse rounded-xl bg-ink-800" />
+            <div key={i} className="h-16 animate-pulse rounded-2xl bg-ink-800" />
           ))}
         </div>
       )}
@@ -228,158 +241,140 @@ export default function AdminCategories() {
       )}
 
       {status === 'success' && (
-        <div className="mt-6 overflow-hidden rounded-2xl border border-white/10 bg-ink-800">
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[560px] text-left text-sm">
-              <thead>
-                <tr className="border-b border-white/10 text-xs uppercase tracking-wide text-white/50">
-                  <th className="w-16 px-4 py-3 font-semibold">Orden</th>
-                  <th className="px-4 py-3 font-semibold">Nombre</th>
-                  <th className="px-4 py-3 font-semibold">Slug</th>
-                  <th className="px-4 py-3 font-semibold">Productos</th>
-                  <th className="sticky right-0 border-l border-white/5 bg-ink-800 px-4 py-3" />
-                </tr>
-              </thead>
-              <tbody>
-                {categories.map((category, index) => {
-                  const isEditing = editingId === category.id
-                  const isBusy = busyId === category.id
+        <div className="mt-6 space-y-2.5">
+          {categories.map((category, index) => {
+            const isEditing = editingId === category.id
+            const isBusy = busyId === category.id
+            const Icon = categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON
 
-                  return (
-                    <tr
-                      key={category.id}
-                      className="group border-b border-white/5 transition last:border-0 hover:bg-white/[0.03]"
+            return (
+              <div
+                key={category.id}
+                className="flex items-center gap-3 rounded-2xl border border-white/10 bg-ink-800 p-3 transition hover:border-white/15 sm:p-4"
+              >
+                <div className="flex shrink-0 flex-col">
+                  <Tooltip label="Subir">
+                    <button
+                      type="button"
+                      disabled={index === 0 || isBusy}
+                      onClick={() => handleMove(category, -1)}
+                      aria-label={`Subir ${category.name}`}
+                      className="flex h-5 w-6 items-center justify-center rounded text-white/40 transition hover:bg-white/5 hover:text-white disabled:opacity-20"
                     >
-                      <td className="px-4 py-3">
-                        <div className="flex flex-col gap-0.5">
-                          <Tooltip label="Subir">
-                            <button
-                              type="button"
-                              disabled={index === 0 || isBusy}
-                              onClick={() => handleMove(category, -1)}
-                              aria-label={`Subir ${category.name}`}
-                              className="flex h-6 w-6 items-center justify-center rounded text-white/50 transition hover:bg-white/5 hover:text-white disabled:opacity-25"
-                            >
-                              <ChevronUpIcon className="h-3.5 w-3.5" />
-                            </button>
-                          </Tooltip>
-                          <Tooltip label="Bajar">
-                            <button
-                              type="button"
-                              disabled={index === categories.length - 1 || isBusy}
-                              onClick={() => handleMove(category, 1)}
-                              aria-label={`Bajar ${category.name}`}
-                              className="flex h-6 w-6 items-center justify-center rounded text-white/50 transition hover:bg-white/5 hover:text-white disabled:opacity-25"
-                            >
-                              <ChevronDownIcon className="h-3.5 w-3.5" />
-                            </button>
-                          </Tooltip>
-                        </div>
-                      </td>
-                      <td className="px-4 py-3">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editName}
-                            onChange={(e) => setEditName(e.target.value)}
-                            className="input"
-                            autoFocus
-                          />
-                        ) : (
-                          <span className="font-semibold text-white">{category.name}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        {isEditing ? (
-                          <input
-                            type="text"
-                            value={editSlug}
-                            onChange={(e) => setEditSlug(e.target.value)}
-                            className="input font-mono-price"
-                          />
-                        ) : (
-                          <span className="font-mono-price text-white/60">{category.slug}</span>
-                        )}
-                      </td>
-                      <td className="px-4 py-3">
-                        <span className="rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/70">
-                          {category.productCount}
-                        </span>
-                      </td>
-                      <td className="sticky right-0 border-l border-white/5 bg-ink-800 px-4 py-3 group-hover:bg-white/[0.03]">
-                        <div className="flex items-center justify-end gap-1">
-                          {isEditing ? (
-                            <>
-                              <Tooltip label="Guardar cambios">
-                                <button
-                                  type="button"
-                                  disabled={isBusy}
-                                  onClick={() => handleSaveEdit(category.id)}
-                                  aria-label={`Guardar ${category.name}`}
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-electric-400 disabled:opacity-50"
-                                >
-                                  <CheckIcon className="h-4 w-4" />
-                                </button>
-                              </Tooltip>
-                              <Tooltip label="Cancelar">
-                                <button
-                                  type="button"
-                                  disabled={isBusy}
-                                  onClick={cancelEdit}
-                                  aria-label="Cancelar edición"
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white disabled:opacity-50"
-                                >
-                                  <CloseIcon className="h-4 w-4" />
-                                </button>
-                              </Tooltip>
-                            </>
-                          ) : (
-                            <>
-                              <Tooltip label="Editar categoría">
-                                <button
-                                  type="button"
-                                  disabled={isBusy}
-                                  onClick={() => startEdit(category)}
-                                  aria-label={`Editar ${category.name}`}
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-electric-400 disabled:opacity-50"
-                                >
-                                  <PencilIcon className="h-4 w-4" />
-                                </button>
-                              </Tooltip>
-                              <Tooltip
-                                label={
-                                  category.productCount > 0
-                                    ? 'No se puede eliminar: tiene productos'
-                                    : 'Eliminar categoría'
-                                }
-                              >
-                                <button
-                                  type="button"
-                                  disabled={isBusy}
-                                  onClick={() => handleDelete(category)}
-                                  aria-label={`Eliminar ${category.name}`}
-                                  className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition hover:bg-ember-500/10 hover:text-ember-400 disabled:opacity-50"
-                                >
-                                  <TrashIcon className="h-4 w-4" />
-                                </button>
-                              </Tooltip>
-                            </>
-                          )}
-                        </div>
-                      </td>
-                    </tr>
-                  )
-                })}
-              </tbody>
-            </table>
-          </div>
+                      <ChevronUpIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </Tooltip>
+                  <Tooltip label="Bajar">
+                    <button
+                      type="button"
+                      disabled={index === categories.length - 1 || isBusy}
+                      onClick={() => handleMove(category, 1)}
+                      aria-label={`Bajar ${category.name}`}
+                      className="flex h-5 w-6 items-center justify-center rounded text-white/40 transition hover:bg-white/5 hover:text-white disabled:opacity-20"
+                    >
+                      <ChevronDownIcon className="h-3.5 w-3.5" />
+                    </button>
+                  </Tooltip>
+                </div>
 
-          {editError && (
-            <p className="border-t border-white/10 px-4 py-3 text-xs text-ember-400">{editError}</p>
-          )}
+                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
+                  <Icon className="h-5 w-5" />
+                </span>
+
+                {isEditing ? (
+                  <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
+                    <input
+                      type="text"
+                      value={editName}
+                      onChange={(e) => setEditName(e.target.value)}
+                      className="input"
+                      autoFocus
+                    />
+                    <input
+                      type="text"
+                      value={editSlug}
+                      onChange={(e) => setEditSlug(e.target.value)}
+                      className="input font-mono-price"
+                    />
+                  </div>
+                ) : (
+                  <div className="min-w-0 flex-1">
+                    <p className="line-clamp-2 font-semibold leading-snug text-white">{category.name}</p>
+                    <p className="truncate font-mono-price text-xs text-white/40">{category.slug}</p>
+                  </div>
+                )}
+
+                <span className="hidden shrink-0 rounded-full bg-white/5 px-2.5 py-1 text-xs font-semibold text-white/70 sm:inline-block">
+                  {category.productCount} producto{category.productCount === 1 ? '' : 's'}
+                </span>
+
+                <div className="flex shrink-0 items-center gap-1">
+                  {isEditing ? (
+                    <>
+                      <Tooltip label="Guardar cambios">
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleSaveEdit(category.id)}
+                          aria-label={`Guardar ${category.name}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-electric-400 disabled:opacity-50"
+                        >
+                          <CheckIcon className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                      <Tooltip label="Cancelar">
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={cancelEdit}
+                          aria-label="Cancelar edición"
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-white disabled:opacity-50"
+                        >
+                          <CloseIcon className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                    </>
+                  ) : (
+                    <>
+                      <Tooltip label="Editar categoría">
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => startEdit(category)}
+                          aria-label={`Editar ${category.name}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition hover:bg-white/5 hover:text-electric-400 disabled:opacity-50"
+                        >
+                          <PencilIcon className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                      <Tooltip
+                        label={
+                          category.productCount > 0
+                            ? 'No se puede eliminar: tiene productos'
+                            : 'Eliminar categoría'
+                        }
+                      >
+                        <button
+                          type="button"
+                          disabled={isBusy}
+                          onClick={() => handleDelete(category)}
+                          aria-label={`Eliminar ${category.name}`}
+                          className="flex h-8 w-8 items-center justify-center rounded-lg text-white/60 transition hover:bg-ember-500/10 hover:text-ember-400 disabled:opacity-50"
+                        >
+                          <TrashIcon className="h-4 w-4" />
+                        </button>
+                      </Tooltip>
+                    </>
+                  )}
+                </div>
+              </div>
+            )
+          })}
+
+          {editError && <p className="px-1 text-xs text-ember-400">{editError}</p>}
 
           {categories.length === 0 && (
-            <p className="px-4 py-10 text-center text-sm text-white/50">
+            <p className="rounded-2xl border border-white/10 bg-ink-800 px-4 py-10 text-center text-sm text-white/50">
               Todavía no hay categorías. Crea la primera arriba.
             </p>
           )}
