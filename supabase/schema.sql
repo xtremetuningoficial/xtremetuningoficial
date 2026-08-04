@@ -208,3 +208,29 @@ create policy "reviews_public_insert" on reviews
 drop policy if exists "reviews_admin_all" on reviews;
 create policy "reviews_admin_all" on reviews
   for all using (auth.role() = 'authenticated') with check (auth.role() = 'authenticated');
+
+-- ── Ícono personalizado por categoría ────────────────────────────────────
+-- Si icon_url es null, la tienda usa el ícono SVG por defecto según el
+-- slug; si el admin sube una imagen, esa imagen reemplaza al ícono.
+
+alter table categories add column if not exists icon_url text;
+
+insert into storage.buckets (id, name, public)
+values ('category-icons', 'category-icons', true)
+on conflict (id) do nothing;
+
+drop policy if exists "category_icons_bucket_public_read" on storage.objects;
+create policy "category_icons_bucket_public_read" on storage.objects
+  for select using (bucket_id = 'category-icons');
+
+drop policy if exists "category_icons_bucket_admin_write" on storage.objects;
+create policy "category_icons_bucket_admin_write" on storage.objects
+  for insert with check (bucket_id = 'category-icons' and auth.role() = 'authenticated');
+
+drop policy if exists "category_icons_bucket_admin_update" on storage.objects;
+create policy "category_icons_bucket_admin_update" on storage.objects
+  for update using (bucket_id = 'category-icons' and auth.role() = 'authenticated');
+
+drop policy if exists "category_icons_bucket_admin_delete" on storage.objects;
+create policy "category_icons_bucket_admin_delete" on storage.objects
+  for delete using (bucket_id = 'category-icons' and auth.role() = 'authenticated');

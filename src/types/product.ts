@@ -4,6 +4,7 @@ export type MediaType = 'image' | 'video'
 export interface Category {
   slug: string
   name: string
+  iconUrl: string | null
 }
 
 export interface ProductMedia {

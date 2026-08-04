@@ -1,10 +1,10 @@
 import { useMemo, useState } from 'react'
-import type { ComponentType } from 'react'
-import { categoryIcons, DEFAULT_CATEGORY_ICON } from '../../data/categoryIcons'
+import type { ReactNode } from 'react'
 import type { Category, Product } from '../../types/product'
 import type { RatingSummary } from '../../types/review'
 import { GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
 import { GridIcon } from '../icons'
+import { CategoryIcon } from '../CategoryIcon'
 import { Tooltip } from '../ui/Tooltip'
 import { ProductCard } from './ProductCard'
 import { ProductCardSkeleton } from './ProductCardSkeleton'
@@ -59,7 +59,7 @@ export function CatalogSection({
           <div className="scrollbar-none -mx-4 flex gap-2 overflow-x-auto px-4 pb-1 sm:mx-0 sm:px-0">
             <FilterPill
               label="Todos"
-              icon={GridIcon}
+              icon={<GridIcon className="h-4 w-4 shrink-0" />}
               active={activeCategory === 'all'}
               onClick={() => onSelect('all')}
             />
@@ -67,7 +67,7 @@ export function CatalogSection({
               <FilterPill
                 key={category.slug}
                 label={category.name}
-                icon={categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON}
+                icon={<CategoryIcon category={category} className="h-4 w-4 shrink-0" />}
                 active={activeCategory === category.slug}
                 onClick={() => onSelect(category.slug)}
               />
@@ -126,12 +126,12 @@ export function CatalogSection({
 
 function FilterPill({
   label,
-  icon: Icon,
+  icon,
   active,
   onClick,
 }: {
   label: string
-  icon: ComponentType<{ className?: string }>
+  icon: ReactNode
   active: boolean
   onClick: () => void
 }) {
@@ -146,7 +146,7 @@ function FilterPill({
             : 'border-ink-900/15 bg-white text-ink-900/70 hover:border-electric-500/50'
         }`}
       >
-        <Icon className="h-4 w-4 shrink-0" />
+        {icon}
         <span className="max-w-[150px] truncate sm:max-w-[240px]">{label}</span>
       </button>
     </Tooltip>

@@ -6,6 +6,7 @@ export interface AdminCategory {
   name: string
   sortOrder: number
   productCount: number
+  iconUrl: string | null
 }
 
 export interface CategoryFormValues {

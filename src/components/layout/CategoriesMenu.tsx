@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Category } from '../../types/product'
-import { categoryIcons, DEFAULT_CATEGORY_ICON } from '../../data/categoryIcons'
+import { CategoryIcon } from '../CategoryIcon'
 import { ChevronDownIcon, GridIcon } from '../icons'
 
 // La lista de categorías crece con el tiempo (empezó en 4, ya va en 7+),
@@ -48,21 +48,18 @@ export function CategoriesMenu({ categories }: { categories: Category[] }) {
           role="menu"
           className="absolute left-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-ink-800 p-2 shadow-2xl shadow-black/40"
         >
-          {categories.map((category) => {
-            const Icon = categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON
-            return (
-              <Link
-                key={category.slug}
-                to={`/categoria/${category.slug}`}
-                role="menuitem"
-                onClick={() => setOpen(false)}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-white/80 transition hover:bg-white/5 hover:text-cyan-400"
-              >
-                <Icon className="h-4 w-4 shrink-0" />
-                {category.name}
-              </Link>
-            )
-          })}
+          {categories.map((category) => (
+            <Link
+              key={category.slug}
+              to={`/categoria/${category.slug}`}
+              role="menuitem"
+              onClick={() => setOpen(false)}
+              className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-white/80 transition hover:bg-white/5 hover:text-cyan-400"
+            >
+              <CategoryIcon category={category} className="h-4 w-4 shrink-0" />
+              {category.name}
+            </Link>
+          ))}
         </div>
       )}
     </div>

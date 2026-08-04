@@ -1,4 +1,4 @@
-import { categoryIcons, DEFAULT_CATEGORY_ICON } from '../../data/categoryIcons'
+import { CategoryIcon } from '../CategoryIcon'
 import type { Category, Product } from '../../types/product'
 
 interface CategorySectionProps {
@@ -31,7 +31,6 @@ export function CategorySection({
         {categories.map((category) => {
           const count = products.filter((p) => p.categorySlug === category.slug).length
           const isActive = activeCategory === category.slug
-          const Icon = categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON
 
           return (
             <button
@@ -47,7 +46,7 @@ export function CategorySection({
                   : 'border-ink-900/10 bg-white text-ink-900 hover:border-electric-500/40 hover:shadow-md'
               }`}
             >
-              {Icon && <Icon className="h-8 w-8" />}
+              <CategoryIcon category={category} className="h-8 w-8" />
               <p className="mt-4 font-display text-base uppercase leading-tight sm:text-lg">
                 {category.name}
               </p>

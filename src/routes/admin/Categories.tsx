@@ -1,15 +1,17 @@
-import { useEffect, useState, type FormEvent } from 'react'
+import { useEffect, useRef, useState, type FormEvent } from 'react'
 import {
   createCategory,
   deleteCategory,
   fetchAdminCategories,
+  removeCategoryIcon,
   swapCategoryOrder,
   updateCategory,
+  uploadCategoryIcon,
 } from '../../lib/api/categories'
 import { slugify } from '../../lib/slugify'
 import { getErrorMessage } from '../../lib/errors'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
-import { categoryIcons, DEFAULT_CATEGORY_ICON } from '../../data/categoryIcons'
+import { CategoryIcon } from '../../components/CategoryIcon'
 import { Tooltip } from '../../components/ui/Tooltip'
 import { StatTile } from '../../components/admin/StatTile'
 import {
@@ -22,6 +24,7 @@ import {
   PencilIcon,
   PlusIcon,
   TrashIcon,
+  UploadIcon,
 } from '../../components/icons'
 import type { AdminCategory } from '../../types/admin'
 
@@ -42,6 +45,8 @@ export default function AdminCategories() {
   const [editError, setEditError] = useState<string | null>(null)
 
   const [busyId, setBusyId] = useState<string | null>(null)
+  const [iconError, setIconError] = useState<string | null>(null)
+  const iconInputRefs = useRef<Record<string, HTMLInputElement | null>>({})
 
   async function load() {
     setStatus('loading')
@@ -164,6 +169,37 @@ export default function AdminCategories() {
     }
   }
 
+  async function handleIconUpload(category: AdminCategory, file: File | null) {
+    if (!file) return
+    if (!file.type.startsWith('image/')) {
+      setIconError('Solo se permiten imágenes para el ícono.')
+      return
+    }
+
+    setIconError(null)
+    setBusyId(category.id)
+    try {
+      await uploadCategoryIcon(category.id, category.slug, file)
+      await load()
+    } catch (error) {
+      setIconError(`No pudimos subir el ícono: ${getErrorMessage(error)}`)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
+  async function handleRemoveIcon(category: AdminCategory) {
+    setBusyId(category.id)
+    try {
+      await removeCategoryIcon(category.id)
+      await load()
+    } catch (error) {
+      window.alert(`No pudimos quitar el ícono: ${getErrorMessage(error)}`)
+    } finally {
+      setBusyId(null)
+    }
+  }
+
   const totalProducts = categories.reduce((sum, c) => sum + c.productCount, 0)
 
   return (
@@ -245,7 +281,6 @@ export default function AdminCategories() {
           {categories.map((category, index) => {
             const isEditing = editingId === category.id
             const isBusy = busyId === category.id
-            const Icon = categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON
 
             return (
               <div
@@ -277,9 +312,50 @@ export default function AdminCategories() {
                   </Tooltip>
                 </div>
 
-                <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white/5 text-cyan-400">
-                  <Icon className="h-5 w-5" />
-                </span>
+                <div className="group/icon relative shrink-0">
+                  <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/5 text-cyan-400">
+                    <CategoryIcon category={category} className="h-5 w-5" />
+                  </span>
+
+                  <Tooltip label={category.iconUrl ? 'Cambiar ícono' : 'Subir ícono'}>
+                    <button
+                      type="button"
+                      disabled={isBusy}
+                      onClick={() => iconInputRefs.current[category.id]?.click()}
+                      aria-label={`Cambiar ícono de ${category.name}`}
+                      className="absolute inset-0 flex items-center justify-center rounded-xl bg-ink-900/0 opacity-0 transition group-hover/icon:bg-ink-900/70 group-hover/icon:opacity-100 disabled:pointer-events-none"
+                    >
+                      <UploadIcon className="h-4 w-4 text-white" />
+                    </button>
+                  </Tooltip>
+
+                  <input
+                    ref={(el) => {
+                      iconInputRefs.current[category.id] = el
+                    }}
+                    type="file"
+                    accept="image/*"
+                    className="hidden"
+                    onChange={(e) => {
+                      handleIconUpload(category, e.target.files?.[0] ?? null)
+                      e.target.value = ''
+                    }}
+                  />
+
+                  {category.iconUrl && (
+                    <Tooltip label="Quitar ícono (volver al de la tienda)">
+                      <button
+                        type="button"
+                        disabled={isBusy}
+                        onClick={() => handleRemoveIcon(category)}
+                        aria-label={`Quitar ícono de ${category.name}`}
+                        className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ember-500 text-white opacity-0 transition group-hover/icon:opacity-100 hover:bg-ember-400 disabled:pointer-events-none"
+                      >
+                        <CloseIcon className="h-2.5 w-2.5" />
+                      </button>
+                    </Tooltip>
+                  )}
+                </div>
 
                 {isEditing ? (
                   <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
@@ -372,6 +448,7 @@ export default function AdminCategories() {
           })}
 
           {editError && <p className="px-1 text-xs text-ember-400">{editError}</p>}
+          {iconError && <p className="px-1 text-xs text-ember-400">{iconError}</p>}
 
           {categories.length === 0 && (
             <p className="rounded-2xl border border-white/10 bg-ink-800 px-4 py-10 text-center text-sm text-white/50">
