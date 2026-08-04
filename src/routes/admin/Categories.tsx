@@ -312,12 +312,12 @@ export default function AdminCategories() {
                   </Tooltip>
                 </div>
 
-                <div className="group/icon relative shrink-0">
-                  <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/5 text-cyan-400">
-                    <CategoryIcon category={category} className="h-5 w-5" />
-                  </span>
+                <Tooltip label={category.iconUrl ? 'Cambiar ícono' : 'Subir ícono'} className="shrink-0">
+                  <div className="group/icon relative">
+                    <span className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-xl bg-white/5 text-cyan-400">
+                      <CategoryIcon category={category} className="h-5 w-5" />
+                    </span>
 
-                  <Tooltip label={category.iconUrl ? 'Cambiar ícono' : 'Subir ícono'}>
                     <button
                       type="button"
                       disabled={isBusy}
@@ -327,35 +327,37 @@ export default function AdminCategories() {
                     >
                       <UploadIcon className="h-4 w-4 text-white" />
                     </button>
-                  </Tooltip>
 
-                  <input
-                    ref={(el) => {
-                      iconInputRefs.current[category.id] = el
-                    }}
-                    type="file"
-                    accept="image/*"
-                    className="hidden"
-                    onChange={(e) => {
-                      handleIconUpload(category, e.target.files?.[0] ?? null)
-                      e.target.value = ''
-                    }}
-                  />
+                    <input
+                      ref={(el) => {
+                        iconInputRefs.current[category.id] = el
+                      }}
+                      type="file"
+                      accept="image/*"
+                      className="hidden"
+                      onChange={(e) => {
+                        handleIconUpload(category, e.target.files?.[0] ?? null)
+                        e.target.value = ''
+                      }}
+                    />
 
-                  {category.iconUrl && (
-                    <Tooltip label="Quitar ícono (volver al de la tienda)">
+                    {category.iconUrl && (
                       <button
                         type="button"
                         disabled={isBusy}
-                        onClick={() => handleRemoveIcon(category)}
+                        onClick={(e) => {
+                          e.stopPropagation()
+                          handleRemoveIcon(category)
+                        }}
                         aria-label={`Quitar ícono de ${category.name}`}
+                        title="Quitar ícono (volver al de la tienda)"
                         className="absolute -right-1.5 -top-1.5 flex h-4 w-4 items-center justify-center rounded-full bg-ember-500 text-white opacity-0 transition group-hover/icon:opacity-100 hover:bg-ember-400 disabled:pointer-events-none"
                       >
                         <CloseIcon className="h-2.5 w-2.5" />
                       </button>
-                    </Tooltip>
-                  )}
-                </div>
+                    )}
+                  </div>
+                </Tooltip>
 
                 {isEditing ? (
                   <div className="grid min-w-0 flex-1 gap-2 sm:grid-cols-2">
