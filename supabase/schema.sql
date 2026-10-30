@@ -234,3 +234,13 @@ create policy "category_icons_bucket_admin_update" on storage.objects
 drop policy if exists "category_icons_bucket_admin_delete" on storage.objects;
 create policy "category_icons_bucket_admin_delete" on storage.objects
   for delete using (bucket_id = 'category-icons' and auth.role() = 'authenticated');
+
+-- ── Descuentos por producto ─────────────────────────────────────────────
+-- Porcentaje sobre el precio del producto (la instalación no se descuenta).
+-- discount_ends_at vacío = el descuento sigue hasta que el admin lo quite.
+
+alter table products add column if not exists discount_percent smallint not null default 0;
+alter table products drop constraint if exists products_discount_percent_check;
+alter table products add constraint products_discount_percent_check
+  check (discount_percent between 0 and 90);
+alter table products add column if not exists discount_ends_at timestamptz;

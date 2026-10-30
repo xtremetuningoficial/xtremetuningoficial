@@ -6,6 +6,10 @@ import { WhatsAppIcon } from '../layout/Header'
 export function CartSummary({ items, onClear }: { items: CartInquiryItem[]; onClear: () => void }) {
   const productsTotal = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0)
   const installTotal = items.reduce((sum, item) => sum + item.product.installPrice * item.quantity, 0)
+  const savings = items.reduce(
+    (sum, item) => sum + (item.product.regularPrice - item.product.price) * item.quantity,
+    0,
+  )
 
   return (
     <div className="rounded-2xl border border-ink-900/10 bg-white p-5 sm:p-6">
@@ -14,8 +18,14 @@ export function CartSummary({ items, onClear }: { items: CartInquiryItem[]; onCl
       <dl className="mt-4 space-y-2 font-mono-price text-sm">
         <div className="flex justify-between text-ink-900/70">
           <dt>Productos</dt>
-          <dd>{formatCOP(productsTotal)}</dd>
+          <dd>{formatCOP(productsTotal + savings)}</dd>
         </div>
+        {savings > 0 && (
+          <div className="flex justify-between font-semibold text-ember-500">
+            <dt>Descuentos</dt>
+            <dd>−{formatCOP(savings)}</dd>
+          </div>
+        )}
         <div className="flex justify-between text-ember-500">
           <dt>Instalación</dt>
           <dd>{formatCOP(installTotal)}</dd>

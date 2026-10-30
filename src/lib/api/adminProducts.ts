@@ -1,6 +1,7 @@
 import { supabase } from '../supabase'
 import { compressImage } from '../compressImage'
 import { slugify } from '../slugify'
+import { endOfDayBogota } from '../pricing'
 import type { AdminProduct, AdminProductMedia, ProductFormValues } from '../../types/admin'
 import type { MediaType, VehicleType } from '../../types/product'
 
@@ -9,7 +10,7 @@ const MAX_VIDEO_BYTES = 30 * 1024 * 1024
 export const MAX_MEDIA_PER_PRODUCT = 3
 
 const ADMIN_SELECT =
-  'id, slug, name, description, price, install_price, stock_quantity, is_active, is_featured, vehicle_type, categories(id, name), product_images(url, sort_order, media_type)'
+  'id, slug, name, description, price, install_price, discount_percent, discount_ends_at, stock_quantity, is_active, is_featured, vehicle_type, categories(id, name), product_images(url, sort_order, media_type)'
 
 interface AdminProductRow {
   id: string
@@ -18,6 +19,8 @@ interface AdminProductRow {
   description: string | null
   price: number
   install_price: number | null
+  discount_percent: number | null
+  discount_ends_at: string | null
   stock_quantity: number
   is_active: boolean
   is_featured: boolean
@@ -41,6 +44,8 @@ function mapRow(row: AdminProductRow): AdminProduct {
     categoryName: category?.name ?? null,
     price: row.price,
     installPrice: row.install_price ?? 0,
+    discountPercent: row.discount_percent ?? 0,
+    discountEndsAt: row.discount_ends_at,
     stockQuantity: row.stock_quantity,
     isActive: row.is_active,
     isFeatured: row.is_featured,
@@ -74,6 +79,9 @@ function toRow(values: ProductFormValues) {
     vehicle_type: values.vehicleType,
     price: values.price,
     install_price: values.installPrice,
+    discount_percent: values.discountPercent,
+    discount_ends_at:
+      values.discountPercent > 0 && values.discountEndsOn ? endOfDayBogota(values.discountEndsOn) : null,
     stock_quantity: values.stockQuantity,
     is_featured: values.isFeatured,
     is_active: values.isActive,

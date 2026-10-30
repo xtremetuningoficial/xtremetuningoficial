@@ -103,7 +103,7 @@ export function StockAdjuster({ productId, stock, onStockChange }: StockAdjuster
               + Entrada
             </button>
           </Tooltip>
-          <Tooltip label="Restar unidades del stock (ej. venta en tienda)" className="flex-1">
+          <Tooltip label="Restar unidades del stock (ej. venta en tienda)" className="flex-1" align="end">
             <button
               type="button"
               disabled={applying}

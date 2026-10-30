@@ -13,6 +13,14 @@ import {
 } from '../../lib/api/adminProducts'
 import { fetchAdminCategories } from '../../lib/api/categories'
 import { getErrorMessage } from '../../lib/errors'
+import { formatCOP } from '../../lib/format'
+import {
+  applyDiscount,
+  formatDiscountEnd,
+  isDiscountActive,
+  MAX_DISCOUNT_PERCENT,
+  toBogotaDateInput,
+} from '../../lib/pricing'
 import { StockAdjuster } from '../../components/admin/StockAdjuster'
 import { Switch } from '../../components/admin/Switch'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
@@ -41,6 +49,8 @@ const EMPTY_FORM: ProductFormValues = {
   vehicleType: 'carro',
   price: 0,
   installPrice: 0,
+  discountPercent: 0,
+  discountEndsOn: '',
   stockQuantity: 0,
   isFeatured: false,
   isActive: true,
@@ -90,6 +100,8 @@ export default function AdminProductForm() {
           vehicleType: product.vehicleType,
           price: product.price,
           installPrice: product.installPrice,
+          discountPercent: product.discountPercent,
+          discountEndsOn: product.discountEndsAt ? toBogotaDateInput(product.discountEndsAt) : '',
           stockQuantity: product.stockQuantity,
           isFeatured: product.isFeatured,
           isActive: product.isActive,
@@ -154,6 +166,11 @@ export default function AdminProductForm() {
 
     if (!form.name.trim() || !form.categoryId) {
       setSubmitError('Nombre y categoría son obligatorios.')
+      return
+    }
+
+    if (form.discountPercent < 0 || form.discountPercent > MAX_DISCOUNT_PERCENT) {
+      setSubmitError(`El descuento debe estar entre 0 % y ${MAX_DISCOUNT_PERCENT} %.`)
       return
     }
 
@@ -332,6 +349,15 @@ export default function AdminProductForm() {
                 />
               </Field>
             </div>
+          </Section>
+
+          <Section title="Descuento">
+            <DiscountFields
+              price={form.price}
+              percent={form.discountPercent}
+              endsOn={form.discountEndsOn}
+              onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
+            />
           </Section>
 
           <Section title="Visibilidad">
@@ -548,6 +574,109 @@ export default function AdminProductForm() {
           )}
         </div>
       </form>
+    </div>
+  )
+}
+
+const DISCOUNT_PRESETS = [10, 15, 20, 30]
+
+function DiscountFields({
+  price,
+  percent,
+  endsOn,
+  onChange,
+}: {
+  price: number
+  percent: number
+  endsOn: string
+  onChange: (patch: Partial<Pick<ProductFormValues, 'discountPercent' | 'discountEndsOn'>>) => void
+}) {
+  const today = toBogotaDateInput(new Date().toISOString())
+  const expired = percent > 0 && endsOn !== '' && endsOn < today
+  const active = !expired && isDiscountActive(percent, null)
+  const finalPrice = applyDiscount(price, percent)
+
+  return (
+    <div className="space-y-4">
+      <div className="flex flex-wrap gap-2" role="group" aria-label="Descuentos rápidos">
+        {[0, ...DISCOUNT_PRESETS].map((preset) => {
+          const selected = percent === preset
+          return (
+            <button
+              key={preset}
+              type="button"
+              aria-pressed={selected}
+              onClick={() =>
+                onChange(preset === 0 ? { discountPercent: 0, discountEndsOn: '' } : { discountPercent: preset })
+              }
+              className={`rounded-full border px-3.5 py-1.5 font-mono-price text-xs font-bold transition ${
+                selected
+                  ? preset === 0
+                    ? 'border-white/40 bg-white/10 text-white'
+                    : 'border-ember-400 bg-ember-400 text-ink-900'
+                  : 'border-white/15 text-white/60 hover:border-white/30 hover:text-white'
+              }`}
+            >
+              {preset === 0 ? 'Sin descuento' : `−${preset} %`}
+            </button>
+          )
+        })}
+      </div>
+
+      <div className="grid gap-5 sm:grid-cols-2">
+        <Field label="Porcentaje (%)">
+          <input
+            type="number"
+            min={0}
+            max={MAX_DISCOUNT_PERCENT}
+            step={1}
+            inputMode="numeric"
+            value={percent}
+            onChange={(e) => {
+              const value = Math.min(MAX_DISCOUNT_PERCENT, Math.max(0, Math.round(Number(e.target.value) || 0)))
+              onChange(value === 0 ? { discountPercent: 0, discountEndsOn: '' } : { discountPercent: value })
+            }}
+            className="input font-mono-price"
+          />
+        </Field>
+        <Field label="Válido hasta (opcional)">
+          <input
+            type="date"
+            min={today}
+            disabled={percent === 0}
+            value={endsOn}
+            onChange={(e) => onChange({ discountEndsOn: e.target.value })}
+            className="input font-mono-price"
+          />
+        </Field>
+      </div>
+
+      <div
+        aria-live="polite"
+        className={`rounded-xl border px-4 py-3 text-sm ${
+          expired
+            ? 'border-hazard-400/30 bg-hazard-400/10 text-hazard-400'
+            : active
+              ? 'border-ember-400/30 bg-ember-400/10 text-white'
+              : 'border-white/10 text-white/50'
+        }`}
+      >
+        {expired ? (
+          <>Este descuento venció el {formatDiscountEnd(`${endsOn}T12:00:00-05:00`)}. Cambia la fecha o quítalo.</>
+        ) : active ? (
+          <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
+            <span className="text-white/60">En la tienda se verá:</span>
+            <span className="font-mono-price text-white/40 line-through">{formatCOP(price)}</span>
+            <span className="font-mono-price text-base font-bold text-white">{formatCOP(finalPrice)}</span>
+            <span className="font-mono-price text-xs font-semibold text-ember-400">
+              ahorra {formatCOP(price - finalPrice)}
+              {endsOn ? ` · hasta el ${formatDiscountEnd(`${endsOn}T12:00:00-05:00`)}` : ' · sin fecha de fin'}
+            </span>
+          </span>
+        ) : (
+          <>Sin descuento. El producto se vende a {formatCOP(price)}. La instalación nunca se descuenta.</>
+        )}
+      </div>
     </div>
   )
 }

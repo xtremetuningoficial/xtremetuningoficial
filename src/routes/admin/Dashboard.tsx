@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { deleteProduct, fetchAdminProducts, setProductActive } from '../../lib/api/adminProducts'
 import { formatCOP } from '../../lib/format'
+import { applyDiscount, formatDiscountEnd, isDiscountActive } from '../../lib/pricing'
 import { useLowStockThreshold } from '../../hooks/useLowStockThreshold'
 import { useDocumentTitle } from '../../hooks/useDocumentTitle'
 import { LowStockBell } from '../../components/admin/LowStockBell'
@@ -166,7 +167,20 @@ export default function AdminDashboard() {
                         {product.categoryName ?? '—'}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-mono-price text-white">{formatCOP(product.price)}</td>
+                    <td className="px-4 py-3 font-mono-price text-white">
+                      {formatCOP(product.price)}
+                      {isDiscountActive(product.discountPercent, product.discountEndsAt) && (
+                        <Tooltip
+                          label={`Se vende a ${formatCOP(applyDiscount(product.price, product.discountPercent))}${
+                            product.discountEndsAt ? ` hasta el ${formatDiscountEnd(product.discountEndsAt)}` : ''
+                          }`}
+                        >
+                          <span className="ml-2 rounded-full bg-ember-400/15 px-2 py-0.5 text-[10px] font-bold text-ember-400">
+                            −{product.discountPercent} %
+                          </span>
+                        </Tooltip>
+                      )}
+                    </td>
                     <td className="px-4 py-3 font-mono-price text-ember-400">
                       {formatCOP(product.installPrice)}
                     </td>

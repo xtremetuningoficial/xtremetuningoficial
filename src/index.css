@@ -41,6 +41,8 @@
     padding: 0.5rem 0.75rem;
     font-size: 0.875rem;
     color: white;
+    /* Que los select, date y number nativos usen controles oscuros (en Safari salían blancos). */
+    color-scheme: dark;
   }
 
   .input::placeholder {

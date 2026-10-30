@@ -28,6 +28,8 @@ export interface AdminProduct {
   categoryName: string | null
   price: number
   installPrice: number
+  discountPercent: number
+  discountEndsAt: string | null
   stockQuantity: number
   isActive: boolean
   isFeatured: boolean
@@ -42,6 +44,9 @@ export interface ProductFormValues {
   vehicleType: VehicleType
   price: number
   installPrice: number
+  discountPercent: number
+  /** "YYYY-MM-DD" o vacío si el descuento no tiene fecha de fin. */
+  discountEndsOn: string
   stockQuantity: number
   isFeatured: boolean
   isActive: boolean

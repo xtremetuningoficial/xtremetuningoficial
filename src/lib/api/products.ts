@@ -1,8 +1,9 @@
 import { supabase } from '../supabase'
+import { applyDiscount, isDiscountActive } from '../pricing'
 import type { MediaType, Product, VehicleType } from '../../types/product'
 
 const PRODUCT_SELECT =
-  'id, slug, name, description, price, install_price, is_featured, vehicle_type, categories(slug), product_images(url, sort_order, media_type)'
+  'id, slug, name, description, price, install_price, discount_percent, discount_ends_at, is_featured, vehicle_type, categories(slug), product_images(url, sort_order, media_type)'
 
 interface ProductRow {
   id: string
@@ -11,6 +12,8 @@ interface ProductRow {
   description: string | null
   price: number
   install_price: number | null
+  discount_percent: number | null
+  discount_ends_at: string | null
   is_featured: boolean
   vehicle_type: VehicleType
   categories: { slug: string } | { slug: string }[] | null
@@ -23,6 +26,9 @@ function mapRow(row: ProductRow): Product {
     .map((item) => ({ url: item.url, type: item.media_type }))
 
   const category = Array.isArray(row.categories) ? row.categories[0] : row.categories
+  const discountPercent = isDiscountActive(row.discount_percent ?? 0, row.discount_ends_at)
+    ? (row.discount_percent ?? 0)
+    : 0
 
   return {
     id: row.id,
@@ -30,7 +36,10 @@ function mapRow(row: ProductRow): Product {
     name: row.name,
     categorySlug: category?.slug ?? '',
     vehicleType: row.vehicle_type,
-    price: row.price,
+    price: applyDiscount(row.price, discountPercent),
+    regularPrice: row.price,
+    discountPercent,
+    discountEndsAt: discountPercent > 0 ? row.discount_ends_at : null,
     installPrice: row.install_price ?? 0,
     description: row.description ? row.description.split('\n').filter(Boolean) : [],
     image: media.find((item) => item.type === 'image')?.url ?? '',

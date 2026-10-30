@@ -31,6 +31,11 @@ export function ProductCard({ product, rating }: { product: Product; rating?: Ra
           <VehicleIcon className="h-3 w-3" />
           {vehicleLabels[product.vehicleType].label}
         </span>
+        {product.discountPercent > 0 && (
+          <span className="absolute bottom-3 left-3 rounded-md bg-ember-500 px-2 py-1 font-mono-price text-sm font-bold leading-none text-white shadow-md shadow-ink-900/20">
+            −{product.discountPercent} %
+          </span>
+        )}
       </Link>
 
       <div className="flex flex-1 flex-col p-4 sm:p-5">
@@ -60,7 +65,15 @@ export function ProductCard({ product, rating }: { product: Product; rating?: Ra
 
         <div className="mt-4 flex flex-1 items-end justify-between gap-3">
           <div className="font-mono-price">
-            <p className="text-lg font-bold text-ink-900 sm:text-xl">{formatCOP(product.price)}</p>
+            {product.discountPercent > 0 && (
+              <p className="text-xs text-ink-900/50">
+                <span className="sr-only">Antes </span>
+                <s>{formatCOP(product.regularPrice)}</s>
+              </p>
+            )}
+            <p className={`text-lg font-bold sm:text-xl ${product.discountPercent > 0 ? 'text-ember-500' : 'text-ink-900'}`}>
+              {formatCOP(product.price)}
+            </p>
             <p className="mt-0.5 inline-flex items-center gap-1 rounded bg-ember-500/10 px-1.5 py-0.5 text-[11px] font-semibold text-ember-500">
               + instalación {formatCOP(product.installPrice)}
             </p>

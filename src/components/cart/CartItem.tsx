@@ -36,7 +36,17 @@ export function CartItem({ product, quantity }: { product: Product; quantity: nu
         </div>
 
         <p className="font-mono-price text-xs text-ink-900/60">
-          {formatCOP(product.price)} + instalación {formatCOP(product.installPrice)}
+          {product.discountPercent > 0 && (
+            <>
+              <span className="sr-only">Antes </span>
+              <s className="text-ink-900/40">{formatCOP(product.regularPrice)}</s>{' '}
+            </>
+          )}
+          <span className={product.discountPercent > 0 ? 'font-semibold text-ember-500' : undefined}>
+            {formatCOP(product.price)}
+          </span>
+          {product.discountPercent > 0 && ` (−${product.discountPercent} %)`} + instalación{' '}
+          {formatCOP(product.installPrice)}
         </p>
 
         <div className="flex items-center justify-between gap-3">

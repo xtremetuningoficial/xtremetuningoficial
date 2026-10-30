@@ -3,6 +3,7 @@ import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { useProduct } from '../hooks/useProduct'
 import { useProductReviews } from '../hooks/useProductReviews'
 import { formatCOP, formatDateTime } from '../lib/format'
+import { formatDiscountEnd } from '../lib/pricing'
 import { buildProductInquiryLink, GENERAL_INQUIRY_LINK } from '../lib/whatsapp'
 import { vehicleLabels } from '../data/vehicleLabels'
 import { WhatsAppIcon } from '../components/layout/Header'
@@ -132,13 +133,41 @@ export default function ProductDetail() {
 
           <div className="mt-6 flex flex-wrap items-end gap-4 rounded-2xl border border-ink-900/10 bg-white p-5 font-mono-price">
             <div>
-              <p className="text-xs uppercase tracking-wide text-ink-900/60">Producto</p>
-              <p className="text-2xl font-bold text-ink-900 sm:text-3xl">{formatCOP(product.price)}</p>
+              <p className="flex items-center gap-2 text-xs uppercase tracking-wide text-ink-900/60">
+                Producto
+                {product.discountPercent > 0 && (
+                  <span className="rounded bg-ember-500 px-1.5 py-0.5 text-[11px] font-bold normal-case tracking-normal text-white">
+                    −{product.discountPercent} %
+                  </span>
+                )}
+              </p>
+              <p className="flex flex-wrap items-baseline gap-x-2">
+                <span className={`text-2xl font-bold sm:text-3xl ${product.discountPercent > 0 ? 'text-ember-500' : 'text-ink-900'}`}>
+                  {formatCOP(product.price)}
+                </span>
+                {product.discountPercent > 0 && (
+                  <span className="text-sm text-ink-900/50">
+                    <span className="sr-only">Antes </span>
+                    <s>{formatCOP(product.regularPrice)}</s>
+                  </span>
+                )}
+              </p>
             </div>
             <div>
               <p className="text-xs uppercase tracking-wide text-ember-500">Instalación</p>
               <p className="text-lg font-bold text-ember-500">{formatCOP(product.installPrice)}</p>
             </div>
+            {product.discountPercent > 0 && (
+              <p className="basis-full border-t border-ink-900/10 pt-3 font-body text-sm text-ink-900/70">
+                Ahorras{' '}
+                <strong className="font-mono-price text-ink-900">
+                  {formatCOP(product.regularPrice - product.price)}
+                </strong>
+                {product.discountEndsAt
+                  ? ` · oferta válida hasta el ${formatDiscountEnd(product.discountEndsAt)}`
+                  : ' · oferta por tiempo limitado'}
+              </p>
+            )}
           </div>
 
           {(() => {

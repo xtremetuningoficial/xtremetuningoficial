@@ -12,7 +12,9 @@ export function buildProductInquiryLink(product: Product): string {
   const message = [
     `Hola Xtreme Tuning, estoy interesado en:`,
     `*${product.name}*`,
-    `Producto: ${formatCOP(product.price)} · Instalación: ${formatCOP(product.installPrice)}`,
+    product.discountPercent > 0
+      ? `Producto: ${formatCOP(product.price)} (−${product.discountPercent} %, antes ${formatCOP(product.regularPrice)}) · Instalación: ${formatCOP(product.installPrice)}`
+      : `Producto: ${formatCOP(product.price)} · Instalación: ${formatCOP(product.installPrice)}`,
     `¿Me confirman disponibilidad?`,
   ].join('\n')
 
@@ -42,16 +44,22 @@ export function buildCartInquiryLink(items: CartInquiryItem[]): string {
     (sum, item) => sum + item.product.installPrice * item.quantity,
     0,
   )
+  const savings = items.reduce(
+    (sum, item) => sum + (item.product.regularPrice - item.product.price) * item.quantity,
+    0,
+  )
 
   const lines = [
     'Hola Xtreme Tuning, quiero pedir esto:',
     '',
     ...items.map((item) => {
       const subtotal = (item.product.price + item.product.installPrice) * item.quantity
-      return `• ${item.quantity}x *${item.product.name}* — ${formatCOP(subtotal)}`
+      const discount = item.product.discountPercent > 0 ? ` (−${item.product.discountPercent} %)` : ''
+      return `• ${item.quantity}x *${item.product.name}*${discount} — ${formatCOP(subtotal)}`
     }),
     '',
     `Productos: ${formatCOP(productsTotal)}`,
+    ...(savings > 0 ? [`Ahorro por descuentos: ${formatCOP(savings)}`] : []),
     `Instalación: ${formatCOP(installTotal)}`,
     `*Total: ${formatCOP(productsTotal + installTotal)}*`,
     '',

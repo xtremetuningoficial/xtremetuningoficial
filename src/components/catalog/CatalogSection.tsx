@@ -3,7 +3,7 @@ import type { ReactNode } from 'react'
 import type { Category, Product } from '../../types/product'
 import type { RatingSummary } from '../../types/review'
 import { GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
-import { GridIcon } from '../icons'
+import { GridIcon, TagIcon } from '../icons'
 import { CategoryIcon } from '../CategoryIcon'
 import { Tooltip } from '../ui/Tooltip'
 import { ProductCard } from './ProductCard'
@@ -28,16 +28,20 @@ export function CatalogSection({
   ratings,
 }: CatalogSectionProps) {
   const [search, setSearch] = useState('')
+  const [onlyDeals, setOnlyDeals] = useState(false)
+  const dealsCount = useMemo(() => products.filter((p) => p.discountPercent > 0).length, [products])
+  const showDeals = onlyDeals && dealsCount > 0
 
   const filtered = useMemo(() => {
     const byCategory =
       activeCategory === 'all' ? products : products.filter((p) => p.categorySlug === activeCategory)
+    const byDeal = showDeals ? byCategory.filter((p) => p.discountPercent > 0) : byCategory
 
     const term = search.trim().toLowerCase()
-    if (!term) return byCategory
+    if (!term) return byDeal
 
-    return byCategory.filter((product) => product.name.toLowerCase().includes(term))
-  }, [products, activeCategory, search])
+    return byDeal.filter((product) => product.name.toLowerCase().includes(term))
+  }, [products, activeCategory, search, showDeals])
 
   return (
     <section id="catalogo" className="bg-paper-50 py-14 sm:py-16">
@@ -63,6 +67,15 @@ export function CatalogSection({
               active={activeCategory === 'all'}
               onClick={() => onSelect('all')}
             />
+            {dealsCount > 0 && (
+              <FilterPill
+                label={`Ofertas (${dealsCount})`}
+                icon={<TagIcon className="h-4 w-4 shrink-0" />}
+                active={showDeals}
+                tone="deal"
+                onClick={() => setOnlyDeals((current) => !current)}
+              />
+            )}
             {categories.map((category) => (
               <FilterPill
                 key={category.slug}
@@ -112,10 +125,23 @@ export function CatalogSection({
             </div>
 
             {filtered.length === 0 && (
-              <p className="py-16 text-center text-ink-900/60">
-                No encontramos productos con ese criterio. Escríbenos por WhatsApp y te contamos
-                qué tenemos disponible.
-              </p>
+              <div className="py-16 text-center text-ink-900/60">
+                <p>
+                  {showDeals
+                    ? 'No hay ofertas en esta categoría por ahora.'
+                    : 'No encontramos productos con ese criterio.'}{' '}
+                  Escríbenos por WhatsApp y te contamos qué tenemos disponible.
+                </p>
+                {showDeals && (
+                  <button
+                    type="button"
+                    onClick={() => setOnlyDeals(false)}
+                    className="mt-4 text-sm font-semibold text-electric-500 underline underline-offset-4 hover:text-electric-400"
+                  >
+                    Ver todos los productos
+                  </button>
+                )}
+              </div>
             )}
           </>
         )}
@@ -128,22 +154,30 @@ function FilterPill({
   label,
   icon,
   active,
+  tone = 'default',
   onClick,
 }: {
   label: string
   icon: ReactNode
   active: boolean
+  tone?: 'default' | 'deal'
   onClick: () => void
 }) {
+  const activeClasses =
+    tone === 'deal' ? 'border-ember-500 bg-ember-500 text-white' : 'border-electric-500 bg-electric-500 text-white'
+  const idleClasses =
+    tone === 'deal'
+      ? 'border-ember-500/30 bg-white text-ember-500 hover:border-ember-500/60'
+      : 'border-ink-900/15 bg-white text-ink-900/70 hover:border-electric-500/50'
+
   return (
     <Tooltip label={label} className="shrink-0">
       <button
         type="button"
         onClick={onClick}
+        aria-pressed={active}
         className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-semibold transition ${
-          active
-            ? 'border-electric-500 bg-electric-500 text-white'
-            : 'border-ink-900/15 bg-white text-ink-900/70 hover:border-electric-500/50'
+          active ? activeClasses : idleClasses
         }`}
       >
         {icon}
