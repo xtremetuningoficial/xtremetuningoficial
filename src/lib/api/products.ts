@@ -20,7 +20,7 @@ interface ProductRow {
   product_images: { url: string; sort_order: number; media_type: MediaType }[] | null
 }
 
-function mapRow(row: ProductRow): Product {
+export function mapRow(row: ProductRow): Product {
   const media = [...(row.product_images ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
     .map((item) => ({ url: item.url, type: item.media_type }))

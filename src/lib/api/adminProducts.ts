@@ -29,7 +29,7 @@ interface AdminProductRow {
   product_images: { url: string; sort_order: number; media_type: MediaType }[] | null
 }
 
-function mapRow(row: AdminProductRow): AdminProduct {
+export function mapRow(row: AdminProductRow): AdminProduct {
   const category = Array.isArray(row.categories) ? row.categories[0] : row.categories
   const media = [...(row.product_images ?? [])]
     .sort((a, b) => a.sort_order - b.sort_order)
