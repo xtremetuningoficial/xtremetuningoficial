@@ -13,10 +13,13 @@ export function applyDiscount(price: number, percent: number): number {
   return Math.round((price * (100 - percent)) / 10000) * 100
 }
 
+/** Colombia no cambia de horario: siempre UTC−5. */
+const BOGOTA_OFFSET = '-05:00'
+
+// Fijar la zona evita que la fecha salga un día corrida en un celular con otra zona horaria.
 const endDateFormatter = new Intl.DateTimeFormat('es-CO', {
   day: 'numeric',
   month: 'long',
-  // El descuento vence a las 23:59 de Colombia: sin esto, fuera de esa zona se ve un día más.
   timeZone: 'America/Bogota',
 })
 
@@ -26,7 +29,12 @@ export function formatDiscountEnd(endsAt: string): string {
 
 /** "2026-11-15" (input date) → fin de ese día en hora de Colombia. */
 export function endOfDayBogota(date: string): string {
-  return `${date}T23:59:59-05:00`
+  return `${date}T23:59:59${BOGOTA_OFFSET}`
+}
+
+/** "2026-11-15" (input date) → mediodía de ese día en hora de Colombia, para mostrarlo sin correrse. */
+export function dateInputToBogotaNoon(date: string): string {
+  return `${date}T12:00:00${BOGOTA_OFFSET}`
 }
 
 /** ISO → "YYYY-MM-DD" en hora de Colombia, para el input date. */

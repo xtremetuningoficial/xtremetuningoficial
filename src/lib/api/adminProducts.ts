@@ -1,7 +1,8 @@
 import { supabase } from '../supabase'
 import { compressImage } from '../compressImage'
 import { slugify } from '../slugify'
-import { endOfDayBogota } from '../pricing'
+import { endOfDayBogota, toBogotaDateInput } from '../pricing'
+import { getErrorMessage, isUniqueViolation } from '../errors'
 import type { AdminProduct, AdminProductMedia, ProductFormValues } from '../../types/admin'
 import type { MediaType, VehicleType } from '../../types/product'
 
@@ -89,8 +90,6 @@ function toRow(values: ProductFormValues) {
   }
 }
 
-const DUPLICATE_SLUG_ERROR = '23505'
-
 export async function createProduct(values: ProductFormValues): Promise<{ id: string; slug: string }> {
   const baseSlug = slugify(values.name)
   const row = toRow(values)
@@ -104,7 +103,7 @@ export async function createProduct(values: ProductFormValues): Promise<{ id: st
       .single()
 
     if (!error) return data
-    if (error.code !== DUPLICATE_SLUG_ERROR) throw error
+    if (!isUniqueViolation(error)) throw error
   }
 
   throw new Error('No pudimos generar un slug único para este producto.')
@@ -156,6 +155,85 @@ export async function uploadProductMedia(slug: string, file: File): Promise<Admi
 
   const { data } = supabase.storage.from(BUCKET).getPublicUrl(path)
   return { url: data.publicUrl, mediaType }
+}
+
+/** Producto de la base → valores del formulario de edición. */
+export function productToFormValues(product: AdminProduct): ProductFormValues {
+  return {
+    name: product.name,
+    categoryId: product.categoryId ?? '',
+    vehicleType: product.vehicleType,
+    price: product.price,
+    installPrice: product.installPrice,
+    discountPercent: product.discountPercent,
+    discountEndsOn: product.discountEndsAt ? toBogotaDateInput(product.discountEndsAt) : '',
+    stockQuantity: product.stockQuantity,
+    isFeatured: product.isFeatured,
+    isActive: product.isActive,
+    description: product.description,
+  }
+}
+
+/** Un recurso del formulario: uno que ya está en Storage o un archivo nuevo por subir. */
+export type MediaDraft = { kind: 'existing'; media: AdminProductMedia } | { kind: 'new'; file: File }
+
+export interface SavedProduct {
+  id: string
+  slug: string
+}
+
+/**
+ * El producto quedó guardado en la base, pero las fotos no.
+ * Lleva el producto creado y lo que alcanzó a subir, para reintentar sobre el
+ * mismo producto (sin crear `mi-producto-2`) y sin volver a subir lo que ya subió.
+ */
+export class ProductMediaSaveError extends Error {
+  readonly product: SavedProduct
+  /** Mismo orden que los borradores; `null` donde la subida no alcanzó a terminar. */
+  readonly resolved: (AdminProductMedia | null)[]
+
+  constructor(product: SavedProduct, resolved: (AdminProductMedia | null)[], cause: unknown) {
+    super(getErrorMessage(cause))
+    this.name = 'ProductMediaSaveError'
+    this.product = product
+    this.resolved = resolved
+  }
+}
+
+/**
+ * Guarda un producto completo: datos, subida de archivos nuevos y orden de medios.
+ * Si `existing` viene, actualiza; si no, crea.
+ */
+export async function saveProduct(input: {
+  existing: SavedProduct | null
+  values: ProductFormValues
+  media: MediaDraft[]
+}): Promise<SavedProduct> {
+  let product: SavedProduct
+  if (input.existing) {
+    await updateProduct(input.existing.id, input.values)
+    product = input.existing
+  } else {
+    product = await createProduct(input.values)
+  }
+
+  const resolved: (AdminProductMedia | null)[] = input.media.map((draft) =>
+    draft.kind === 'existing' ? draft.media : null,
+  )
+
+  try {
+    for (const [index, draft] of input.media.entries()) {
+      if (draft.kind === 'new') resolved[index] = await uploadProductMedia(product.slug, draft.file)
+    }
+    await replaceProductMedia(
+      product.id,
+      resolved.filter((item): item is AdminProductMedia => item !== null),
+    )
+  } catch (error) {
+    throw new ProductMediaSaveError(product, resolved, error)
+  }
+
+  return product
 }
 
 export async function replaceProductMedia(productId: string, items: AdminProductMedia[]): Promise<void> {
