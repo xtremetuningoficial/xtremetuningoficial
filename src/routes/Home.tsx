@@ -14,6 +14,7 @@ import { useProducts } from '../hooks/useProducts'
 import { useProductRatings } from '../hooks/useProductRatings'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
 import type { Category } from '../types/product'
+import { montarEscenas } from '../scripts/escenas'
 
 interface CategoriesContext {
   status: 'loading' | 'success' | 'error'
@@ -31,6 +32,20 @@ export default function Home() {
   const activeCategoryName = categoriesState.data.find((c) => c.slug === categorySlug)?.name
   useDocumentTitle(activeCategoryName)
 
+  // Escenas de scroll del kit de la casa: héroe que se abre (sólo desde 1024 px, donde la
+  // foto ocupa el costado), riel de sonido (desde 768 px; en celular queda el carrusel con
+  // el dedo) y niveles de polarizado que se encienden. Respeta "reducir movimiento".
+  useEffect(() => {
+    const opciones = {
+      barra: '[data-barra]',
+      ancho: '(min-width: 1024px) and (min-height: 620px)',
+      alto: '(min-width: 768px) and (min-height: 620px)',
+    }
+    montarEscenas(opciones)
+    // Al salir de la home se sueltan las escenas que ya no están en pantalla.
+    return () => montarEscenas(opciones)
+  }, [])
+
   useEffect(() => {
     if (categorySlug) {
       document.getElementById('catalogo')?.scrollIntoView({ block: 'start' })
@@ -43,7 +58,7 @@ export default function Home() {
 
   return (
     <>
-      <Hero />
+      <Hero totalProductos={productsState.status === 'success' ? productsState.data.length : null} />
       <TrustBar />
       <CategorySection
         categories={categoriesState.data}

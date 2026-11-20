@@ -2,7 +2,7 @@ import { Link } from 'react-router-dom'
 import type { Category } from '../../types/product'
 import { GENERAL_INQUIRY_LINK, WHATSAPP_NUMBER_DISPLAY } from '../../lib/whatsapp'
 import { FACEBOOK_URL, STORE_ADDRESS } from '../../lib/contact'
-import { FacebookIcon, PinIcon, WhatsAppIcon } from './Header'
+import { FacebookIcon, PinIcon, WhatsAppIcon } from '../icons'
 
 export function Footer({ categories }: { categories: Category[] }) {
   return (
@@ -10,7 +10,15 @@ export function Footer({ categories }: { categories: Category[] }) {
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
           <span className="mb-4 inline-flex h-14 w-20 items-center justify-center">
-            <img src="/logo.webp" alt="Xtreme Tuning" className="h-full w-full object-contain" />
+            <img
+              src="/logo.webp"
+              alt="Xtreme Tuning"
+              width={594}
+              height={420}
+              loading="lazy"
+              decoding="async"
+              className="h-full w-full object-contain"
+            />
           </span>
           <p className="max-w-xs text-sm leading-relaxed">
             Soluciones integrales en accesorios y electricidad automotriz: productos de
@@ -23,28 +31,31 @@ export function Footer({ categories }: { categories: Category[] }) {
               target="_blank"
               rel="noreferrer"
               aria-label="Escríbenos por WhatsApp"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-[#1fbe5c] transition hover:border-[#1fbe5c]"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-[#25d366] transition hover:border-[#25d366]"
             >
-              <WhatsAppIcon className="h-4 w-4" />
+              <WhatsAppIcon className="h-5 w-5" />
             </a>
             <a
               href={FACEBOOK_URL}
               target="_blank"
               rel="noreferrer"
               aria-label="Síguenos en Facebook"
-              className="flex h-9 w-9 items-center justify-center rounded-full border border-white/15 text-[#1877f2] transition hover:border-[#1877f2]"
+              className="flex h-11 w-11 items-center justify-center rounded-full border border-white/15 text-[#4b93f5] transition hover:border-[#4b93f5]"
             >
-              <FacebookIcon className="h-4 w-4" />
+              <FacebookIcon className="h-5 w-5" />
             </a>
           </div>
         </div>
 
         <div>
-          <h3 className="font-display text-sm tracking-wide text-hazard-400">CATEGORÍAS</h3>
-          <ul className="mt-4 space-y-2.5 text-sm">
+          <h2 className="font-display text-sm tracking-wide text-hazard-400">CATEGORÍAS</h2>
+          <ul className="mt-3 text-sm">
             {categories.map((category) => (
               <li key={category.slug}>
-                <Link to={`/categoria/${category.slug}`} className="transition hover:text-cyan-400">
+                <Link
+                  to={`/categoria/${category.slug}`}
+                  className="flex min-h-11 items-center py-1 transition hover:text-cyan-400"
+                >
                   {category.name}
                 </Link>
               </li>
@@ -53,26 +64,38 @@ export function Footer({ categories }: { categories: Category[] }) {
         </div>
 
         <div>
-          <h3 className="font-display text-sm tracking-wide text-hazard-400">CONTACTO</h3>
-          <ul className="mt-4 space-y-3 text-sm">
+          <h2 className="font-display text-sm tracking-wide text-hazard-400">CONTACTO</h2>
+          <ul className="mt-3 text-sm">
             <li className="flex items-center gap-2">
-              <WhatsAppIcon className="h-4 w-4 text-[#1fbe5c]" />
-              <span className="font-mono">{WHATSAPP_NUMBER_DISPLAY}</span>
+              <WhatsAppIcon className="h-5 w-5 shrink-0 text-[#25d366]" />
+              <a
+                href={GENERAL_INQUIRY_LINK}
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-11 items-center font-mono transition hover:text-cyan-400"
+              >
+                {WHATSAPP_NUMBER_DISPLAY}
+              </a>
             </li>
             <li className="flex items-center gap-2">
-              <FacebookIcon className="h-4 w-4 text-[#1877f2]" />
-              <a href={FACEBOOK_URL} target="_blank" rel="noreferrer" className="transition hover:text-cyan-400">
+              <FacebookIcon className="h-5 w-5 shrink-0 text-[#4b93f5]" />
+              <a
+                href={FACEBOOK_URL}
+                target="_blank"
+                rel="noreferrer"
+                className="flex min-h-11 items-center transition hover:text-cyan-400"
+              >
                 Xtreme Tuning en Facebook
               </a>
             </li>
-            <li className="flex items-start gap-2">
-              <PinIcon className="mt-0.5 h-4 w-4 shrink-0 text-hazard-400" />
+            <li className="flex items-start gap-2 py-2.5">
+              <PinIcon className="mt-0.5 h-5 w-5 shrink-0 text-hazard-400" />
               <span>{STORE_ADDRESS}</span>
             </li>
           </ul>
-          <h3 className="mt-6 font-display text-sm tracking-wide text-hazard-400">
+          <h2 className="mt-6 font-display text-sm tracking-wide text-hazard-400">
             MEDIOS DE PAGO
-          </h3>
+          </h2>
           <div className="mt-3 flex flex-wrap gap-2">
             {['Nequi', 'Daviplata', 'Addi', 'Mastercard', 'Visa'].map((method) => (
               <span
@@ -86,7 +109,7 @@ export function Footer({ categories }: { categories: Category[] }) {
         </div>
       </div>
 
-      <div className="border-t border-white/10 py-5 text-center text-xs text-white/50">
+      <div className="border-t border-white/10 py-5 px-4 text-center text-xs text-white/60">
         © {new Date().getFullYear()} Xtreme Tuning · Lujos y Accesorios. Precios sujetos a
         cambio sin previo aviso.
       </div>

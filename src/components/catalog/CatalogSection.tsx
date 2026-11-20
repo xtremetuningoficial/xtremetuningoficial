@@ -44,7 +44,7 @@ export function CatalogSection({
   }, [products, activeCategory, search, showDeals])
 
   return (
-    <section id="catalogo" className="bg-paper-50 py-14 sm:py-16">
+    <section id="catalogo" aria-labelledby="catalogo-titulo" className="bg-paper-50 py-14 sm:py-16">
       <div className="mx-auto max-w-7xl px-4 sm:px-6">
         <header className="mb-8 flex flex-col gap-6">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
@@ -52,7 +52,7 @@ export function CatalogSection({
               <span className="text-xs font-bold uppercase tracking-widest text-ember-500">
                 Catálogo
               </span>
-              <h2 className="font-display text-2xl uppercase text-ink-900 sm:text-3xl">
+              <h2 id="catalogo-titulo" className="text-balance font-display text-2xl uppercase text-ink-900 sm:text-3xl">
                 Precio de producto + instalación, sin sorpresas
               </h2>
             </div>
@@ -109,7 +109,7 @@ export function CatalogSection({
               href={GENERAL_INQUIRY_LINK}
               target="_blank"
               rel="noreferrer"
-              className="mt-5 inline-flex items-center gap-2 rounded-full bg-electric-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-electric-400"
+              className="mt-5 inline-flex min-h-12 items-center gap-2 rounded-full bg-electric-500 px-6 text-sm font-bold text-white transition hover:bg-electric-400"
             >
               Escribir por WhatsApp
             </a>
@@ -136,7 +136,7 @@ export function CatalogSection({
                   <button
                     type="button"
                     onClick={() => setOnlyDeals(false)}
-                    className="mt-4 text-sm font-semibold text-electric-500 underline underline-offset-4 hover:text-electric-400"
+                    className="mt-4 inline-flex min-h-11 items-center text-sm font-semibold text-electric-500 underline underline-offset-4 hover:text-electric-400"
                   >
                     Ver todos los productos
                   </button>
@@ -168,7 +168,7 @@ function FilterPill({
   const idleClasses =
     tone === 'deal'
       ? 'border-ember-500/30 bg-white text-ember-500 hover:border-ember-500/60'
-      : 'border-ink-900/15 bg-white text-ink-900/70 hover:border-electric-500/50'
+      : 'border-ink-900/15 bg-white text-ink-900/75 hover:border-electric-500/50'
 
   return (
     <Tooltip label={label} className="shrink-0">
@@ -176,7 +176,7 @@ function FilterPill({
         type="button"
         onClick={onClick}
         aria-pressed={active}
-        className={`flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-3.5 py-1.5 text-sm font-semibold transition ${
+        className={`flex min-h-11 shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full border px-4 text-sm font-semibold transition active:scale-95 ${
           active ? activeClasses : idleClasses
         }`}
       >

@@ -22,7 +22,10 @@
       property="og:description"
       content="Alarmas, radios, bloqueo central y electricidad automotriz para carro y moto, con instalación profesional y garantía. Pide por WhatsApp."
     />
-    <meta property="og:image" content="/banner.jpg" />
+    <meta property="og:image" content="https://xtremetuningoficial.vercel.app/banner.jpg" />
+    <meta property="og:image:width" content="1448" />
+    <meta property="og:image:height" content="1086" />
+    <meta property="og:image:alt" content="Fachada de la tienda Xtreme Tuning, Lujos y Accesorios" />
 
     <!-- Twitter/X card -->
     <meta name="twitter:card" content="summary_large_image" />
@@ -31,14 +34,11 @@
       name="twitter:description"
       content="Alarmas, radios, bloqueo central y electricidad automotriz para carro y moto, con instalación profesional y garantía."
     />
-    <meta name="twitter:image" content="/banner.jpg" />
+    <meta name="twitter:image" content="https://xtremetuningoficial.vercel.app/banner.jpg" />
 
-    <link rel="preconnect" href="https://fonts.googleapis.com" />
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-    <link
-      rel="stylesheet"
-      href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=optional"
-    />
+    <!-- Foto del héroe: es lo primero grande que se pinta (LCP) en celular y en desktop. -->
+    <link rel="preload" as="image" href="/carrusel-1.webp" type="image/webp" fetchpriority="high" />
+    <!-- Tipografías: Anton, Inter y JetBrains Mono van empaquetadas con el sitio (src/main.tsx). -->
   </head>
   <body>
     <div id="app"></div>
