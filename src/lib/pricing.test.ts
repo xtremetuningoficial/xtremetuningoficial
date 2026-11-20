@@ -142,7 +142,7 @@ describe('formatDiscountEnd', () => {
   // dispositivo fuera de Colombia (o en el servidor de CI en UTC) un descuento que vence
   // el 15 a las 23:59 de Bogotá se muestra "16 de noviembre". Cuando se corrija con
   // timeZone: 'America/Bogota', esta prueba empezará a pasar: cámbiala a `it`.
-  it.fails('en un dispositivo con otra zona horaria debería mostrar el mismo día', async () => {
+  it('en un dispositivo con otra zona horaria debería mostrar el mismo día', async () => {
     process.env.TZ = 'UTC'
     vi.resetModules()
     const { formatDiscountEnd: formatearEnUtc } = await import('./pricing')

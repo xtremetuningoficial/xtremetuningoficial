@@ -13,7 +13,12 @@ export function applyDiscount(price: number, percent: number): number {
   return Math.round((price * (100 - percent)) / 10000) * 100
 }
 
-const endDateFormatter = new Intl.DateTimeFormat('es-CO', { day: 'numeric', month: 'long' })
+const endDateFormatter = new Intl.DateTimeFormat('es-CO', {
+  day: 'numeric',
+  month: 'long',
+  // El descuento vence a las 23:59 de Colombia: sin esto, fuera de esa zona se ve un día más.
+  timeZone: 'America/Bogota',
+})
 
 export function formatDiscountEnd(endsAt: string): string {
   return endDateFormatter.format(new Date(endsAt))
