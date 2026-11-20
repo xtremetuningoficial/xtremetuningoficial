@@ -16,7 +16,7 @@
   --color-paper-100: #eaeef2;
 
   --font-display: "Anton", "Arial Narrow", sans-serif;
-  --font-body: "Inter", system-ui, sans-serif;
+  --font-body: "Inter Variable", "Inter", system-ui, sans-serif;
   --font-mono: "JetBrains Mono", ui-monospace, monospace;
 }
 

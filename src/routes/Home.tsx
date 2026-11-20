@@ -58,7 +58,7 @@ export default function Home() {
 
   return (
     <>
-      <Hero />
+      <Hero totalProductos={productsState.status === 'success' ? productsState.data.length : null} />
       <TrustBar />
       <CategorySection
         categories={categoriesState.data}

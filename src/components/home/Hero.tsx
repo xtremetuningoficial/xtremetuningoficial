@@ -5,7 +5,12 @@ import { GENERAL_INQUIRY_LINK } from '../../lib/whatsapp'
 // Sale del texto ya aprobado del negocio (misión y pie de página), no se inventa.
 const FRASE = 'Instalación profesional y un servicio honesto y personalizado.'.split(' ')
 
-export function Hero() {
+interface HeroProps {
+  /** Productos activos del catálogo; null mientras carga o si falló la consulta. */
+  totalProductos?: number | null
+}
+
+export function Hero({ totalProductos = null }: HeroProps) {
   return (
     <section id="inicio" data-escena="abre" className="heroe relative bg-ink-900">
       <div data-fijo className="heroe-fijo relative overflow-clip">
@@ -72,7 +77,12 @@ export function Hero() {
             <dl className="mt-10 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/10 pt-6 font-mono">
               <div>
                 <dt className="text-[11px] uppercase tracking-wide text-white/60">Catálogo</dt>
-                <dd className="text-lg font-bold text-white">13+ productos</dd>
+                {/* Sale del catálogo real; sin dato no se inventa un número. */}
+                <dd className="min-w-[8ch] text-lg font-bold text-white" aria-live="polite">
+                  {totalProductos && totalProductos > 0
+                    ? `${totalProductos} ${totalProductos === 1 ? 'producto' : 'productos'}`
+                    : 'Variado'}
+                </dd>
               </div>
               <div>
                 <dt className="text-[11px] uppercase tracking-wide text-white/60">Instalación</dt>
