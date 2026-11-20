@@ -1,4 +1,5 @@
 import { supabase } from '../supabase'
+import { summarizeRatings } from '../ratings'
 import type { AdminReview, ProductReview, RatingSummary, Review, ReviewSubmission } from '../../types/review'
 
 interface ReviewRow {
@@ -17,12 +18,6 @@ function mapRow(row: ReviewRow): Review {
     comment: row.comment,
     createdAt: row.created_at,
   }
-}
-
-function summarize(ratings: number[]): RatingSummary {
-  if (ratings.length === 0) return { average: 0, count: 0 }
-  const total = ratings.reduce((sum, value) => sum + value, 0)
-  return { average: total / ratings.length, count: ratings.length }
 }
 
 export async function fetchSiteReviews(): Promise<Review[]> {
@@ -46,7 +41,7 @@ export async function fetchSiteRatingSummary(): Promise<RatingSummary> {
     .eq('is_approved', true)
 
   if (error) throw error
-  return summarize((data as { rating: number }[]).map((row) => row.rating))
+  return summarizeRatings((data as { rating: number }[]).map((row) => row.rating))
 }
 
 export async function fetchProductReviews(productId: string): Promise<ProductReview[]> {
@@ -80,7 +75,7 @@ export async function fetchProductRatingSummaries(): Promise<Record<string, Rati
 
   const summaries: Record<string, RatingSummary> = {}
   for (const [productId, ratings] of byProduct) {
-    summaries[productId] = summarize(ratings)
+    summaries[productId] = summarizeRatings(ratings)
   }
   return summaries
 }

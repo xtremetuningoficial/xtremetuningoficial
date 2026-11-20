@@ -1,47 +1,33 @@
-import { useEffect, useRef, useState, type FormEvent, type ReactNode } from 'react'
-import { Link, useNavigate, useParams } from 'react-router-dom'
+import { useEffect, useId, useRef, useState, type FormEvent, type ReactNode } from 'react'
+import { Link, useLocation, useNavigate, useParams } from 'react-router-dom'
 import {
-  createProduct,
   deleteProduct,
-  detectMediaType,
   fetchAdminProductById,
-  MAX_MEDIA_PER_PRODUCT,
-  replaceProductMedia,
-  updateProduct,
-  uploadProductMedia,
-  validateMediaFile,
+  ProductMediaSaveError,
+  productToFormValues,
+  saveProduct,
+  type MediaDraft,
+  type SavedProduct,
 } from '../../lib/api/adminProducts'
 import { fetchAdminCategories } from '../../lib/api/categories'
 import { getErrorMessage } from '../../lib/errors'
+import { DELETE_PRODUCT_WARNING, deleteProductErrorMessage } from '../../lib/adminMessages'
 import { formatCOP } from '../../lib/format'
-import {
-  applyDiscount,
-  formatDiscountEnd,
-  isDiscountActive,
-  MAX_DISCOUNT_PERCENT,
-  toBogotaDateInput,
-} from '../../lib/pricing'
+import { MAX_DISCOUNT_PERCENT } from '../../lib/pricing'
+import { vehicleLabels } from '../../data/vehicleLabels'
+import { useAsync } from '../../hooks/useAsync'
+import { useDocumentTitle } from '../../hooks/useDocumentTitle'
+import { useAdminFeedback } from '../../components/admin/AdminFeedback'
+import { DiscountFields } from '../../components/admin/DiscountFields'
+import { FormField } from '../../components/admin/FormField'
+import { EmptyState, ErrorState } from '../../components/admin/LoadStates'
+import { MediaSlotsEditor, type MediaSlot } from '../../components/admin/MediaSlotsEditor'
 import { StockAdjuster } from '../../components/admin/StockAdjuster'
 import { Switch } from '../../components/admin/Switch'
-import { useDocumentTitle } from '../../hooks/useDocumentTitle'
-import {
-  ChevronLeftIcon,
-  ChevronRightIcon,
-  CloseIcon,
-  PlayIcon,
-  TrashIcon,
-  UploadIcon,
-} from '../../components/icons'
-import type { AdminCategory, AdminProductMedia, ProductFormValues } from '../../types/admin'
-import type { MediaType, VehicleType } from '../../types/product'
-
-interface MediaSlot {
-  key: string
-  status: 'existing' | 'new'
-  url: string
-  mediaType: MediaType
-  file?: File
-}
+import { buttonDangerGhost, buttonPrimary, buttonSecondary, card } from '../../components/admin/ui'
+import { ChevronLeftIcon, TrashIcon } from '../../components/icons'
+import type { AdminProduct, ProductFormValues } from '../../types/admin'
+import type { VehicleType } from '../../types/product'
 
 const EMPTY_FORM: ProductFormValues = {
   name: '',
@@ -57,644 +43,465 @@ const EMPTY_FORM: ProductFormValues = {
   description: '',
 }
 
+type FieldName = 'name' | 'categoryId' | 'price' | 'installPrice' | 'stockQuantity' | 'discountPercent'
+type FieldErrors = Partial<Record<FieldName, string>>
+
+function validate(form: ProductFormValues, isEditing: boolean): FieldErrors {
+  const errors: FieldErrors = {}
+  if (!form.name.trim()) errors.name = 'Escribe el nombre del producto.'
+  if (!form.categoryId) errors.categoryId = 'Elige una categoría.'
+  if (!Number.isFinite(form.price) || form.price <= 0) errors.price = 'El precio debe ser mayor que $0.'
+  if (!Number.isFinite(form.installPrice) || form.installPrice < 0) {
+    errors.installPrice = 'La instalación no puede ser negativa. Usa 0 si no aplica.'
+  }
+  if (!isEditing && (!Number.isInteger(form.stockQuantity) || form.stockQuantity < 0)) {
+    errors.stockQuantity = 'El stock debe ser un número entero, 0 o más.'
+  }
+  if (form.discountPercent < 0 || form.discountPercent > MAX_DISCOUNT_PERCENT) {
+    errors.discountPercent = `El descuento debe estar entre 0 % y ${MAX_DISCOUNT_PERCENT} %.`
+  }
+  return errors
+}
+
+function submitLabel({ submitting, isEditing }: { submitting: boolean; isEditing: boolean }): string {
+  if (submitting) return 'Guardando…'
+  return isEditing ? 'Guardar cambios' : 'Crear producto'
+}
+
+function slotsFromProduct(product: AdminProduct): MediaSlot[] {
+  return product.media.map((item, index) => ({
+    key: `existing-${index}-${item.url}`,
+    status: 'existing',
+    url: item.url,
+    mediaType: item.mediaType,
+  }))
+}
+
+function slotToDraft(slot: MediaSlot): MediaDraft {
+  return slot.status === 'new' && slot.file
+    ? { kind: 'new', file: slot.file }
+    : { kind: 'existing', media: { url: slot.url, mediaType: slot.mediaType } }
+}
+
+async function loadFormData(productId: string | undefined) {
+  const [categories, product] = await Promise.all([
+    fetchAdminCategories(),
+    productId ? fetchAdminProductById(productId) : Promise.resolve(null),
+  ])
+  return { categories, product }
+}
+
 export default function AdminProductForm() {
   const { id } = useParams()
   const isEditing = Boolean(id)
   const navigate = useNavigate()
+  const location = useLocation()
+  const { confirm, notify } = useAdminFeedback()
   useDocumentTitle(isEditing ? 'Editar producto' : 'Nuevo producto')
 
-  const [categories, setCategories] = useState<AdminCategory[]>([])
+  // Si la creación quedó a medias, la URL pasa a /productos/:id sin volver a cargar
+  // el formulario: así no se pierden las fotos elegidas que faltó subir.
+  const keepFormForId = useRef<string | null>(null)
+  const [loadId, setLoadId] = useState(id)
+  if (id !== loadId && keepFormForId.current !== id) setLoadId(id)
+
+  const load = useAsync(() => loadFormData(loadId), [loadId])
   const [form, setForm] = useState<ProductFormValues>(EMPTY_FORM)
-  const [existingSlug, setExistingSlug] = useState<string | null>(null)
+  const [saved, setSaved] = useState<SavedProduct | null>(null)
   const [slots, setSlots] = useState<MediaSlot[]>([])
-  const [mediaError, setMediaError] = useState<string | null>(null)
-  const [dragOverIndex, setDragOverIndex] = useState<number | null>(null)
-  const slotInputRefs = [useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null), useRef<HTMLInputElement>(null)]
-  const [loading, setLoading] = useState(isEditing)
-  const [categoriesLoading, setCategoriesLoading] = useState(true)
-  const [loadError, setLoadError] = useState<string | null>(null)
-  const [submitError, setSubmitError] = useState<string | null>(null)
+  const [fieldErrors, setFieldErrors] = useState<FieldErrors>({})
+  const [submitError, setSubmitError] = useState<string | null>(
+    () => (location.state as { saveError?: string } | null)?.saveError ?? null,
+  )
   const [submitting, setSubmitting] = useState(false)
+  const submittingRef = useRef(false)
+  const formRef = useRef<HTMLFormElement>(null)
+  const featuredLabelId = useId()
+  const activeLabelId = useId()
 
   useEffect(() => {
-    fetchAdminCategories()
-      .then((data) => {
-        setCategories(data)
-        setForm((current) => (current.categoryId ? current : { ...current, categoryId: data[0]?.id ?? '' }))
-      })
-      .catch(() => setLoadError('No pudimos cargar las categorías.'))
-      .finally(() => setCategoriesLoading(false))
-  }, [])
-
-  useEffect(() => {
-    if (!id) return
-    fetchAdminProductById(id)
-      .then((product) => {
-        if (!product) {
-          setLoadError('Producto no encontrado.')
-          return
-        }
-        setForm({
-          name: product.name,
-          categoryId: product.categoryId ?? '',
-          vehicleType: product.vehicleType,
-          price: product.price,
-          installPrice: product.installPrice,
-          discountPercent: product.discountPercent,
-          discountEndsOn: product.discountEndsAt ? toBogotaDateInput(product.discountEndsAt) : '',
-          stockQuantity: product.stockQuantity,
-          isFeatured: product.isFeatured,
-          isActive: product.isActive,
-          description: product.description,
-        })
-        setExistingSlug(product.slug)
-        setSlots(
-          product.media.map((item, index) => ({
-            key: `existing-${index}-${item.url}`,
-            status: 'existing',
-            url: item.url,
-            mediaType: item.mediaType,
-          })),
-        )
-      })
-      .catch(() => setLoadError('No pudimos cargar este producto.'))
-      .finally(() => setLoading(false))
-  }, [id])
-
-  function handleNameChange(name: string) {
-    setForm((current) => ({ ...current, name }))
-  }
-
-  function setSlotFile(index: number, file: File | null) {
-    if (!file) return
-    const validationError = validateMediaFile(file)
-    if (validationError) {
-      setMediaError(validationError)
-      return
+    if (!load.data) return
+    const { categories, product } = load.data
+    if (product) {
+      setForm(productToFormValues(product))
+      setSaved({ id: product.id, slug: product.slug })
+      setSlots(slotsFromProduct(product))
+    } else {
+      setForm({ ...EMPTY_FORM, categoryId: categories[0]?.id ?? '' })
+      setSaved(null)
+      setSlots([])
     }
-    setMediaError(null)
-    setSlots((current) => {
-      const next = [...current]
-      next[index] = {
-        key: `new-${Date.now()}-${index}`,
-        status: 'new',
-        url: URL.createObjectURL(file),
-        mediaType: detectMediaType(file) ?? 'image',
-        file,
-      }
-      return next
-    })
-  }
+    setFieldErrors({})
+  }, [load.data])
 
-  function removeSlot(index: number) {
-    setSlots((current) => current.filter((_, i) => i !== index))
-  }
-
-  function moveSlot(index: number, direction: -1 | 1) {
-    setSlots((current) => {
-      const target = index + direction
-      if (target < 0 || target >= current.length) return current
-      const next = [...current]
-      ;[next[index], next[target]] = [next[target], next[index]]
+  function patchForm(patch: Partial<ProductFormValues>) {
+    setForm((current) => ({ ...current, ...patch }))
+    // Al corregir un campo, su error desaparece.
+    const touched = Object.keys(patch) as FieldName[]
+    setFieldErrors((current) => {
+      if (!touched.some((key) => key in current)) return current
+      const next = { ...current }
+      for (const key of touched) delete next[key]
       return next
     })
   }
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
-    setSubmitError(null)
+    if (submittingRef.current) return
 
-    if (!form.name.trim() || !form.categoryId) {
-      setSubmitError('Nombre y categoría son obligatorios.')
+    const errors = validate(form, Boolean(saved))
+    setFieldErrors(errors)
+    if (Object.keys(errors).length > 0) {
+      setSubmitError('Revisa los campos marcados en naranja.')
+      requestAnimationFrame(() => {
+        formRef.current?.querySelector<HTMLElement>('[aria-invalid="true"]')?.focus()
+      })
       return
     }
 
-    if (form.discountPercent < 0 || form.discountPercent > MAX_DISCOUNT_PERCENT) {
-      setSubmitError(`El descuento debe estar entre 0 % y ${MAX_DISCOUNT_PERCENT} %.`)
-      return
-    }
-
+    submittingRef.current = true
     setSubmitting(true)
+    setSubmitError(null)
     try {
-      let productId = id
-      let productSlug = existingSlug ?? ''
-
-      if (isEditing && id) {
-        await updateProduct(id, form)
-      } else {
-        const created = await createProduct(form)
-        productId = created.id
-        productSlug = created.slug
-      }
-
-      if (productId) {
-        const resolvedMedia: AdminProductMedia[] = []
-        for (const slot of slots) {
-          if (slot.status === 'existing') {
-            resolvedMedia.push({ url: slot.url, mediaType: slot.mediaType })
-          } else if (slot.file) {
-            resolvedMedia.push(await uploadProductMedia(productSlug, slot.file))
-          }
-        }
-        await replaceProductMedia(productId, resolvedMedia)
-      }
-
+      await saveProduct({ existing: saved, values: form, media: slots.map(slotToDraft) })
+      notify(saved ? `Guardamos los cambios de "${form.name.trim()}".` : `Creamos "${form.name.trim()}".`)
       navigate('/admin')
     } catch (error) {
-      const message = getErrorMessage(error)
-      setSubmitError(
-        message.includes('duplicate key')
-          ? 'Ya existe un producto con ese slug. Cámbialo e intenta de nuevo.'
-          : `No pudimos guardar el producto: ${message}`,
-      )
+      if (error instanceof ProductMediaSaveError) {
+        const message = `El producto quedó guardado, pero no pudimos subir las fotos (${error.message}). Revisa la conexión y toca "Guardar cambios" para reintentar: no se va a duplicar.`
+        setSaved(error.product)
+        setSlots((current) =>
+          current.map((slot, index) => {
+            const uploaded = error.resolved[index]
+            if (slot.status !== 'new' || !uploaded) return slot
+            URL.revokeObjectURL(slot.url)
+            return { ...slot, status: 'existing', url: uploaded.url, file: undefined }
+          }),
+        )
+        setSubmitError(message)
+        if (!id) {
+          keepFormForId.current = error.product.id
+          navigate(`/admin/productos/${error.product.id}`, { replace: true, state: { saveError: message } })
+        }
+      } else {
+        setSubmitError(`No pudimos guardar el producto: ${getErrorMessage(error)}`)
+      }
     } finally {
+      submittingRef.current = false
       setSubmitting(false)
     }
   }
 
   async function handleDelete() {
-    if (!id) return
-    if (!window.confirm('¿Eliminar este producto? Esta acción no se puede deshacer.')) return
+    if (!saved || submittingRef.current) return
+    const accepted = await confirm({
+      title: '¿Eliminar este producto?',
+      message: `"${form.name}". ${DELETE_PRODUCT_WARNING}`,
+      confirmLabel: 'Sí, eliminar',
+    })
+    if (!accepted) return
+    submittingRef.current = true
     setSubmitting(true)
     try {
-      await deleteProduct(id)
+      await deleteProduct(saved.id)
+      notify(`Eliminamos "${form.name}".`)
       navigate('/admin')
     } catch (error) {
-      setSubmitError(getErrorMessage(error))
+      setSubmitError(deleteProductErrorMessage(form.name, error))
+      submittingRef.current = false
       setSubmitting(false)
     }
   }
 
-  if (loading) {
+  const title = isEditing ? 'Editar producto' : 'Nuevo producto'
+  const header = (
+    <div className="flex flex-col-reverse gap-3 sm:flex-row sm:items-start sm:justify-between">
+      <div className="min-w-0">
+        <h1 className="font-display text-2xl uppercase text-white sm:text-3xl">{title}</h1>
+        {saved && <p className="mt-1 truncate font-mono-price text-xs text-white/60">{saved.slug}</p>}
+      </div>
+      <Link
+        to="/admin"
+        className="-ml-2 inline-flex min-h-11 items-center gap-1 self-start rounded-lg px-2 text-sm font-semibold text-white/70 transition hover:text-cyan-400"
+      >
+        <ChevronLeftIcon className="h-4 w-4" />
+        Volver a productos
+      </Link>
+    </div>
+  )
+
+  if (load.status === 'loading' && !keepFormForId.current) {
     return (
-      <div className="space-y-4">
-        <div className="h-8 w-48 animate-pulse rounded bg-ink-800" />
-        <div className="h-96 animate-pulse rounded-2xl bg-ink-800" />
+      <div aria-busy="true">
+        {header}
+        <span className="sr-only">Cargando el formulario…</span>
+        <div className="mt-6 grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]" aria-hidden="true">
+          <div className="h-[36rem] animate-pulse rounded-2xl bg-ink-800" />
+          <div className="space-y-6">
+            <div className="h-64 animate-pulse rounded-2xl bg-ink-800" />
+            <div className="h-72 animate-pulse rounded-2xl bg-ink-800" />
+          </div>
+        </div>
       </div>
     )
   }
 
-  if (loadError) {
+  if (load.status === 'error') {
     return (
-      <div className="rounded-2xl bg-ember-500/10 px-4 py-8 text-center text-ember-400">
-        {loadError}
+      <div>
+        {header}
+        <ErrorState
+          title={isEditing ? 'No pudimos cargar este producto.' : 'No pudimos cargar las categorías.'}
+          detail={load.error}
+          onRetry={load.reload}
+        />
+      </div>
+    )
+  }
+
+  if (loadId && load.data && !load.data.product) {
+    return (
+      <div>
+        {header}
+        <EmptyState
+          title="No encontramos este producto."
+          description="Puede que lo hayan eliminado. Vuelve a la lista para ver los que hay."
+          action={
+            <Link to="/admin" className={buttonPrimary}>
+              Ver productos
+            </Link>
+          }
+        />
+      </div>
+    )
+  }
+
+  const categories = load.data?.categories ?? []
+
+  if (categories.length === 0) {
+    return (
+      <div>
+        {header}
+        <EmptyState
+          title="Primero crea una categoría."
+          description="Cada producto va dentro de una categoría (por ejemplo, Alarmas para carro)."
+          action={
+            <Link to="/admin/categorias" className={buttonPrimary}>
+              Ir a categorías
+            </Link>
+          }
+        />
       </div>
     )
   }
 
   return (
     <div>
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="font-display text-2xl uppercase text-white sm:text-3xl">
-            {isEditing ? 'Editar producto' : 'Nuevo producto'}
-          </h1>
-          {isEditing && existingSlug && (
-            <p className="mt-1 font-mono-price text-xs text-white/50">{existingSlug}</p>
-          )}
-        </div>
-        <Link to="/admin" className="text-sm font-semibold text-white/60 transition hover:text-cyan-400">
-          ← Volver
-        </Link>
-      </div>
+      {header}
 
-      <form onSubmit={handleSubmit} className="mt-6 grid gap-6 lg:grid-cols-[1fr_340px]">
-        <div className="space-y-6 rounded-2xl border border-white/10 bg-ink-800 p-5 sm:p-6">
-          <Section title="Información general">
-            <Field label="Nombre">
-              <input
-                type="text"
-                required
-                value={form.name}
-                onChange={(e) => handleNameChange(e.target.value)}
-                className="input"
-              />
-            </Field>
-
-            <div className="grid gap-5 sm:grid-cols-2">
-              <Field label="Categoría">
-                <select
-                  required
-                  value={form.categoryId}
-                  onChange={(e) => setForm((current) => ({ ...current, categoryId: e.target.value }))}
-                  className="input"
-                >
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
-              </Field>
-
-              <Field label="Tipo de vehículo">
-                <select
-                  value={form.vehicleType}
-                  onChange={(e) =>
-                    setForm((current) => ({ ...current, vehicleType: e.target.value as VehicleType }))
-                  }
-                  className="input"
-                >
-                  <option value="carro">Carro</option>
-                  <option value="moto">Moto</option>
-                  <option value="universal">Universal</option>
-                </select>
-              </Field>
-            </div>
-
-            <Field label="Descripción (una característica por línea)">
-              <textarea
-                rows={5}
-                value={form.description}
-                onChange={(e) => setForm((current) => ({ ...current, description: e.target.value }))}
-                className="input"
-                placeholder={'Protección con código variable Anti-Scan\nBloqueo de motor y función Anti-Hijack'}
-              />
-            </Field>
-          </Section>
-
-          <Section title="Precio e inventario">
-            <div className="grid gap-5 sm:grid-cols-3">
-              <Field label="Precio (COP)">
+      <form ref={formRef} onSubmit={handleSubmit} noValidate className="mt-6">
+        <div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_340px]">
+          <div className={`${card} min-w-0 space-y-6 p-5 sm:p-6`}>
+            <Section title="Información general">
+              <FormField label="Nombre" error={fieldErrors.name}>
                 <input
-                  type="number"
-                  min={0}
-                  required
-                  value={form.price}
-                  onChange={(e) => setForm((current) => ({ ...current, price: Number(e.target.value) }))}
+                  type="text"
+                  autoComplete="off"
+                  disabled={submitting}
+                  value={form.name}
+                  onChange={(e) => patchForm({ name: e.target.value })}
                   className="input"
                 />
-              </Field>
-              <Field label="Instalación (COP)">
-                <input
-                  type="number"
-                  min={0}
-                  value={form.installPrice}
-                  onChange={(e) =>
-                    setForm((current) => ({ ...current, installPrice: Number(e.target.value) }))
-                  }
-                  className="input"
-                />
-              </Field>
-              <Field label={isEditing ? 'Stock (ajústalo →)' : 'Stock inicial'}>
-                <input
-                  type="number"
-                  min={0}
-                  disabled={isEditing}
-                  value={form.stockQuantity}
-                  onChange={(e) =>
-                    setForm((current) => ({ ...current, stockQuantity: Number(e.target.value) }))
-                  }
-                  className="input"
-                />
-              </Field>
-            </div>
-          </Section>
+              </FormField>
 
-          <Section title="Descuento">
-            <DiscountFields
-              price={form.price}
-              percent={form.discountPercent}
-              endsOn={form.discountEndsOn}
-              onChange={(patch) => setForm((current) => ({ ...current, ...patch }))}
-            />
-          </Section>
-
-          <Section title="Visibilidad">
-            <div className="flex flex-col gap-4 sm:flex-row sm:gap-8">
-              <label className="flex items-center gap-3 text-sm text-white/80">
-                <Switch
-                  checked={form.isFeatured}
-                  onChange={(checked) => setForm((current) => ({ ...current, isFeatured: checked }))}
-                  label="Destacado"
-                />
-                Destacado ("Más pedido")
-              </label>
-              <label className="flex items-center gap-3 text-sm text-white/80">
-                <Switch
-                  checked={form.isActive}
-                  onChange={(checked) => setForm((current) => ({ ...current, isActive: checked }))}
-                  label="Visible en la tienda"
-                />
-                Visible en la tienda
-              </label>
-            </div>
-          </Section>
-        </div>
-
-        <div className="space-y-6">
-          <div className="rounded-2xl border border-white/10 bg-ink-800 p-5">
-            <div className="flex items-center justify-between">
-              <p className="text-xs font-semibold uppercase tracking-wide text-white/50">Fotos y videos</p>
-              <span className="font-mono-price text-xs text-white/40">
-                {slots.length}/{MAX_MEDIA_PER_PRODUCT}
-              </span>
-            </div>
-            <p className="mt-1 text-xs text-white/40">
-              Hasta {MAX_MEDIA_PER_PRODUCT} recursos. El primero es la foto principal del catálogo.
-            </p>
-
-            <div className="mt-3 grid grid-cols-3 gap-2">
-              {Array.from({ length: MAX_MEDIA_PER_PRODUCT }).map((_, index) => {
-                const slot = slots[index]
-                const isNextOpen = index === slots.length
-
-                if (!slot && !isNextOpen) {
-                  return (
-                    <div key={index} className="aspect-square rounded-xl border border-dashed border-white/10" />
-                  )
-                }
-
-                if (!slot) {
-                  return (
-                    <div key={index}>
-                      <div
-                        onClick={() => slotInputRefs[index].current?.click()}
-                        onDragOver={(e) => {
-                          e.preventDefault()
-                          setDragOverIndex(index)
-                        }}
-                        onDragLeave={() => setDragOverIndex((current) => (current === index ? null : current))}
-                        onDrop={(e) => {
-                          e.preventDefault()
-                          setDragOverIndex(null)
-                          setSlotFile(index, e.dataTransfer.files?.[0] ?? null)
-                        }}
-                        className={`flex aspect-square cursor-pointer flex-col items-center justify-center gap-1 rounded-xl border-2 border-dashed transition ${
-                          dragOverIndex === index
-                            ? 'border-electric-400 bg-electric-500/10'
-                            : 'border-white/15 hover:border-white/25'
-                        }`}
-                      >
-                        <UploadIcon className="h-5 w-5 text-white/40" />
-                        <span className="text-center text-[10px] font-semibold leading-tight text-white/50">
-                          Agregar
-                        </span>
-                      </div>
-                      <input
-                        ref={slotInputRefs[index]}
-                        type="file"
-                        accept="image/*,video/*"
-                        onChange={(e) => {
-                          setSlotFile(index, e.target.files?.[0] ?? null)
-                          e.target.value = ''
-                        }}
-                        className="hidden"
-                      />
-                    </div>
-                  )
-                }
-
-                return (
-                  <div
-                    key={slot.key}
-                    className="group relative aspect-square overflow-hidden rounded-xl bg-ink-900 ring-1 ring-white/10"
+              <div className="grid gap-5 sm:grid-cols-2">
+                <FormField label="Categoría" error={fieldErrors.categoryId}>
+                  <select
+                    disabled={submitting}
+                    value={form.categoryId}
+                    onChange={(e) => patchForm({ categoryId: e.target.value })}
+                    className="input"
                   >
-                    {slot.mediaType === 'video' ? (
-                      <video src={slot.url} className="h-full w-full object-cover" muted playsInline />
-                    ) : (
-                      <img src={slot.url} alt="" className="h-full w-full object-cover" />
-                    )}
+                    {categories.map((category) => (
+                      <option key={category.id} value={category.id}>
+                        {category.name}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
 
-                    {slot.mediaType === 'video' && (
-                      <span className="pointer-events-none absolute inset-0 flex items-center justify-center bg-ink-900/20">
-                        <span className="flex h-7 w-7 items-center justify-center rounded-full bg-ink-900/70 text-white">
-                          <PlayIcon className="h-3.5 w-3.5" />
-                        </span>
-                      </span>
-                    )}
+                <FormField label="Tipo de vehículo">
+                  <select
+                    disabled={submitting}
+                    value={form.vehicleType}
+                    onChange={(e) => patchForm({ vehicleType: e.target.value as VehicleType })}
+                    className="input"
+                  >
+                    {(Object.keys(vehicleLabels) as VehicleType[]).map((type) => (
+                      <option key={type} value={type}>
+                        {vehicleLabels[type].label}
+                      </option>
+                    ))}
+                  </select>
+                </FormField>
+              </div>
 
-                    {index === 0 && (
-                      <span className="absolute left-1 top-1 rounded bg-ink-900/80 px-1.5 py-0.5 text-[9px] font-bold uppercase text-white/80">
-                        Principal
-                      </span>
-                    )}
+              <FormField label="Descripción" hint="Una característica por línea; en la tienda sale como lista.">
+                <textarea
+                  rows={5}
+                  disabled={submitting}
+                  value={form.description}
+                  onChange={(e) => patchForm({ description: e.target.value })}
+                  className="input"
+                  placeholder={'Protección con código variable Anti-Scan\nBloqueo de motor y función Anti-Hijack'}
+                />
+              </FormField>
+            </Section>
 
-                    <div
-                      onClick={() => slotInputRefs[index].current?.click()}
-                      className="absolute inset-0 flex cursor-pointer items-center justify-center bg-ink-900/0 opacity-0 transition group-hover:bg-ink-900/60 group-hover:opacity-100"
-                    >
-                      <UploadIcon className="h-4 w-4 text-white" />
-                    </div>
-                    <input
-                      ref={slotInputRefs[index]}
-                      type="file"
-                      accept="image/*,video/*"
-                      onChange={(e) => {
-                        setSlotFile(index, e.target.files?.[0] ?? null)
-                        e.target.value = ''
-                      }}
-                      className="hidden"
-                    />
+            <Section title="Precio e inventario">
+              <div className="grid gap-5 sm:grid-cols-3">
+                <FormField
+                  label="Precio (COP)"
+                  error={fieldErrors.price}
+                  hint={form.price > 0 ? `Se verá como ${formatCOP(form.price)}` : undefined}
+                >
+                  <input
+                    type="number"
+                    min={0}
+                    step={100}
+                    inputMode="numeric"
+                    disabled={submitting}
+                    value={form.price}
+                    onChange={(e) => patchForm({ price: Number(e.target.value) })}
+                    className="input font-mono-price"
+                  />
+                </FormField>
+                <FormField
+                  label="Instalación (COP)"
+                  error={fieldErrors.installPrice}
+                  hint={form.installPrice > 0 ? formatCOP(form.installPrice) : 'Usa 0 si no aplica.'}
+                >
+                  <input
+                    type="number"
+                    min={0}
+                    step={100}
+                    inputMode="numeric"
+                    disabled={submitting}
+                    value={form.installPrice}
+                    onChange={(e) => patchForm({ installPrice: Number(e.target.value) })}
+                    className="input font-mono-price"
+                  />
+                </FormField>
+                <FormField
+                  label={saved ? 'Stock actual' : 'Stock inicial'}
+                  error={fieldErrors.stockQuantity}
+                  hint={saved ? 'Se cambia con entradas y salidas en Inventario.' : undefined}
+                >
+                  <input
+                    type="number"
+                    min={0}
+                    step={1}
+                    inputMode="numeric"
+                    disabled={Boolean(saved) || submitting}
+                    value={form.stockQuantity}
+                    onChange={(e) => patchForm({ stockQuantity: Number(e.target.value) })}
+                    className="input font-mono-price"
+                  />
+                </FormField>
+              </div>
+            </Section>
 
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        removeSlot(index)
-                      }}
-                      aria-label="Quitar recurso"
-                      className="absolute right-1 top-1 flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white/80 transition hover:bg-ember-500 hover:text-white"
-                    >
-                      <CloseIcon className="h-3 w-3" />
-                    </button>
+            <Section title="Descuento">
+              <DiscountFields
+                price={form.price}
+                percent={form.discountPercent}
+                endsOn={form.discountEndsOn}
+                disabled={submitting}
+                onChange={patchForm}
+              />
+              {fieldErrors.discountPercent && (
+                <p className="text-xs font-semibold text-ember-400">{fieldErrors.discountPercent}</p>
+              )}
+            </Section>
 
-                    <div className="absolute bottom-1 left-1 flex gap-0.5">
-                      <button
-                        type="button"
-                        disabled={index === 0}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          moveSlot(index, -1)
-                        }}
-                        aria-label="Mover a la izquierda"
-                        className="flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white/80 transition hover:text-electric-400 disabled:opacity-30"
-                      >
-                        <ChevronLeftIcon className="h-3 w-3" />
-                      </button>
-                      <button
-                        type="button"
-                        disabled={index === slots.length - 1}
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          moveSlot(index, 1)
-                        }}
-                        aria-label="Mover a la derecha"
-                        className="flex h-5 w-5 items-center justify-center rounded-full bg-ink-900/80 text-white/80 transition hover:text-electric-400 disabled:opacity-30"
-                      >
-                        <ChevronRightIcon className="h-3 w-3" />
-                      </button>
-                    </div>
-                  </div>
-                )
-              })}
-            </div>
-
-            {mediaError && <p className="mt-2 text-xs text-ember-400">{mediaError}</p>}
+            <Section title="Visibilidad">
+              <div className="flex flex-col gap-2 sm:flex-row sm:gap-8">
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={form.isActive}
+                    disabled={submitting}
+                    onChange={(checked) => patchForm({ isActive: checked })}
+                    labelledBy={activeLabelId}
+                  />
+                  <span id={activeLabelId} className="text-sm text-white/85">
+                    Visible en la tienda
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Switch
+                    checked={form.isFeatured}
+                    disabled={submitting}
+                    onChange={(checked) => patchForm({ isFeatured: checked })}
+                    labelledBy={featuredLabelId}
+                  />
+                  <span id={featuredLabelId} className="text-sm text-white/85">
+                    Destacado (“Más pedido”)
+                  </span>
+                </div>
+              </div>
+            </Section>
           </div>
 
-          {isEditing && id && (
-            <StockAdjuster
-              productId={id}
-              stock={form.stockQuantity}
-              onStockChange={(newStock) =>
-                setForm((current) => ({ ...current, stockQuantity: newStock }))
-              }
-            />
-          )}
+          <div className="min-w-0 space-y-6">
+            <MediaSlotsEditor slots={slots} onChange={setSlots} disabled={submitting} />
 
+            {saved && (
+              <StockAdjuster
+                productId={saved.id}
+                stock={form.stockQuantity}
+                onStockChange={(newStock) => setForm((current) => ({ ...current, stockQuantity: newStock }))}
+              />
+            )}
+          </div>
+        </div>
+
+        {/* Barra de acciones pegada abajo: en el celular el botón de guardar queda siempre a mano. */}
+        <div className="sticky bottom-0 z-40 -mx-4 mt-6 border-t border-white/10 bg-ink-900/95 px-4 py-3 backdrop-blur sm:-mx-6 sm:px-6">
           {submitError && (
-            <p className="rounded-lg bg-ember-500/10 px-3 py-2 text-sm text-ember-400">{submitError}</p>
+            <p role="alert" className="mb-3 rounded-lg bg-ember-500/10 px-3 py-2 text-sm text-ember-400">
+              {submitError}
+            </p>
           )}
-
-          <button
-            type="submit"
-            disabled={submitting || categoriesLoading}
-            className="flex w-full items-center justify-center rounded-full bg-electric-500 py-3 text-sm font-bold text-white transition hover:bg-electric-400 disabled:opacity-60"
-          >
-            {submitting
-              ? 'Guardando...'
-              : categoriesLoading
-                ? 'Cargando categorías...'
-                : isEditing
-                  ? 'Guardar cambios'
-                  : 'Crear producto'}
-          </button>
-
-          {isEditing && (
-            <button
-              type="button"
-              onClick={handleDelete}
-              disabled={submitting}
-              className="flex w-full items-center justify-center gap-1.5 text-center text-sm font-semibold text-ember-400 hover:underline"
-            >
-              <TrashIcon className="h-3.5 w-3.5" />
-              Eliminar producto
-            </button>
-          )}
+          <div className="flex items-center gap-2">
+            {saved && (
+              <button type="button" onClick={handleDelete} disabled={submitting} className={buttonDangerGhost}>
+                <TrashIcon className="h-4 w-4" />
+                <span className="sr-only sm:not-sr-only">Eliminar producto</span>
+              </button>
+            )}
+            <div className="ml-auto flex items-center gap-2">
+              <span className="hidden sm:block">
+                <Link to="/admin" className={buttonSecondary}>
+                  Cancelar
+                </Link>
+              </span>
+              <button type="submit" disabled={submitting} aria-busy={submitting} className={`${buttonPrimary} min-w-40`}>
+                {submitLabel({ submitting, isEditing: Boolean(saved) })}
+              </button>
+            </div>
+          </div>
         </div>
       </form>
     </div>
   )
 }
 
-const DISCOUNT_PRESETS = [10, 15, 20, 30]
-
-function DiscountFields({
-  price,
-  percent,
-  endsOn,
-  onChange,
-}: {
-  price: number
-  percent: number
-  endsOn: string
-  onChange: (patch: Partial<Pick<ProductFormValues, 'discountPercent' | 'discountEndsOn'>>) => void
-}) {
-  const today = toBogotaDateInput(new Date().toISOString())
-  const expired = percent > 0 && endsOn !== '' && endsOn < today
-  const active = !expired && isDiscountActive(percent, null)
-  const finalPrice = applyDiscount(price, percent)
-
-  return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap gap-2" role="group" aria-label="Descuentos rápidos">
-        {[0, ...DISCOUNT_PRESETS].map((preset) => {
-          const selected = percent === preset
-          return (
-            <button
-              key={preset}
-              type="button"
-              aria-pressed={selected}
-              onClick={() =>
-                onChange(preset === 0 ? { discountPercent: 0, discountEndsOn: '' } : { discountPercent: preset })
-              }
-              className={`rounded-full border px-3.5 py-1.5 font-mono-price text-xs font-bold transition ${
-                selected
-                  ? preset === 0
-                    ? 'border-white/40 bg-white/10 text-white'
-                    : 'border-ember-400 bg-ember-400 text-ink-900'
-                  : 'border-white/15 text-white/60 hover:border-white/30 hover:text-white'
-              }`}
-            >
-              {preset === 0 ? 'Sin descuento' : `−${preset} %`}
-            </button>
-          )
-        })}
-      </div>
-
-      <div className="grid gap-5 sm:grid-cols-2">
-        <Field label="Porcentaje (%)">
-          <input
-            type="number"
-            min={0}
-            max={MAX_DISCOUNT_PERCENT}
-            step={1}
-            inputMode="numeric"
-            value={percent}
-            onChange={(e) => {
-              const value = Math.min(MAX_DISCOUNT_PERCENT, Math.max(0, Math.round(Number(e.target.value) || 0)))
-              onChange(value === 0 ? { discountPercent: 0, discountEndsOn: '' } : { discountPercent: value })
-            }}
-            className="input font-mono-price"
-          />
-        </Field>
-        <Field label="Válido hasta (opcional)">
-          <input
-            type="date"
-            min={today}
-            disabled={percent === 0}
-            value={endsOn}
-            onChange={(e) => onChange({ discountEndsOn: e.target.value })}
-            className="input font-mono-price"
-          />
-        </Field>
-      </div>
-
-      <div
-        aria-live="polite"
-        className={`rounded-xl border px-4 py-3 text-sm ${
-          expired
-            ? 'border-hazard-400/30 bg-hazard-400/10 text-hazard-400'
-            : active
-              ? 'border-ember-400/30 bg-ember-400/10 text-white'
-              : 'border-white/10 text-white/50'
-        }`}
-      >
-        {expired ? (
-          <>Este descuento venció el {formatDiscountEnd(`${endsOn}T12:00:00-05:00`)}. Cambia la fecha o quítalo.</>
-        ) : active ? (
-          <span className="flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <span className="text-white/60">En la tienda se verá:</span>
-            <span className="font-mono-price text-white/40 line-through">{formatCOP(price)}</span>
-            <span className="font-mono-price text-base font-bold text-white">{formatCOP(finalPrice)}</span>
-            <span className="font-mono-price text-xs font-semibold text-ember-400">
-              ahorra {formatCOP(price - finalPrice)}
-              {endsOn ? ` · hasta el ${formatDiscountEnd(`${endsOn}T12:00:00-05:00`)}` : ' · sin fecha de fin'}
-            </span>
-          </span>
-        ) : (
-          <>Sin descuento. El producto se vende a {formatCOP(price)}. La instalación nunca se descuenta.</>
-        )}
-      </div>
-    </div>
-  )
-}
-
 function Section({ title, children }: { title: string; children: ReactNode }) {
   return (
-    <div className="space-y-5 border-t border-white/10 pt-5 first:border-0 first:pt-0">
-      <p className="text-xs font-bold uppercase tracking-widest text-cyan-400">{title}</p>
+    <section className="space-y-5 border-t border-white/10 pt-5 first:border-0 first:pt-0">
+      <h2 className="text-xs font-bold uppercase tracking-widest text-cyan-400">{title}</h2>
       {children}
-    </div>
-  )
-}
-
-function Field({ label, children }: { label: string; children: ReactNode }) {
-  return (
-    <label className="block">
-      <span className="mb-1 block text-xs font-semibold text-white/60">{label}</span>
-      {children}
-    </label>
+    </section>
   )
 }

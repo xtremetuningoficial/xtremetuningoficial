@@ -4,6 +4,7 @@
   --color-ink-900: #0a0e17;
   --color-ink-800: #121926;
   --color-ink-700: #1b2436;
+  --color-electric-600: #0b4ad6;
   --color-electric-500: #145eff;
   --color-electric-400: #3d7bff;
   --color-cyan-400: #22d3ee;
@@ -35,6 +36,8 @@
   /* Usado solo en el panel admin (tema oscuro). */
   .input {
     width: 100%;
+    /* 44 px: objetivo táctil cómodo en el celular del dueño. */
+    min-height: 2.75rem;
     border-radius: 0.5rem;
     border: 1px solid rgb(255 255 255 / 0.12);
     background-color: var(--color-ink-900);
@@ -46,12 +49,25 @@
   }
 
   .input::placeholder {
-    color: rgb(255 255 255 / 0.3);
+    color: rgb(255 255 255 / 0.45);
   }
 
   .input:focus {
     outline: none;
     border-color: var(--color-electric-400);
+  }
+
+  /* Foco visible también con teclado: el borde solo no se nota sobre fondo oscuro. */
+  .input:focus-visible {
+    box-shadow: 0 0 0 3px rgb(61 123 255 / 0.45);
+  }
+
+  .input[aria-invalid='true'] {
+    border-color: var(--color-ember-400);
+  }
+
+  .input[aria-invalid='true']:focus-visible {
+    box-shadow: 0 0 0 3px rgb(249 115 22 / 0.4);
   }
 
   .input:disabled {

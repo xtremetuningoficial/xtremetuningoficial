@@ -22,6 +22,7 @@ export default function AdminLogin() {
 
   async function handleSubmit(event: FormEvent) {
     event.preventDefault()
+    if (submitting) return
     setSubmitting(true)
     setError(null)
 
@@ -29,7 +30,13 @@ export default function AdminLogin() {
 
     setSubmitting(false)
     if (signInError) {
-      setError('Correo o contraseña incorrectos.')
+      // Supabase responde "Invalid login credentials" cuando el correo o la clave no coinciden;
+      // cualquier otro fallo suele ser de conexión.
+      setError(
+        /invalid login/i.test(signInError)
+          ? 'Correo o contraseña incorrectos. Revisa mayúsculas y vuelve a intentar.'
+          : 'No pudimos conectar con el servidor. Revisa tu internet y vuelve a intentar.',
+      )
       return
     }
     navigate(redirectTo, { replace: true })
@@ -66,11 +73,11 @@ export default function AdminLogin() {
           <h1 className="mt-4 text-center font-display text-xl uppercase text-white">
             Panel de administración
           </h1>
-          <p className="mt-1 text-center text-sm text-white/50">Ingresa con tu correo y contraseña</p>
+          <p className="mt-1 text-center text-sm text-white/60">Ingresa con tu correo y contraseña</p>
 
           <div className="mt-6 space-y-4">
             <div>
-              <label htmlFor="email" className="mb-1 block text-xs font-semibold text-white/60">
+              <label htmlFor="email" className="mb-1 block text-xs font-semibold text-white/70">
                 Correo
               </label>
               <input
@@ -80,13 +87,15 @@ export default function AdminLogin() {
                 autoComplete="username"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? 'login-error' : undefined}
                 className="input"
                 placeholder="tucorreo@xtremetuning.com"
               />
             </div>
 
             <div>
-              <label htmlFor="password" className="mb-1 block text-xs font-semibold text-white/60">
+              <label htmlFor="password" className="mb-1 block text-xs font-semibold text-white/70">
                 Contraseña
               </label>
               <input
@@ -96,6 +105,8 @@ export default function AdminLogin() {
                 autoComplete="current-password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
+                aria-invalid={error ? true : undefined}
+                aria-describedby={error ? 'login-error' : undefined}
                 className="input"
                 placeholder="••••••••"
               />
@@ -103,15 +114,17 @@ export default function AdminLogin() {
           </div>
 
           {error && (
-            <p className="mt-4 rounded-lg bg-ember-500/10 px-3 py-2 text-sm text-ember-400">{error}</p>
+            <p id="login-error" role="alert" className="mt-4 rounded-lg bg-ember-500/10 px-3 py-2 text-sm text-ember-400">
+              {error}
+            </p>
           )}
 
           <button
             type="submit"
             disabled={submitting}
-            className="mt-6 flex w-full items-center justify-center rounded-full bg-electric-500 py-3 text-sm font-bold text-white transition hover:bg-electric-400 disabled:opacity-60"
+            className="mt-6 flex min-h-11 w-full items-center justify-center rounded-full bg-electric-500 py-3 text-sm font-bold text-white transition hover:bg-electric-600 disabled:opacity-60"
           >
-            {submitting ? 'Ingresando...' : 'Ingresar'}
+            {submitting ? 'Ingresando…' : 'Ingresar'}
           </button>
         </div>
       </form>
