@@ -15,13 +15,13 @@ export function CategorySection({
   onSelect,
 }: CategorySectionProps) {
   return (
-    <section className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
+    <section aria-labelledby="explora-titulo" className="mx-auto max-w-7xl px-4 py-14 sm:px-6">
       <header className="mb-8 flex items-end justify-between">
         <div>
           <span className="text-xs font-bold uppercase tracking-widest text-ember-500">
             Explora
           </span>
-          <h2 className="font-display text-2xl uppercase text-ink-900 sm:text-3xl">
+          <h2 id="explora-titulo" className="text-balance font-display text-2xl uppercase text-ink-900 sm:text-3xl">
             ¿Qué le vamos a instalar a tu vehículo?
           </h2>
         </div>
@@ -38,9 +38,11 @@ export function CategorySection({
               type="button"
               onClick={() => {
                 onSelect(category.slug)
-                document.getElementById('catalogo')?.scrollIntoView({ behavior: 'smooth' })
+                const suave = !window.matchMedia('(prefers-reduced-motion: reduce)').matches
+                document.getElementById('catalogo')?.scrollIntoView({ behavior: suave ? 'smooth' : 'auto' })
               }}
-              className={`group relative overflow-hidden rounded-2xl border p-5 text-left transition sm:p-6 ${
+              aria-pressed={isActive}
+              className={`group relative overflow-hidden rounded-2xl border p-5 text-left transition active:scale-[0.98] sm:p-6 ${
                 isActive
                   ? 'border-electric-500 bg-ink-900 text-white'
                   : 'border-ink-900/10 bg-white text-ink-900 hover:border-electric-500/40 hover:shadow-md'

@@ -1,6 +1,5 @@
 import { WHATSAPP_NUMBER_DISPLAY } from '../../lib/whatsapp'
-import { WhatsAppIcon } from '../layout/Header'
-import { CardIcon, PhonePaymentIcon } from '../icons'
+import { CardIcon, PhonePaymentIcon, WhatsAppIcon } from '../icons'
 
 const items = [
   { label: 'WhatsApp', value: WHATSAPP_NUMBER_DISPLAY, icon: 'whatsapp' as const },
@@ -14,14 +13,15 @@ export function TrustBar() {
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-center gap-x-8 gap-y-3 px-4 py-4 text-center sm:justify-between sm:px-6">
         {items.map((item, i) => (
           <div key={i} className="flex items-center gap-2">
+            <span className="sr-only">{item.label}: </span>
             {item.icon === 'whatsapp' ? (
-              <WhatsAppIcon className="h-4 w-4 text-[#1fbe5c]" />
+              <WhatsAppIcon className="h-4 w-4 text-[#128c4a]" />
             ) : item.icon === 'pay' ? (
               <PhonePaymentIcon className="h-4 w-4 text-ink-900/60" />
             ) : (
               <CardIcon className="h-4 w-4 text-ink-900/60" />
             )}
-            <span className="font-mono text-xs font-semibold text-ink-900/70 sm:text-sm">
+            <span className="font-mono text-xs font-semibold text-ink-900/75 sm:text-sm">
               {item.value}
             </span>
           </div>

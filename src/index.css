@@ -1,4 +1,6 @@
 @import "tailwindcss";
+/* Kit de escenas de SurgirIA (estructura base, copiado tal cual de ~/.claude/suria/kit-escenas). */
+@import "./escenas.css";
 
 @theme {
   --color-ink-900: #0a0e17;
@@ -28,6 +30,27 @@
   :focus-visible {
     outline: 2px solid var(--color-cyan-400);
     outline-offset: 2px;
+  }
+
+  /* En fondos claros el cian no llega a 3:1; ahí el foco va en azul eléctrico. */
+  .bg-white :focus-visible,
+  .bg-paper-50 :focus-visible {
+    outline-color: var(--color-electric-500);
+  }
+
+  ::selection {
+    background-color: var(--color-cyan-400);
+    color: var(--color-ink-900);
+  }
+
+  html {
+    scroll-padding-top: 5rem;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  a,
+  button {
+    touch-action: manipulation;
   }
 }
 
@@ -125,4 +148,93 @@
 
 .pulse-ring {
   animation: pulse-ring 2.5s cubic-bezier(0.2, 0.7, 0.4, 1) infinite;
+}
+
+/* ---------- Escenas de scroll: aspecto de la marca Xtreme Tuning ---------- */
+
+/* Héroe que se abre. Sin la escena (celular, tablet, sin JS o movimiento reducido)
+   la foto ocupa el costado derecho como siempre. */
+@media (min-width: 1024px) {
+  .heroe-foto {
+    clip-path: inset(0 0 0 48%);
+  }
+}
+
+.heroe-foto-img {
+  object-position: 72% 40%;
+}
+
+.heroe-foto-velo {
+  background: linear-gradient(
+    to right,
+    var(--color-ink-900) 48%,
+    rgb(10 14 23 / 0.35) 66%,
+    rgb(10 14 23 / 0.1)
+  );
+}
+
+.heroe.is-activa > .heroe-fijo {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.heroe.is-activa > .heroe-fijo > [data-sale] {
+  width: 100%;
+  padding-block: 1.5rem;
+}
+
+.heroe.is-activa .heroe-foto {
+  clip-path: inset(0 0 0 calc(48% * (1 - var(--a, 0))));
+}
+
+.heroe.is-activa .heroe-foto-img {
+  transform: scale(calc(1.06 - var(--a, 0) * 0.06));
+}
+
+.heroe.is-activa .heroe-foto-velo {
+  opacity: calc(1 - var(--a, 0));
+}
+
+.heroe-telon {
+  background:
+    radial-gradient(ellipse at 50% 55%, rgb(10 14 23 / 0.7), rgb(10 14 23 / 0.88) 75%);
+}
+
+.heroe.is-activa .heroe-frase {
+  position: absolute;
+  left: 50%;
+  top: 50%;
+  width: min(92vw, 15ch);
+  transform: translate3d(-50%, calc(-50% + (1 - var(--b, 0)) * 2rem), 0);
+  font-family: var(--font-display);
+  font-size: clamp(3rem, 6.4vw, 6rem);
+  line-height: 0.95;
+  text-align: center;
+  text-transform: uppercase;
+  text-wrap: balance;
+  color: white;
+}
+
+.heroe-frase > span:last-child {
+  color: var(--color-cyan-400);
+}
+
+/* Riel de sonido: la sección se fija y las fotos y videos pasan de lado. */
+.sonido.is-activa > [data-fijo] {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.sonido.is-activa [data-pista] > * {
+  max-width: calc((100svh - var(--tope, 0px) - 19rem) * 0.8);
+}
+
+.riel-linea {
+  display: none;
+}
+
+.sonido.is-activa .riel-linea {
+  display: block;
 }

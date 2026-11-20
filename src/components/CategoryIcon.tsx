@@ -10,7 +10,14 @@ interface CategoryIconProps {
 // mapeado).
 export function CategoryIcon({ category, className = 'h-5 w-5' }: CategoryIconProps) {
   if (category.iconUrl) {
-    return <img src={category.iconUrl} alt="" className={`object-contain ${className}`} />
+    return <img
+        src={category.iconUrl}
+        alt=""
+        aria-hidden="true"
+        loading="lazy"
+        decoding="async"
+        className={`object-contain ${className}`}
+      />
   }
 
   const Icon = categoryIcons[category.slug] ?? DEFAULT_CATEGORY_ICON

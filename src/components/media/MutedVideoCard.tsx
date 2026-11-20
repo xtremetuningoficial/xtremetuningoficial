@@ -57,9 +57,9 @@ export function MutedVideoCard({ src, className = '' }: MutedVideoCardProps) {
         type="button"
         onClick={toggleMute}
         aria-label={muted ? 'Activar el sonido del video' : 'Silenciar el video'}
-        className="absolute bottom-3 right-3 flex h-10 w-10 items-center justify-center rounded-full bg-ink-900/70 text-white backdrop-blur transition hover:bg-ink-900/90"
+        className="absolute bottom-3 right-3 flex h-11 w-11 items-center justify-center rounded-full bg-ink-900/70 text-white backdrop-blur transition hover:bg-ink-900/90"
       >
-        {muted ? <SpeakerMuteIcon className="h-4 w-4" /> : <SpeakerIcon className="h-4 w-4" />}
+        {muted ? <SpeakerMuteIcon className="h-5 w-5" /> : <SpeakerIcon className="h-5 w-5" />}
       </button>
     </div>
   )

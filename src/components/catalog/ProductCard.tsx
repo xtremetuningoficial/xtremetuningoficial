@@ -20,6 +20,8 @@ export function ProductCard({ product, rating }: { product: Product; rating?: Ra
           src={product.image}
           alt={product.name}
           loading="lazy"
+          decoding="async"
+          sizes="(min-width: 1280px) 25vw, (min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw"
           className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
         />
         {product.featured && (
@@ -92,7 +94,7 @@ export function ProductCard({ product, rating }: { product: Product; rating?: Ra
           <button
             type="button"
             onClick={() => addItem(product.slug)}
-            className="mt-4 flex items-center justify-center gap-2 rounded-full bg-electric-500 py-2.5 text-sm font-bold text-white transition hover:bg-electric-400"
+            className="mt-4 flex min-h-11 items-center justify-center gap-2 rounded-full bg-electric-500 py-2.5 text-sm font-bold text-white transition hover:bg-electric-400"
           >
             Agregar al carrito
           </button>

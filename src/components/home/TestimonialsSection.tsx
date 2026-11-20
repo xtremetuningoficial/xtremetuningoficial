@@ -38,7 +38,7 @@ export function TestimonialsSection() {
                 <span className="font-mono-price text-lg font-bold text-white">
                   {summary.average.toFixed(1)}
                 </span>
-                <span className="text-sm text-white/50">
+                <span className="text-sm text-white/65">
                   ({summary.count} {summary.count === 1 ? 'reseña' : 'reseñas'})
                 </span>
               </div>
@@ -48,7 +48,8 @@ export function TestimonialsSection() {
           <button
             type="button"
             onClick={() => setShowForm((current) => !current)}
-            className="inline-flex shrink-0 items-center gap-2 rounded-full bg-electric-500 px-6 py-3 text-sm font-bold text-white transition hover:bg-electric-400"
+            aria-expanded={showForm}
+            className="inline-flex min-h-12 shrink-0 items-center gap-2 self-start rounded-full bg-electric-500 px-6 text-sm font-bold text-white transition hover:bg-electric-400 active:scale-[0.98] sm:self-auto"
           >
             {showForm ? 'Cerrar' : 'Danos tu opinión'}
           </button>
@@ -70,7 +71,7 @@ export function TestimonialsSection() {
           )}
 
           {status === 'error' && (
-            <p className="rounded-2xl border border-white/10 bg-ink-800 px-6 py-10 text-center text-white/50">
+            <p className="rounded-2xl border border-white/10 bg-ink-800 px-6 py-10 text-center text-white/70">
               No pudimos cargar las reseñas en este momento.
             </p>
           )}
@@ -92,7 +93,7 @@ export function TestimonialsSection() {
                   {review.comment && (
                     <p className="mt-3 text-sm leading-relaxed text-white/70">"{review.comment}"</p>
                   )}
-                  <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-white/50">
+                  <p className="mt-4 text-xs font-semibold uppercase tracking-wide text-white/65">
                     {review.authorName}
                   </p>
                 </div>

@@ -1,0 +1,129 @@
+/* Kit de escenas de SurgirIA — estructura base. Se copia a los estilos globales del sitio.
+   Aquí va sólo lo que es igual en todas las landings (qué se fija y cuánto dura). El aspecto
+   (colores, tipografía, qué se mueve dentro) lo pone cada marca con las variables
+   --a, --b, --p, --c y --e. Todo cuelga de .is-activa: sin JS la página queda normal. */
+
+/* ---- abre: el héroe se queda fijo mientras el scroll avanza la historia ---- */
+[data-escena='abre'].is-activa {
+  height: var(--escena-largo, 240svh);
+}
+
+[data-escena='abre'].is-activa > [data-fijo] {
+  position: sticky;
+  top: var(--tope, 0px);
+  height: calc(100svh - var(--tope, 0px));
+  overflow: clip;
+}
+
+/* Lo que se retira al abrir (titular, botones): sube, se desenfoca y se apaga. */
+[data-escena='abre'].is-activa [data-sale] {
+  opacity: calc(1 - var(--a, 0) * 1.5);
+  transform: translate3d(0, calc(var(--a, 0) * -3.5rem), 0);
+  filter: blur(calc(var(--a, 0) * 8px));
+}
+
+/* La frase que entra palabra por palabra. Marcado:
+   <p data-frase style="--n:8"><span style="--i:0">Precio</span> <span style="--i:1">fijo.</span> …</p> */
+[data-frase] {
+  display: none;
+}
+
+[data-escena='abre'].is-activa [data-frase] {
+  display: block;
+  opacity: clamp(0, calc(var(--b, 0) * 6 - 1), 1);
+  pointer-events: none;
+}
+
+[data-frase] > span {
+  opacity: clamp(0.16, calc(var(--b, 0) * (var(--n) + 1.5) - var(--i)), 1);
+}
+
+/* Telón que oscurece la imagen para que la frase siempre se lea. Va antes que las palabras. */
+[data-telon] {
+  display: none;
+}
+
+[data-escena='abre'].is-activa [data-telon] {
+  display: block;
+  position: absolute;
+  inset: 0;
+  opacity: min(1, calc(var(--b, 0) * 3.2));
+}
+
+/* ---- riel: la sección se fija y las tarjetas pasan de lado ---- */
+[data-escena='riel'].is-activa {
+  padding-block: 0;
+}
+
+[data-escena='riel'].is-activa > [data-fijo] {
+  position: sticky;
+  top: var(--tope, 0px);
+  height: calc(100svh - var(--tope, 0px));
+  overflow: clip;
+}
+
+[data-escena='riel'].is-activa [data-pista] {
+  display: flex;
+  overflow: visible;
+  scroll-snap-type: none;
+  will-change: transform;
+}
+
+[data-escena='riel'].is-activa [data-pista] > * {
+  flex: none;
+  transform: scale(0.955);
+  filter: brightness(0.82) saturate(0.85);
+  transition: transform 600ms cubic-bezier(0.16, 1, 0.3, 1), filter 600ms cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-escena='riel'].is-activa [data-pista] > .is-foco {
+  transform: none;
+  filter: none;
+}
+
+[data-riel-lleno] {
+  display: block;
+  height: 100%;
+  transform: scaleX(0);
+  transform-origin: 0 50%;
+}
+
+/* ---- pila: cada tarjeta se queda arriba y la siguiente la tapa ---- */
+[data-escena='pila'].is-activa {
+  display: grid;
+  gap: 0;
+}
+
+[data-escena='pila'].is-activa > * {
+  position: sticky;
+  top: calc(var(--tope, 0px) + 1rem + var(--i, 0) * 0.9rem);
+  margin-bottom: var(--pila-pausa, 16vh);
+  transform-origin: 50% 0;
+  transform: scale(calc(1 - var(--c, 0) * 0.05));
+  transition: none;
+}
+
+[data-escena='pila'].is-activa > :last-child {
+  margin-bottom: 0;
+}
+
+@media (max-width: 980px) {
+  [data-escena='pila'].is-activa > :not(:last-child) {
+    margin-bottom: var(--pila-pausa-movil, 42vh);
+  }
+}
+
+/* ---- traza: los pasos se encienden al paso del scroll ---- */
+[data-escena='traza'].is-activa > * {
+  transition: opacity 420ms ease;
+}
+
+[data-escena='traza'].is-activa > :not(.is-on) {
+  opacity: 0.4;
+}
+
+/* ---- entra: el bloque encaja en su sitio ---- */
+html.con-movimiento [data-entra] {
+  transform-origin: 50% 100%;
+  transform: scale(calc(0.93 + var(--e, 1) * 0.07));
+}

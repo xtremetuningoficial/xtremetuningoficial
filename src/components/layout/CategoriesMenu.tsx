@@ -35,32 +35,36 @@ export function CategoriesMenu({ categories }: { categories: Category[] }) {
         type="button"
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
-        aria-haspopup="menu"
-        className="flex items-center gap-1.5 rounded-full border border-white/15 px-3 py-2 text-sm font-semibold text-white/80 transition hover:border-cyan-400 hover:text-cyan-400 sm:px-3.5"
+        aria-controls="menu-categorias"
+        aria-label="Categorías"
+        className="flex h-11 items-center gap-1.5 rounded-full border border-white/15 px-3.5 text-sm font-semibold text-white/85 transition hover:border-cyan-400 hover:text-cyan-400 active:scale-95"
       >
-        <GridIcon className="h-4 w-4" />
-        <span className="hidden sm:inline">Categorías</span>
-        <ChevronDownIcon className={`h-3.5 w-3.5 transition-transform ${open ? 'rotate-180' : ''}`} />
+        <GridIcon className="h-5 w-5" />
+        <span className="hidden sm:inline" aria-hidden="true">Categorías</span>
+        <ChevronDownIcon className={`h-4 w-4 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
 
       {open && (
-        <div
-          role="menu"
-          className="absolute left-0 top-full z-50 mt-2 w-72 max-w-[calc(100vw-2rem)] rounded-2xl border border-white/10 bg-ink-800 p-2 shadow-2xl shadow-black/40"
+        <nav
+          id="menu-categorias"
+          aria-label="Categorías de productos"
+          className="absolute left-0 top-full z-50 mt-2 max-h-[min(70svh,32rem)] w-80 max-w-[calc(100vw-2rem)] overflow-y-auto overscroll-contain rounded-2xl border border-white/10 bg-ink-800 p-2 shadow-2xl shadow-black/40"
         >
-          {categories.map((category) => (
-            <Link
-              key={category.slug}
-              to={`/categoria/${category.slug}`}
-              role="menuitem"
-              onClick={() => setOpen(false)}
-              className="flex items-center gap-2.5 rounded-lg px-3 py-2.5 text-sm font-semibold text-white/80 transition hover:bg-white/5 hover:text-cyan-400"
-            >
-              <CategoryIcon category={category} className="h-4 w-4 shrink-0" />
-              {category.name}
-            </Link>
-          ))}
-        </div>
+          <ul>
+            {categories.map((category) => (
+              <li key={category.slug}>
+                <Link
+                  to={`/categoria/${category.slug}`}
+                  onClick={() => setOpen(false)}
+                  className="flex min-h-11 items-center gap-3 rounded-lg px-3 py-2 text-sm font-semibold text-white/85 transition hover:bg-white/5 hover:text-cyan-400"
+                >
+                  <CategoryIcon category={category} className="h-5 w-5 shrink-0" />
+                  {category.name}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </nav>
       )}
     </div>
   )
