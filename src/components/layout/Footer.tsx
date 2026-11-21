@@ -13,10 +13,23 @@ export function Footer({ categories, spaceForFloat = false }: { categories: Cate
     <footer className="bg-ink-900 text-white/70">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
-          {/* El logo en miniatura se pixela: el pie usa el nombre, como la barra en celular. */}
-          <p className="mb-4 font-display text-2xl leading-none tracking-tight text-white">
-            XTREME <span className="text-cyan-400">TUNING</span>
-          </p>
+          {/* Logo de la marca (pedido de William: no se quita) junto al nombre. */}
+          <div className="mb-4 flex items-center gap-3">
+            <span className="inline-flex h-14 w-20 items-center justify-center">
+              <img
+                src="/logo.webp"
+                alt="Xtreme Tuning"
+                width={594}
+                height={420}
+                loading="lazy"
+                decoding="async"
+                className="h-full w-full object-contain"
+              />
+            </span>
+            <p className="font-display text-2xl leading-none tracking-tight text-white" aria-hidden="true">
+              XTREME <span className="text-cyan-400">TUNING</span>
+            </p>
+          </div>
           <p className="max-w-xs text-sm leading-relaxed">
             Soluciones integrales en accesorios y electricidad automotriz: productos de
             calidad, instalación profesional y un servicio honesto y personalizado.

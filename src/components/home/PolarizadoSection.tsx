@@ -27,35 +27,66 @@ export function PolarizadoSection() {
           </a>
         </div>
 
-        <div className="mt-8 grid gap-6 sm:mt-10 lg:grid-cols-[1.3fr_0.7fr] lg:gap-8">
-          {/* Los niveles van de menor a mayor protección: se encienden en ese orden al bajar
-              (escena "traza" del kit). */}
-          <ol data-escena="traza" className="niveles grid gap-3 sm:grid-cols-2 sm:gap-4" aria-label="Niveles de polarizado, de menor a mayor protección">
-            {polarizadoTiers.map((tier) => (
+        <div className="mt-8 space-y-4 sm:mt-10 sm:space-y-6">
+          {/* Escalera de protección: los 4 niveles en una fila (de menor a mayor, como dice el
+              texto), cada uno con su medidor. Se encienden en ese orden al bajar (escena "traza"). */}
+          <ol
+            data-escena="traza"
+            className="niveles grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4"
+            aria-label="Niveles de polarizado, de menor a mayor protección"
+          >
+            {polarizadoTiers.map((tier, i) => (
               <li
                 key={tier.name}
-                className={`relative overflow-hidden rounded-2xl border-2 p-4 sm:p-6 ${
-                  tier.featured ? 'border-electric-500 shadow-lg shadow-electric-500/10' : 'border-ink-900/10'
+                className={`relative flex flex-col overflow-hidden rounded-2xl border-2 p-4 sm:p-5 ${
+                  tier.featured
+                    ? 'border-electric-500 bg-ink-900 text-white shadow-lg shadow-electric-500/20'
+                    : 'border-ink-900/10 bg-white text-ink-900'
                 }`}
               >
-                {/* Cinta de peligro: marca el nivel que el scroll tiene encendido. */}
                 <span className="nivel-cinta hazard-stripes absolute inset-x-0 top-0 h-1.5" aria-hidden="true" />
-                {tier.featured && (
-                  <span className="absolute right-0 top-0 rounded-bl-xl bg-hazard-400 px-3 py-1 text-[11px] font-bold uppercase tracking-wide text-ink-900">
-                    Recomendado
+                <div className="flex items-center justify-between gap-2">
+                  <span className={`font-mono text-xs font-bold ${tier.featured ? 'text-cyan-400' : 'text-electric-600'}`}>
+                    {String(i + 1).padStart(2, '0')}
                   </span>
-                )}
-                <h3 className={`font-display text-lg uppercase leading-tight text-ink-900 ${tier.featured ? 'pr-24' : ''}`}>
-                  {tier.name}
-                </h3>
-                <p className="mt-2 text-sm leading-relaxed text-ink-900/75">{tier.description}</p>
+                  {tier.featured && (
+                    <span className="rounded-full bg-hazard-400 px-2.5 py-0.5 text-[11px] font-bold uppercase tracking-wide text-ink-900">
+                      Recomendado
+                    </span>
+                  )}
+                </div>
+                <h3 className="mt-2 font-display text-base uppercase leading-tight sm:text-lg">{tier.name}</h3>
+                <p className={`mt-2 text-sm leading-relaxed ${tier.featured ? 'text-white/80' : 'text-ink-900/75'}`}>
+                  {tier.description}
+                </p>
+                {/* Medidor: la posición en la escalera, no una cifra inventada. */}
+                <div
+                  className="mt-auto flex gap-1 pt-4"
+                  role="img"
+                  aria-label={`Protección: nivel ${i + 1} de ${polarizadoTiers.length}`}
+                >
+                  {polarizadoTiers.map((_, j) => (
+                    <span
+                      key={j}
+                      className={`h-1.5 flex-1 rounded-full ${
+                        j <= i
+                          ? tier.featured
+                            ? 'bg-cyan-400'
+                            : 'bg-electric-500'
+                          : tier.featured
+                            ? 'bg-white/15'
+                            : 'bg-ink-900/10'
+                      }`}
+                    />
+                  ))}
+                </div>
               </li>
             ))}
           </ol>
 
-          {/* Foto y video lado a lado en celular: misma información, la mitad de alto. */}
-          <div className="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-1">
-            <div className="aspect-[4/5] overflow-hidden rounded-2xl border border-ink-900/10 lg:aspect-[4/3]">
+          {/* Foto y video lado a lado en todos los tamaños: formato ancho en escritorio. */}
+          <div className="grid grid-cols-2 gap-3 sm:gap-4">
+            <div className="aspect-[4/5] overflow-hidden rounded-2xl border border-ink-900/10 sm:aspect-[16/9]">
               <img
                 src="/polarizado-1.webp"
                 alt="Rollos de lámina de polarizado disponibles en el local"
@@ -70,7 +101,7 @@ export function PolarizadoSection() {
               src="/polarizado-video.mp4"
               poster="/polarizado-video-poster.webp"
               label="Video del servicio de polarizado"
-              className="aspect-[4/5] rounded-2xl border border-ink-900/10 lg:aspect-[4/3]"
+              className="aspect-[4/5] rounded-2xl border border-ink-900/10 sm:aspect-[16/9]"
             />
           </div>
         </div>

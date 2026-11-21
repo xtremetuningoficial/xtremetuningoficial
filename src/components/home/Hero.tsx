@@ -87,7 +87,7 @@ export function Hero({ totalProductos = null }: HeroProps) {
 
           {/* En celular y tablet la foto real del local va en una banda completa; desde 1024 px
               ocupa el costado derecho del héroe (bloque de arriba). */}
-          <div className="lg:hidden">
+          <div className="relative lg:hidden">
             <img
               src="/carrusel-1.webp"
               alt="El local de Xtreme Tuning por dentro, con alarmas, radios y accesorios en exhibición"
@@ -96,6 +96,33 @@ export function Hero({ totalProductos = null }: HeroProps) {
               fetchPriority="high"
               decoding="async"
               className="aspect-[16/10] w-full rounded-2xl border border-white/10 object-cover object-[60%_40%]"
+            />
+            {/* Logo de la marca sobre la foto (pedido de William), con sombra suave para leerse. */}
+            <div className="pointer-events-none absolute inset-0 flex items-center justify-center rounded-2xl bg-[radial-gradient(ellipse_at_center,rgba(10,14,23,0.78)_0%,rgba(10,14,23,0.35)_45%,transparent_75%)]">
+              <img
+                src="/logo.webp"
+                alt="Xtreme Tuning — Lujos y Accesorios"
+                width={594}
+                height={420}
+                decoding="async"
+                className="h-28 w-auto object-contain drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)] sm:h-36"
+              />
+            </div>
+          </div>
+
+          {/* Desde 1024 px el logo va en el costado derecho, sobre la foto del local. */}
+          <div className="relative z-10 hidden items-center justify-center lg:flex">
+            <span
+              className="absolute h-56 w-80 rounded-full bg-[radial-gradient(ellipse,rgba(10,14,23,0.94)_0%,rgba(10,14,23,0.6)_55%,transparent_82%)]"
+              aria-hidden="true"
+            />
+            <img
+              src="/logo.webp"
+              alt="Xtreme Tuning — Lujos y Accesorios"
+              width={594}
+              height={420}
+              decoding="async"
+              className="relative h-40 w-60 object-contain drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)]"
             />
           </div>
         </div>
