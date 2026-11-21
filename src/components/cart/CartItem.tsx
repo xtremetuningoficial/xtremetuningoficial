@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { Product } from '../../types/product'
-import { formatCOP } from '../../lib/format'
+import { displayName, formatCOP } from '../../lib/format'
 import { useCart } from '../../context/CartContext'
 import { QuantityStepper } from './QuantityStepper'
 import { Tooltip } from '../ui/Tooltip'
@@ -9,26 +9,27 @@ import { CloseIcon } from '../icons'
 export function CartItem({ product, quantity }: { product: Product; quantity: number }) {
   const { setQuantity, removeItem } = useCart()
   const subtotal = (product.price + product.installPrice) * quantity
+  const name = displayName(product.name)
 
   return (
     <div className="flex gap-4 border-b border-ink-900/10 py-5 last:border-0">
-      <Link to={`/producto/${product.slug}`} className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-paper-100 sm:h-24 sm:w-24">
-        <img src={product.image} alt={product.name} className="h-full w-full object-cover" />
+      <Link to={`/producto/${product.slug}`} tabIndex={-1} aria-hidden="true" className="h-20 w-20 shrink-0 overflow-hidden rounded-lg bg-paper-100 sm:h-24 sm:w-24">
+        <img src={product.image} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
       </Link>
 
-      <div className="flex flex-1 flex-col justify-between gap-2">
-        <div className="flex items-start justify-between gap-3">
-          <Link to={`/producto/${product.slug}`}>
-            <h3 className="font-display text-sm uppercase leading-tight text-ink-900 hover:text-electric-500 sm:text-base">
-              {product.name}
+      <div className="flex min-w-0 flex-1 flex-col justify-between gap-2">
+        <div className="flex items-start justify-between gap-2">
+          <Link to={`/producto/${product.slug}`} className="flex min-h-11 min-w-0 items-center">
+            <h3 className="break-words font-display text-sm uppercase leading-tight text-ink-900 hover:text-electric-500 sm:text-base">
+              {name}
             </h3>
           </Link>
-          <Tooltip label="Quitar del carrito">
+          <Tooltip label="Quitar del carrito" align="end" className="shrink-0">
             <button
               type="button"
               onClick={() => removeItem(product.slug)}
-              aria-label={`Quitar ${product.name} del carrito`}
-              className="shrink-0 text-ink-900/60 transition hover:text-ember-500"
+              aria-label={`Quitar ${name} del carrito`}
+              className="-mr-2 -mt-1 flex h-11 w-11 shrink-0 items-center justify-center rounded-full text-ink-900/60 transition hover:bg-ember-500/10 hover:text-ember-500"
             >
               <CloseIcon className="h-4 w-4" />
             </button>
@@ -45,8 +46,8 @@ export function CartItem({ product, quantity }: { product: Product; quantity: nu
           <span className={product.discountPercent > 0 ? 'font-semibold text-ember-500' : undefined}>
             {formatCOP(product.price)}
           </span>
-          {product.discountPercent > 0 && ` (−${product.discountPercent} %)`} + instalación{' '}
-          {formatCOP(product.installPrice)}
+          {product.discountPercent > 0 && ` (−${product.discountPercent} %)`}
+          {product.installPrice > 0 && <> + instalación {formatCOP(product.installPrice)}</>}
         </p>
 
         <div className="flex items-center justify-between gap-3">

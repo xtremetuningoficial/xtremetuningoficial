@@ -25,14 +25,15 @@ export function StarRating({ value, onChange, size = 'md' }: StarRatingProps) {
   }
 
   return (
-    <span className="inline-flex items-center gap-0.5 text-hazard-400">
+    <span className="-ml-2 inline-flex items-center text-hazard-400">
       {[1, 2, 3, 4, 5].map((star) => (
         <button
           key={star}
           type="button"
           onClick={() => onChange(star)}
           aria-label={`Calificar con ${star} estrella${star === 1 ? '' : 's'}`}
-          className="transition hover:scale-110"
+          aria-pressed={star === value}
+          className="flex h-11 w-11 items-center justify-center rounded-full transition hover:scale-110"
         >
           <StarIcon filled={star <= value} className={SIZE_CLASSES[size]} />
         </button>

@@ -1,8 +1,6 @@
 import { useEffect } from 'react'
 import { useNavigate, useOutletContext, useParams } from 'react-router-dom'
 import { Hero } from '../components/home/Hero'
-import { TrustBar } from '../components/home/TrustBar'
-import { CategorySection } from '../components/home/CategorySection'
 import { CatalogSection } from '../components/catalog/CatalogSection'
 import { SoundServiceSection } from '../components/home/SoundServiceSection'
 import { PolarizadoSection } from '../components/home/PolarizadoSection'
@@ -46,26 +44,20 @@ export default function Home() {
     return () => montarEscenas(opciones)
   }, [])
 
+  // Al elegir una categoría (desde el filtro, el menú o un enlace /categoria/…) se lleva al
+  // catálogo, salvo que el comprador ya esté mirando su parte de arriba.
   useEffect(() => {
-    if (categorySlug) {
-      document.getElementById('catalogo')?.scrollIntoView({ block: 'start' })
-    }
+    if (categorySlug) llevarAlCatalogo()
   }, [categorySlug])
 
   function handleSelectCategory(slug: string) {
     navigate(slug === 'all' ? '/' : `/categoria/${slug}`)
+    if (slug === 'all') requestAnimationFrame(llevarAlCatalogo)
   }
 
   return (
     <>
       <Hero totalProductos={productsState.status === 'success' ? productsState.data.length : null} />
-      <TrustBar />
-      <CategorySection
-        categories={categoriesState.data}
-        products={productsState.data}
-        activeCategory={activeCategory}
-        onSelect={handleSelectCategory}
-      />
       <HazardDivider />
       <CatalogSection
         categories={categoriesState.data}
@@ -82,4 +74,13 @@ export default function Home() {
       <VisitStore />
     </>
   )
+}
+
+function llevarAlCatalogo() {
+  const catalogo = document.getElementById('catalogo')
+  if (!catalogo) return
+  const arriba = catalogo.getBoundingClientRect().top
+  if (arriba < -4 || arriba > window.innerHeight * 0.4) {
+    catalogo.scrollIntoView({ block: 'start' })
+  }
 }

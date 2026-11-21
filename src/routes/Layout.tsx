@@ -1,11 +1,31 @@
-import { Outlet } from 'react-router-dom'
+import { useEffect, useRef } from 'react'
+import { Outlet, useLocation, useNavigationType } from 'react-router-dom'
 import { Header } from '../components/layout/Header'
 import { Footer } from '../components/layout/Footer'
 import { WhatsAppFloatButton } from '../components/layout/WhatsAppFloatButton'
 import { useCategories } from '../hooks/useCategories'
 
+const esInicio = (path: string) => path === '/' || path.startsWith('/categoria/')
+
 export function Layout() {
   const categoriesState = useCategories()
+  const { pathname } = useLocation()
+  const navigationType = useNavigationType()
+  const previous = useRef(pathname)
+
+  // Al abrir una ficha o el carrito se empieza arriba. Entre el inicio y sus categorías no se
+  // mueve (el filtro ya lleva al catálogo) y con "atrás" se deja al navegador.
+  useEffect(() => {
+    const from = previous.current
+    previous.current = pathname
+    if (from === pathname || navigationType === 'POP') return
+    if (esInicio(from) && esInicio(pathname)) return
+    window.scrollTo(0, 0)
+  }, [pathname, navigationType])
+
+  // El flotante sobra donde ya hay un botón de WhatsApp a la vista (ficha y carrito) y en
+  // pantallas anchas, donde la barra de arriba ya lo muestra con texto.
+  const showFloat = !pathname.startsWith('/producto/') && pathname !== '/carrito'
 
   return (
     <div className="min-h-screen bg-paper-50">
@@ -19,8 +39,8 @@ export function Layout() {
       <main id="contenido" tabIndex={-1} className="outline-none">
         <Outlet context={categoriesState} />
       </main>
-      <Footer categories={categoriesState.data} />
-      <WhatsAppFloatButton />
+      <Footer categories={categoriesState.data} spaceForFloat={showFloat} />
+      {showFloat && <WhatsAppFloatButton />}
     </div>
   )
 }

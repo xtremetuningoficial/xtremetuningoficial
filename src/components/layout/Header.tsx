@@ -28,10 +28,11 @@ export function Header({ categories }: { categories: Category[] }) {
         <div className="mx-auto flex max-w-7xl items-center justify-between gap-2 px-4 py-2 sm:gap-4 sm:px-6">
           <div className="flex min-w-0 items-center gap-2 sm:gap-5">
             <Link to="/" className="flex min-h-11 shrink-0 items-center gap-2" aria-label="Xtreme Tuning, ir al inicio">
-              <span className="flex h-11 w-14 items-center justify-center sm:h-12 sm:w-16">
+              {/* A 44 px el logo se pixela y no se lee: en celular va sólo el nombre. */}
+              <span className="hidden h-12 w-16 items-center justify-center sm:flex">
                 <img src="/logo.webp" alt="" width={594} height={420} className="h-full w-full object-contain" />
               </span>
-              <span className="hidden font-display text-lg tracking-tight text-white sm:block" aria-hidden="true">
+              <span className="font-display text-lg leading-none tracking-tight text-white" aria-hidden="true">
                 XTREME <span className="text-cyan-400">TUNING</span>
               </span>
             </Link>
@@ -47,7 +48,8 @@ export function Header({ categories }: { categories: Category[] }) {
               <span className="block text-white/60">Línea directa</span>
               {WHATSAPP_NUMBER_DISPLAY}
             </a>
-            <Tooltip label="Compartir tienda (QR)">
+            {/* En celular el QR vive en el pie: la barra queda para lo que se usa a diario. */}
+            <Tooltip label="Compartir tienda (QR)" className="max-sm:hidden">
               <button
                 type="button"
                 onClick={() => setQrOpen(true)}
@@ -82,7 +84,6 @@ export function Header({ categories }: { categories: Category[] }) {
               className="flex h-11 min-w-11 shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-full bg-electric-500 px-3 text-sm font-bold text-white shadow-[0_0_0_1px_rgba(255,255,255,0.08)] transition hover:bg-electric-400 active:scale-95 sm:px-4"
             >
               <WhatsAppIcon className="h-5 w-5" />
-              <span className="hidden min-[380px]:inline sm:hidden" aria-hidden="true">WhatsApp</span>
               <span className="hidden sm:inline" aria-hidden="true">Pedir por WhatsApp</span>
             </a>
           </div>

@@ -5,16 +5,13 @@ import { StoreCarousel } from './StoreCarousel'
 
 export function VisitStore() {
   return (
-    <section aria-labelledby="tienda-titulo" className="bg-ink-900 pb-16 sm:pb-20">
+    <section aria-labelledby="tienda-titulo" className="bg-ink-900 pb-12 pt-2 sm:pb-20">
       <div className="mx-auto max-w-4xl px-4 text-center sm:px-6">
-        <h2
-          id="tienda-titulo"
-          className="inline-flex items-center gap-2 rounded-full bg-hazard-400 px-4 py-1.5 font-display text-sm uppercase text-ink-900 shadow-lg sm:text-base"
-        >
+        <h2 id="tienda-titulo" className="font-display text-2xl uppercase leading-snug text-white sm:text-3xl">
           Visítanos en tienda
         </h2>
 
-        <div className="mt-8 text-left">
+        <div className="mt-6 text-left sm:mt-8">
           <StoreCarousel images={storeImages} />
         </div>
 

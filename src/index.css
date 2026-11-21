@@ -254,3 +254,23 @@
 .sonido.is-activa .riel-linea {
   display: block;
 }
+
+/* Niveles de polarizado (escena "traza"). El kit apaga al 40 % los pasos que aún no se
+   encienden; con este contraste el texto quedaba ilegible, así que aquí todos se leen
+   completos y el encendido se marca con borde azul y la cinta de peligro. */
+.niveles .nivel-cinta {
+  opacity: 0;
+  transition: opacity 420ms ease;
+}
+
+.niveles[data-escena='traza'].is-activa > :not(.is-on) {
+  opacity: 1;
+}
+
+.niveles[data-escena='traza'].is-activa > .is-on {
+  border-color: var(--color-electric-500);
+}
+
+.niveles[data-escena='traza'].is-activa > .is-on .nivel-cinta {
+  opacity: 1;
+}

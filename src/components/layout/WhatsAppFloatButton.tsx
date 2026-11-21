@@ -3,7 +3,7 @@ import { WhatsAppIcon } from '../icons'
 
 export function WhatsAppFloatButton() {
   return (
-    <div className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-50 sm:bottom-6 sm:right-6">
+    <div className="fixed bottom-[max(1.25rem,env(safe-area-inset-bottom))] right-4 z-50 sm:bottom-6 sm:right-6 lg:hidden">
       <a
           href={GENERAL_INQUIRY_LINK}
           target="_blank"

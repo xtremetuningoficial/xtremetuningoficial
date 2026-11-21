@@ -2,7 +2,7 @@ import { useState } from 'react'
 import { Link, useOutletContext, useParams } from 'react-router-dom'
 import { useProduct } from '../hooks/useProduct'
 import { useProductReviews } from '../hooks/useProductReviews'
-import { formatCOP, formatDateTime } from '../lib/format'
+import { displayName, formatCOP, formatDateTime } from '../lib/format'
 import { formatDiscountEnd } from '../lib/pricing'
 import { buildProductInquiryLink, GENERAL_INQUIRY_LINK } from '../lib/whatsapp'
 import { vehicleLabels } from '../data/vehicleLabels'
@@ -13,7 +13,7 @@ import { StarRating } from '../components/reviews/StarRating'
 import { ReviewForm } from '../components/reviews/ReviewForm'
 import { useCart } from '../context/CartContext'
 import { useDocumentTitle } from '../hooks/useDocumentTitle'
-import type { Category, ProductMedia } from '../types/product'
+import type { Category, Product, ProductMedia } from '../types/product'
 
 export default function ProductDetail() {
   const { slug } = useParams()
@@ -22,7 +22,7 @@ export default function ProductDetail() {
   const categoriesState = useOutletContext<{ data: Category[] }>()
   const { quantityOf, addItem, setQuantity } = useCart()
 
-  useDocumentTitle(product?.name)
+  useDocumentTitle(product ? displayName(product.name) : undefined)
 
   if (status === 'loading') {
     return (
@@ -80,20 +80,20 @@ export default function ProductDetail() {
 
   return (
     <section className="mx-auto max-w-6xl px-4 py-10 sm:px-6 sm:py-14">
-      <nav className="mb-6 flex items-center gap-1.5 text-xs text-ink-900/60 sm:text-sm">
-        <Link to="/" className="hover:text-electric-500">
+      <nav aria-label="Ruta" className="mb-3 flex min-w-0 items-center gap-1.5 text-xs text-ink-900/70 sm:text-sm">
+        <Link to="/" className="-mx-2 inline-flex min-h-11 items-center px-2 hover:text-electric-500">
           Inicio
         </Link>
         <span>/</span>
-        <Link to={`/categoria/${product.categorySlug}`} className="hover:text-electric-500">
+        <Link to={`/categoria/${product.categorySlug}`} className="inline-flex min-h-11 shrink-0 items-center hover:text-electric-500">
           {categoryName}
         </Link>
         <span>/</span>
-        <span className="text-ink-900/70">{product.name}</span>
+        <span className="min-w-0 truncate text-ink-900/70">{displayName(product.name)}</span>
       </nav>
 
       <div className="grid gap-10 lg:grid-cols-2">
-        <Gallery media={gallery} name={product.name} />
+        <Gallery media={gallery} name={displayName(product.name)} />
 
         <div>
           {(() => {
@@ -106,8 +106,8 @@ export default function ProductDetail() {
             )
           })()}
 
-          <h1 className="mt-3 font-display text-2xl uppercase leading-tight text-ink-900 sm:text-3xl">
-            {product.name}
+          <h1 className="mt-3 break-words font-display text-2xl uppercase leading-tight text-ink-900 sm:text-3xl">
+            {displayName(product.name)}
           </h1>
 
           {reviewsStatus === 'success' && reviews.length > 0 && (
@@ -131,44 +131,7 @@ export default function ProductDetail() {
             </ul>
           )}
 
-          <div className="mt-6 flex flex-wrap items-end gap-4 rounded-2xl border border-ink-900/10 bg-white p-5 font-mono-price">
-            <div>
-              <p className="flex items-center gap-2 text-xs uppercase tracking-wide text-ink-900/60">
-                Producto
-                {product.discountPercent > 0 && (
-                  <span className="rounded bg-ember-500 px-1.5 py-0.5 text-[11px] font-bold normal-case tracking-normal text-white">
-                    −{product.discountPercent} %
-                  </span>
-                )}
-              </p>
-              <p className="flex flex-wrap items-baseline gap-x-2">
-                <span className={`text-2xl font-bold sm:text-3xl ${product.discountPercent > 0 ? 'text-ember-500' : 'text-ink-900'}`}>
-                  {formatCOP(product.price)}
-                </span>
-                {product.discountPercent > 0 && (
-                  <span className="text-sm text-ink-900/50">
-                    <span className="sr-only">Antes </span>
-                    <s>{formatCOP(product.regularPrice)}</s>
-                  </span>
-                )}
-              </p>
-            </div>
-            <div>
-              <p className="text-xs uppercase tracking-wide text-ember-500">Instalación</p>
-              <p className="text-lg font-bold text-ember-500">{formatCOP(product.installPrice)}</p>
-            </div>
-            {product.discountPercent > 0 && (
-              <p className="basis-full border-t border-ink-900/10 pt-3 font-body text-sm text-ink-900/70">
-                Ahorras{' '}
-                <strong className="font-mono-price text-ink-900">
-                  {formatCOP(product.regularPrice - product.price)}
-                </strong>
-                {product.discountEndsAt
-                  ? ` · oferta válida hasta el ${formatDiscountEnd(product.discountEndsAt)}`
-                  : ' · oferta por tiempo limitado'}
-              </p>
-            )}
-          </div>
+          <PriceBlock product={product} />
 
           {(() => {
             const quantity = quantityOf(product.slug)
@@ -181,7 +144,7 @@ export default function ProductDetail() {
                 />
                 <Link
                   to="/carrito"
-                  className="flex flex-1 items-center justify-center rounded-full bg-ink-900 py-3.5 text-sm font-bold text-white transition hover:bg-ink-800"
+                  className="flex min-h-12 flex-1 items-center justify-center rounded-full bg-ink-900 py-3.5 text-sm font-bold text-white transition hover:bg-ink-800"
                 >
                   Ver carrito
                 </Link>
@@ -190,7 +153,7 @@ export default function ProductDetail() {
               <button
                 type="button"
                 onClick={() => addItem(product.slug)}
-                className="mt-6 flex w-full items-center justify-center gap-2 rounded-full bg-electric-500 py-3.5 text-sm font-bold text-white transition hover:bg-electric-400"
+                className="mt-6 flex min-h-12 w-full items-center justify-center gap-2 rounded-full bg-electric-500 py-3.5 text-sm font-bold text-white transition hover:bg-electric-400"
               >
                 Agregar al carrito
               </button>
@@ -201,7 +164,7 @@ export default function ProductDetail() {
             href={buildProductInquiryLink(product)}
             target="_blank"
             rel="noreferrer"
-            className="mt-3 flex items-center justify-center gap-2 text-sm font-semibold text-ink-900/60 transition hover:text-electric-500"
+            className="mt-2 flex min-h-11 items-center justify-center gap-2 text-sm font-semibold text-ink-900/70 transition hover:text-electric-500"
           >
             <WhatsAppIcon className="h-4 w-4" />
             ¿Prefieres preguntar antes? Escríbenos
@@ -209,7 +172,7 @@ export default function ProductDetail() {
 
           <Link
             to={`/categoria/${product.categorySlug}`}
-            className="mt-4 block text-center text-sm font-semibold text-ink-900/60 transition hover:text-electric-500"
+            className="flex min-h-11 items-center justify-center text-sm font-semibold text-ink-900/70 transition hover:text-electric-500"
           >
             ← Ver más en esta categoría
           </Link>
@@ -272,14 +235,14 @@ function Gallery({ media, name }: { media: ProductMedia[]; name: string }) {
     <div>
       <div className="aspect-square overflow-hidden rounded-2xl border border-ink-900/10 bg-paper-100">
         {current.type === 'video' ? (
-          <video src={current.url} controls playsInline className="h-full w-full object-cover" />
+          <video src={current.url} controls playsInline preload="metadata" className="h-full w-full object-cover" />
         ) : (
-          <img src={current.url} alt={name} className="h-full w-full object-cover" />
+          <img src={current.url} alt={name} decoding="async" className="h-full w-full object-cover" />
         )}
       </div>
 
       {media.length > 1 && (
-        <div className="mt-3 flex gap-2">
+        <div className="mt-3 flex flex-wrap gap-2">
           {media.map((item, index) => (
             <button
               key={item.url}
@@ -292,7 +255,7 @@ function Gallery({ media, name }: { media: ProductMedia[]; name: string }) {
             >
               {item.type === 'video' ? (
                 <>
-                  <video src={item.url} muted playsInline className="h-full w-full object-cover" />
+                  <video src={item.url} muted playsInline preload="metadata" className="h-full w-full object-cover" />
                   <span className="absolute inset-0 flex items-center justify-center bg-ink-900/25">
                     <span className="flex h-6 w-6 items-center justify-center rounded-full bg-ink-900/70 text-white">
                       <PlayIcon className="h-3 w-3" />
@@ -300,12 +263,77 @@ function Gallery({ media, name }: { media: ProductMedia[]; name: string }) {
                   </span>
                 </>
               ) : (
-                <img src={item.url} alt="" className="h-full w-full object-cover" />
+                <img src={item.url} alt="" loading="lazy" decoding="async" className="h-full w-full object-cover" />
               )}
             </button>
           ))}
         </div>
       )}
+    </div>
+  )
+}
+
+// Precio claro: producto, instalación (si aplica) y el total instalado en grande, que es lo
+// que el cliente termina pagando. Instalación en 0 = no aplica: sólo se muestra el producto.
+function PriceBlock({ product }: { product: Product }) {
+  const hasInstall = product.installPrice > 0
+  const hasDeal = product.discountPercent > 0
+
+  return (
+    <div className="mt-6 overflow-hidden rounded-2xl border border-ink-900/10 bg-white font-mono-price">
+      {hasInstall && <div className="hazard-stripes h-1.5" aria-hidden="true" />}
+      <div className="p-5">
+        <dl className="space-y-1.5 text-sm">
+          <div className="flex items-baseline justify-between gap-3">
+            <dt className="flex items-center gap-2 text-ink-900/70">
+              Producto
+              {hasDeal && (
+                <span className="rounded bg-ember-500 px-1.5 py-0.5 text-[11px] font-bold text-white">
+                  −{product.discountPercent} %
+                </span>
+              )}
+            </dt>
+            <dd className="flex flex-wrap items-baseline justify-end gap-x-2">
+              {hasDeal && (
+                <span className="text-xs text-ink-900/60">
+                  <span className="sr-only">Antes </span>
+                  <s>{formatCOP(product.regularPrice)}</s>
+                </span>
+              )}
+              <span
+                className={`font-bold ${hasInstall ? 'text-base' : 'text-3xl'} ${hasDeal ? 'text-ember-500' : 'text-ink-900'}`}
+              >
+                {formatCOP(product.price)}
+              </span>
+            </dd>
+          </div>
+          {hasInstall && (
+            <>
+              <div className="flex items-baseline justify-between gap-3">
+                <dt className="text-ink-900/70">+ Instalación en el local</dt>
+                <dd className="text-base font-bold text-electric-600">{formatCOP(product.installPrice)}</dd>
+              </div>
+              <div className="flex items-baseline justify-between gap-3 border-t border-ink-900/10 pt-3">
+                <dt className="font-body text-sm font-bold uppercase tracking-wide text-ink-900">Total instalado</dt>
+                <dd className="text-3xl font-bold text-ink-900">
+                  {formatCOP(product.price + product.installPrice)}
+                </dd>
+              </div>
+            </>
+          )}
+        </dl>
+        {hasDeal && (
+          <p className="mt-3 border-t border-ink-900/10 pt-3 font-body text-sm text-ink-900/70">
+            Ahorras{' '}
+            <strong className="font-mono-price text-ink-900">
+              {formatCOP(product.regularPrice - product.price)}
+            </strong>
+            {product.discountEndsAt
+              ? ` · oferta válida hasta el ${formatDiscountEnd(product.discountEndsAt)}`
+              : ' · oferta por tiempo limitado'}
+          </p>
+        )}
+      </div>
     </div>
   )
 }

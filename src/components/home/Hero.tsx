@@ -40,24 +40,20 @@ export function Hero({ totalProductos = null }: HeroProps) {
 
         <div
           data-sale
-          className="relative mx-auto grid max-w-7xl items-center gap-10 px-4 py-14 sm:px-6 sm:py-20 lg:grid-cols-[1.15fr_0.85fr] lg:gap-6 lg:py-24"
+          className="relative mx-auto grid max-w-7xl items-center gap-8 px-4 pb-8 pt-8 sm:gap-10 sm:px-6 sm:py-16 lg:grid-cols-[1.15fr_0.85fr] lg:gap-6 lg:py-24"
         >
           <div className="relative z-10 min-w-0">
-            <p className="inline-flex max-w-full items-center gap-2 rounded-full border border-hazard-400/40 bg-hazard-400/10 px-3 py-1 text-[11px] font-bold tracking-wide text-hazard-400 sm:text-xs">
-              ALARMAS · RADIOS · BLOQUEO CENTRAL · ELECTRICIDAD AUTOMOTRIZ
-            </p>
-
-            <h1 className="mt-5 text-balance font-display text-4xl uppercase leading-[0.95] text-white sm:text-5xl lg:text-6xl">
+            <h1 className="text-balance font-display text-[2.75rem] uppercase leading-[0.95] text-white sm:text-5xl lg:text-6xl">
               Seguridad y estilo
               <span className="block text-cyan-400">para tu vehículo</span>
             </h1>
 
-            <p className="mt-5 max-w-lg text-base leading-relaxed text-white/75 sm:text-lg">
+            <p className="mt-4 max-w-lg text-base leading-relaxed text-white/80 sm:mt-5 sm:text-lg">
               Accesorios y electricidad automotriz de excelente calidad, con instalación
               profesional y un servicio honesto y personalizado — para carro y moto.
             </p>
 
-            <div className="mt-8 flex flex-wrap items-center gap-3">
+            <div className="mt-6 flex flex-wrap items-center gap-3 sm:mt-8">
               <a
                 href="#catalogo"
                 className="inline-flex min-h-12 items-center rounded-full bg-electric-500 px-6 text-sm font-bold text-white shadow-lg shadow-electric-500/25 transition hover:bg-electric-400 active:scale-[0.98]"
@@ -74,70 +70,33 @@ export function Hero({ totalProductos = null }: HeroProps) {
               </a>
             </div>
 
-            <dl className="mt-10 flex flex-wrap gap-x-8 gap-y-4 border-t border-white/10 pt-6 font-mono">
-              <div>
-                <dt className="text-[11px] uppercase tracking-wide text-white/60">Catálogo</dt>
-                {/* Sale del catálogo real; sin dato no se inventa un número. */}
-                <dd className="min-w-[8ch] text-lg font-bold text-white" aria-live="polite">
-                  {totalProductos && totalProductos > 0
-                    ? `${totalProductos} ${totalProductos === 1 ? 'producto' : 'productos'}`
-                    : 'Variado'}
-                </dd>
-              </div>
-              <div>
-                <dt className="text-[11px] uppercase tracking-wide text-white/60">Instalación</dt>
-                <dd className="text-lg font-bold text-white">Profesional</dd>
-              </div>
-              <div>
-                <dt className="text-[11px] uppercase tracking-wide text-white/60">Garantía</dt>
-                <dd className="text-lg font-bold text-white">Oficial</dd>
-              </div>
-            </dl>
+            {/* Sólo hechos del negocio: el número sale del catálogo real y los medios de pago
+                son los del pie de página. Sin dato, no se inventa un número. */}
+            <p className="mt-6 max-w-lg font-mono text-xs leading-relaxed text-white/70 sm:mt-8 sm:text-sm" aria-live="polite">
+              {totalProductos && totalProductos > 0 && (
+                <>
+                  <strong className="font-bold text-white">
+                    {totalProductos} {totalProductos === 1 ? 'producto' : 'productos'}
+                  </strong>
+                  {' · '}
+                </>
+              )}
+              instalación en el local · pago con Nequi, Daviplata, Addi y tarjeta
+            </p>
           </div>
 
-          <div className="flex justify-center lg:justify-end">
-            <div className="relative flex h-64 w-64 items-center justify-center sm:h-80 sm:w-80">
-              {/* En mobile/tablet no hay panel de fondo, así que la foto envuelve el aro aquí */}
-              <div className="absolute -inset-16 overflow-hidden rounded-full sm:-inset-24 lg:hidden" aria-hidden="true">
-                <img
-                  src="/carrusel-1.webp"
-                  alt=""
-                  width={1000}
-                  height={591}
-                  fetchPriority="high"
-                  decoding="async"
-                  className="h-full w-full scale-110 object-cover object-[60%_35%]"
-                />
-                <div className="absolute inset-0 bg-[radial-gradient(circle,transparent_28%,var(--color-ink-900)_70%)]" />
-              </div>
-
-              <span className="pulse-ring absolute inset-0 rounded-full border-2 border-cyan-400/50" aria-hidden="true" />
-              <span
-                className="pulse-ring absolute inset-0 rounded-full border-2 border-cyan-400/50"
-                style={{ animationDelay: '0.85s' }}
-                aria-hidden="true"
-              />
-              <span
-                className="pulse-ring absolute inset-0 rounded-full border-2 border-cyan-400/50"
-                style={{ animationDelay: '1.7s' }}
-                aria-hidden="true"
-              />
-              {/* Sombra suave tras el isotipo, para que el resto del aro deje ver la foto a color */}
-              <span
-                className="absolute left-1/2 top-1/2 h-44 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(ellipse,rgba(10,14,23,0.94)_0%,rgba(10,14,23,0.6)_55%,transparent_82%)] sm:h-56 sm:w-80"
-                aria-hidden="true"
-              />
-              <span className="relative flex h-32 w-48 items-center justify-center sm:h-40 sm:w-60">
-                <img
-                  src="/logo.webp"
-                  alt="Xtreme Tuning — Lujos y Accesorios"
-                  width={594}
-                  height={420}
-                  decoding="async"
-                  className="h-full w-full object-contain drop-shadow-[0_4px_18px_rgba(0,0,0,0.75)]"
-                />
-              </span>
-            </div>
+          {/* En celular y tablet la foto real del local va en una banda completa; desde 1024 px
+              ocupa el costado derecho del héroe (bloque de arriba). */}
+          <div className="lg:hidden">
+            <img
+              src="/carrusel-1.webp"
+              alt="El local de Xtreme Tuning por dentro, con alarmas, radios y accesorios en exhibición"
+              width={1000}
+              height={591}
+              fetchPriority="high"
+              decoding="async"
+              className="aspect-[16/10] w-full rounded-2xl border border-white/10 object-cover object-[60%_40%]"
+            />
           </div>
         </div>
 

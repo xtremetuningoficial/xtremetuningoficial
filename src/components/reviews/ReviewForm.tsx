@@ -69,7 +69,7 @@ export function ReviewForm({ targetType, productId, title = 'Cuéntanos tu exper
           value={authorName}
           onChange={(e) => setAuthorName(e.target.value)}
           placeholder="Escribe tu nombre"
-          className="w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-900/40 focus:border-electric-500 focus:outline-none"
+          className="min-h-11 w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-base text-ink-900 placeholder:text-ink-900/55 sm:text-sm focus:border-electric-500 focus:outline-none"
         />
       </label>
 
@@ -80,7 +80,7 @@ export function ReviewForm({ targetType, productId, title = 'Cuéntanos tu exper
           value={comment}
           onChange={(e) => setComment(e.target.value)}
           placeholder="¿Qué te pareció?"
-          className="w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-sm text-ink-900 placeholder:text-ink-900/40 focus:border-electric-500 focus:outline-none"
+          className="min-h-11 w-full rounded-lg border border-ink-900/15 bg-white px-3 py-2 text-base text-ink-900 placeholder:text-ink-900/55 sm:text-sm focus:border-electric-500 focus:outline-none"
         />
       </label>
 
@@ -89,7 +89,7 @@ export function ReviewForm({ targetType, productId, title = 'Cuéntanos tu exper
       <button
         type="submit"
         disabled={submitting}
-        className="mt-5 flex w-full items-center justify-center rounded-full bg-electric-500 py-3 text-sm font-bold text-white transition hover:bg-electric-400 disabled:opacity-60"
+        className="mt-5 flex min-h-12 w-full items-center justify-center rounded-full bg-electric-500 py-3 text-sm font-bold text-white transition hover:bg-electric-400 disabled:opacity-60"
       >
         {submitting ? 'Enviando...' : 'Enviar reseña'}
       </button>

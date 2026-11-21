@@ -21,7 +21,7 @@ export default function Cart() {
         </p>
         <Link
           to="/"
-          className="mt-6 inline-flex items-center gap-2 rounded-full bg-electric-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-electric-400"
+          className="mt-6 inline-flex min-h-12 items-center gap-2 rounded-full bg-electric-500 px-6 text-sm font-bold text-white transition hover:bg-electric-400"
         >
           Ver catálogo
         </Link>
@@ -62,13 +62,13 @@ export default function Cart() {
           <button
             type="button"
             onClick={clear}
-            className="rounded-full border border-ink-900/15 px-6 py-2.5 text-sm font-bold text-ink-900/70 transition hover:border-ember-500 hover:text-ember-500"
+            className="min-h-12 rounded-full border border-ink-900/15 px-6 text-sm font-bold text-ink-900/70 transition hover:border-ember-500 hover:text-ember-500"
           >
             Vaciar carrito
           </button>
           <Link
             to="/"
-            className="inline-flex items-center gap-2 rounded-full bg-electric-500 px-6 py-2.5 text-sm font-bold text-white transition hover:bg-electric-400"
+            className="inline-flex min-h-12 items-center gap-2 rounded-full bg-electric-500 px-6 text-sm font-bold text-white transition hover:bg-electric-400"
           >
             Ver catálogo
           </Link>
@@ -90,7 +90,7 @@ export default function Cart() {
       )}
 
       <div className="mt-6 grid gap-8 lg:grid-cols-[1fr_360px]">
-        <div className="rounded-2xl border border-ink-900/10 bg-white px-5 sm:px-6">
+        <div className="min-w-0 rounded-2xl border border-ink-900/10 bg-white px-4 sm:px-6">
           {items.map((item) => (
             <CartItem key={item.product.slug} product={item.product} quantity={item.quantity} />
           ))}
@@ -100,7 +100,7 @@ export default function Cart() {
           <CartSummary items={items} onClear={clear} />
           <Link
             to="/"
-            className="mt-4 block text-center text-sm font-semibold text-ink-900/60 transition hover:text-electric-500"
+            className="mt-2 flex min-h-11 items-center justify-center text-sm font-semibold text-ink-900/60 transition hover:text-electric-500"
           >
             ← Seguir comprando
           </Link>

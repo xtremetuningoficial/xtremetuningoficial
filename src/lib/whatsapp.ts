@@ -12,9 +12,12 @@ export function buildProductInquiryLink(product: Product): string {
   const message = [
     `Hola Xtreme Tuning, estoy interesado en:`,
     `*${product.name}*`,
-    product.discountPercent > 0
-      ? `Producto: ${formatCOP(product.price)} (−${product.discountPercent} %, antes ${formatCOP(product.regularPrice)}) · Instalación: ${formatCOP(product.installPrice)}`
-      : `Producto: ${formatCOP(product.price)} · Instalación: ${formatCOP(product.installPrice)}`,
+    // Instalación en 0 significa "no aplica" (ceras, limpiadores): no se menciona.
+    `Producto: ${formatCOP(product.price)}` +
+      (product.discountPercent > 0
+        ? ` (−${product.discountPercent} %, antes ${formatCOP(product.regularPrice)})`
+        : '') +
+      (product.installPrice > 0 ? ` · Instalación: ${formatCOP(product.installPrice)}` : ''),
     `¿Me confirman disponibilidad?`,
   ].join('\n')
 
@@ -60,7 +63,7 @@ export function buildCartInquiryLink(items: CartInquiryItem[]): string {
     '',
     `Productos: ${formatCOP(productsTotal)}`,
     ...(savings > 0 ? [`Ahorro por descuentos: ${formatCOP(savings)}`] : []),
-    `Instalación: ${formatCOP(installTotal)}`,
+    ...(installTotal > 0 ? [`Instalación: ${formatCOP(installTotal)}`] : []),
     `*Total: ${formatCOP(productsTotal + installTotal)}*`,
     '',
     '¿Me confirman disponibilidad y cómo coordinamos el pago y la instalación?',

@@ -9,6 +9,7 @@ export const soundMedia: SoundMediaItem[] = [
   {
     type: 'video',
     src: '/sonido-video.mp4',
+    poster: '/sonido-video-poster.webp',
     alt: 'Demostración en video de una instalación de sonido Xtreme Tuning',
   },
   {

@@ -26,10 +26,12 @@ export function CartSummary({ items, onClear }: { items: CartInquiryItem[]; onCl
             <dd>−{formatCOP(savings)}</dd>
           </div>
         )}
-        <div className="flex justify-between text-ember-500">
-          <dt>Instalación</dt>
-          <dd>{formatCOP(installTotal)}</dd>
-        </div>
+        {installTotal > 0 && (
+          <div className="flex justify-between text-ink-900/70">
+            <dt>Instalación</dt>
+            <dd>{formatCOP(installTotal)}</dd>
+          </div>
+        )}
         <div className="flex justify-between border-t border-ink-900/10 pt-2 text-base font-bold text-ink-900">
           <dt>Total</dt>
           <dd>{formatCOP(productsTotal + installTotal)}</dd>
@@ -40,7 +42,7 @@ export function CartSummary({ items, onClear }: { items: CartInquiryItem[]; onCl
         href={buildCartInquiryLink(items)}
         target="_blank"
         rel="noreferrer"
-        className="mt-6 flex items-center justify-center gap-2 rounded-full bg-electric-500 py-3.5 text-sm font-bold text-white transition hover:bg-electric-400"
+        className="mt-6 flex min-h-12 items-center justify-center gap-2 rounded-full bg-electric-500 py-3.5 text-sm font-bold text-white transition hover:bg-electric-400"
       >
         <WhatsAppIcon className="h-5 w-5" />
         Enviar pedido por WhatsApp
@@ -53,7 +55,7 @@ export function CartSummary({ items, onClear }: { items: CartInquiryItem[]; onCl
       <button
         type="button"
         onClick={onClear}
-        className="mt-4 block w-full text-center text-xs font-semibold text-ink-900/60 transition hover:text-ember-500"
+        className="mt-2 flex min-h-11 w-full items-center justify-center text-xs font-semibold text-ink-900/60 transition hover:text-ember-500"
       >
         Vaciar carrito
       </button>

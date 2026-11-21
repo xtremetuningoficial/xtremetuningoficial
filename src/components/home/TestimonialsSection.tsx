@@ -21,14 +21,13 @@ export function TestimonialsSection() {
   }, [])
 
   return (
-    <section className="relative overflow-hidden bg-ink-900 py-16 sm:py-20">
+    <section aria-labelledby="resenas-titulo" className="relative overflow-hidden border-t border-white/10 bg-ink-900 py-12 sm:py-20">
       <div className="circuit-bg pointer-events-none absolute inset-0 opacity-[0.1]" aria-hidden="true" />
 
       <div className="relative mx-auto max-w-7xl px-4 sm:px-6">
         <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
           <div className="max-w-xl">
-            <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">Califícanos</span>
-            <h2 className="mt-3 font-display text-2xl uppercase leading-snug text-white sm:text-3xl">
+            <h2 id="resenas-titulo" className="font-display text-2xl uppercase leading-snug text-white sm:text-3xl">
               Lo que opinan de la tienda y el servicio
             </h2>
 
@@ -71,13 +70,13 @@ export function TestimonialsSection() {
           )}
 
           {status === 'error' && (
-            <p className="rounded-2xl border border-white/10 bg-ink-800 px-6 py-10 text-center text-white/70">
+            <p className="rounded-2xl border border-white/10 bg-ink-800 px-6 py-8 text-center text-white/75">
               No pudimos cargar las reseñas en este momento.
             </p>
           )}
 
           {status === 'success' && reviews.length === 0 && (
-            <p className="rounded-2xl border border-white/10 bg-ink-800 px-6 py-10 text-center text-white/60">
+            <p className="rounded-2xl border border-white/10 bg-ink-800 px-6 py-8 text-center text-white/75">
               Todavía no hay reseñas — ¡sé el primero en contarnos qué te pareció!
             </p>
           )}

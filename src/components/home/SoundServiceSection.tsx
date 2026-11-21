@@ -20,7 +20,7 @@ export function SoundServiceSection() {
       id="sonido"
       data-escena="riel"
       aria-labelledby="sonido-titulo"
-      className="sonido relative overflow-clip bg-ink-900 py-16 sm:py-20"
+      className="sonido relative overflow-clip bg-ink-900 py-12 sm:py-20"
     >
       <div className="circuit-bg pointer-events-none absolute inset-0 opacity-[0.1]" aria-hidden="true" />
 
@@ -28,12 +28,9 @@ export function SoundServiceSection() {
         <div className="relative mx-auto w-full max-w-7xl px-4 sm:px-6">
           <div className="flex flex-col gap-6 sm:flex-row sm:items-end sm:justify-between">
             <div className="max-w-xl">
-              <span className="text-xs font-bold uppercase tracking-widest text-cyan-400">
-                Sonido a tu medida
-              </span>
               <h2
                 id="sonido-titulo"
-                className="mt-3 text-balance font-display text-2xl uppercase leading-snug text-white sm:text-3xl"
+                className="text-balance font-display text-2xl uppercase leading-snug text-white sm:text-3xl"
               >
                 Adaptamos y vendemos el equipo de sonido ideal para tu vehículo
               </h2>
@@ -64,6 +61,8 @@ export function SoundServiceSection() {
                   {item.type === 'video' ? (
                     <MutedVideoCard
                       src={item.src}
+                      poster={item.poster}
+                      label={item.alt}
                       className="aspect-[4/5] rounded-2xl border border-white/10"
                     />
                   ) : (

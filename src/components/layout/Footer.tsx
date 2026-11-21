@@ -1,25 +1,22 @@
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
 import type { Category } from '../../types/product'
 import { GENERAL_INQUIRY_LINK, WHATSAPP_NUMBER_DISPLAY } from '../../lib/whatsapp'
 import { FACEBOOK_URL, STORE_ADDRESS } from '../../lib/contact'
-import { FacebookIcon, PinIcon, WhatsAppIcon } from '../icons'
+import { FacebookIcon, PinIcon, QrIcon, WhatsAppIcon } from '../icons'
+import { ShareQrModal } from './ShareQrModal'
 
-export function Footer({ categories }: { categories: Category[] }) {
+export function Footer({ categories, spaceForFloat = false }: { categories: Category[]; spaceForFloat?: boolean }) {
+  const [qrOpen, setQrOpen] = useState(false)
+
   return (
     <footer className="bg-ink-900 text-white/70">
       <div className="mx-auto grid max-w-7xl gap-10 px-4 py-14 sm:px-6 md:grid-cols-[1.2fr_1fr_1fr]">
         <div>
-          <span className="mb-4 inline-flex h-14 w-20 items-center justify-center">
-            <img
-              src="/logo.webp"
-              alt="Xtreme Tuning"
-              width={594}
-              height={420}
-              loading="lazy"
-              decoding="async"
-              className="h-full w-full object-contain"
-            />
-          </span>
+          {/* El logo en miniatura se pixela: el pie usa el nombre, como la barra en celular. */}
+          <p className="mb-4 font-display text-2xl leading-none tracking-tight text-white">
+            XTREME <span className="text-cyan-400">TUNING</span>
+          </p>
           <p className="max-w-xs text-sm leading-relaxed">
             Soluciones integrales en accesorios y electricidad automotriz: productos de
             calidad, instalación profesional y un servicio honesto y personalizado.
@@ -44,6 +41,14 @@ export function Footer({ categories }: { categories: Category[] }) {
             >
               <FacebookIcon className="h-5 w-5" />
             </a>
+            <button
+              type="button"
+              onClick={() => setQrOpen(true)}
+              className="flex h-11 items-center gap-2 rounded-full border border-white/15 px-4 text-sm font-semibold text-white/85 transition hover:border-cyan-400 hover:text-cyan-400"
+            >
+              <QrIcon className="h-5 w-5" />
+              Compartir con QR
+            </button>
           </div>
         </div>
 
@@ -109,10 +114,12 @@ export function Footer({ categories }: { categories: Category[] }) {
         </div>
       </div>
 
-      <div className="border-t border-white/10 py-5 px-4 text-center text-xs text-white/60">
+      {/* En celular deja espacio para que el botón flotante de WhatsApp no tape el texto. */}
+      <div className={`border-t border-white/10 px-4 pt-5 text-center text-xs text-white/60 ${spaceForFloat ? 'pb-24 lg:pb-5' : 'pb-5'}`}>
         © {new Date().getFullYear()} Xtreme Tuning · Lujos y Accesorios. Precios sujetos a
         cambio sin previo aviso.
       </div>
+      {qrOpen && <ShareQrModal onClose={() => setQrOpen(false)} />}
     </footer>
   )
 }

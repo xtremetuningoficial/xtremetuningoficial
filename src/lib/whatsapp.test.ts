@@ -93,9 +93,10 @@ describe('buildProductInquiryLink', () => {
     expect(texto).toContain('Producto: $135.000 (−10 %, antes $150.000) · Instalación: $30.000')
   })
 
-  it('sin instalación muestra $0', () => {
+  it('sin instalación (0 = no aplica) no la menciona', () => {
     const texto = mensaje(buildProductInquiryLink(producto({ installPrice: 0 })))
-    expect(texto).toContain('Instalación: $0')
+    expect(texto).toContain('Producto: $150.000')
+    expect(texto).not.toContain('Instalación')
   })
 
   it('nombres con símbolos no rompen la URL', () => {
@@ -119,6 +120,12 @@ describe('buildCartInquiryLink', () => {
     expect(texto).toContain('Instalación: $60.000')
     expect(texto).toContain('*Total: $440.000*')
     expect(texto).not.toContain('Ahorro')
+  })
+
+  it('si nada del pedido lleva instalación, omite esa línea', () => {
+    const texto = mensaje(buildCartInquiryLink([{ product: producto({ installPrice: 0 }), quantity: 1 }]))
+    expect(texto).not.toContain('Instalación')
+    expect(texto).toContain('*Total: $150.000*')
   })
 
   it('con descuento muestra el porcentaje por línea y el ahorro total', () => {
